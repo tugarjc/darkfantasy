@@ -8,6 +8,8 @@ const authRoutes = require('./routes/auth');
 const circleRoutes = require('./routes/circles');
 const buildingRoutes = require('./routes/buildings');
 const unitRoutes = require('./routes/units');
+const mapRoutes = require('./routes/map');
+const legionRoutes = require('./routes/legions');
 
 const app = express();
 const httpServer = createServer(app);
@@ -24,6 +26,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/circles', circleRoutes);
 app.use('/api/circles', buildingRoutes);
 app.use('/api/circles', unitRoutes);
+app.use('/api/map', mapRoutes);
+app.use('/api/legions', legionRoutes);
 
 // ── WebSocket ──
 io.on('connection', (socket) => {

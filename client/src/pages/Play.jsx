@@ -4,11 +4,14 @@ import { useGameStore } from '../stores/gameStore';
 import ResourceBar from '../components/ResourceBar';
 import BuildingGrid from '../components/BuildingGrid';
 import UnitPanel from '../components/UnitPanel';
+import HexMap from '../components/HexMap';
+import LegionPanel from '../components/LegionPanel';
 
 export default function Play() {
   const { player, logout } = useAuthStore();
   const { circle, loading, loadCircle, loadBuildings, loadUnits, tickResources, error, clearError } = useGameStore();
   const [tab, setTab] = useState('buildings');
+  const [legionTarget, setLegionTarget] = useState(null);
 
   // Load data on mount
   useEffect(() => {
@@ -63,7 +66,9 @@ export default function Play() {
       {/* Tab navigation */}
       <div className="bg-surface border-b border-border px-4 flex gap-1">
         <TabBtn label="Structures" active={tab === 'buildings'} onClick={() => setTab('buildings')} />
-        <TabBtn label="Legions" active={tab === 'units'} onClick={() => setTab('units')} />
+        <TabBtn label="Unites" active={tab === 'units'} onClick={() => setTab('units')} />
+        <TabBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
+        <TabBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
       </div>
 
       {/* Main content */}
@@ -71,15 +76,34 @@ export default function Play() {
         <div className="max-w-6xl mx-auto">
           {tab === 'buildings' && <BuildingGrid />}
           {tab === 'units' && <UnitPanel />}
+          {tab === 'map' && (
+            <div className="flex flex-col lg:flex-row gap-4" style={{ minHeight: 500 }}>
+              <div className="flex-1">
+                <HexMap onSelectHex={(hex) => {
+                  if (hex && !hex.circle?.isOwn) {
+                    setLegionTarget(hex);
+                  }
+                }} />
+              </div>
+              {legionTarget && (
+                <div className="lg:w-96">
+                  <LegionPanel targetHex={legionTarget} onClearTarget={() => setLegionTarget(null)} />
+                </div>
+              )}
+            </div>
+          )}
+          {tab === 'legions' && (
+            <LegionPanel targetHex={null} onClearTarget={() => {}} />
+          )}
         </div>
       </main>
 
       {/* Bottom nav (mobile) */}
       <nav className="md:hidden bg-base border-t border-border flex justify-around py-2">
         <NavBtn label="Cercle" active={tab === 'buildings'} onClick={() => setTab('buildings')} />
-        <NavBtn label="Legions" active={tab === 'units'} onClick={() => setTab('units')} />
-        <NavBtn label="Carte" />
-        <NavBtn label="Alliance" />
+        <NavBtn label="Unites" active={tab === 'units'} onClick={() => setTab('units')} />
+        <NavBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
+        <NavBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
       </nav>
     </div>
   );

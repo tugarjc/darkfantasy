@@ -134,6 +134,72 @@ export const useGameStore = create((set, get) => ({
     }
   },
 
+  // ── Map state ──
+  mapHexes: [],
+  mapLegions: [],
+  mapCenter: { q: 0, r: 0 },
+  mapLoading: false,
+
+  loadMapSector: async (q = 0, r = 0, radius = 7) => {
+    set({ mapLoading: true });
+    try {
+      const res = await fetch(`${API}/map/sector?q=${q}&r=${r}&radius=${radius}`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) {
+        set({ mapHexes: data.hexes, mapLegions: data.legions, mapCenter: data.center, mapLoading: false });
+      } else {
+        set({ mapLoading: false });
+      }
+    } catch {
+      set({ mapLoading: false });
+    }
+  },
+
+  // ── Legions state ──
+  legions: [],
+
+  loadLegions: async () => {
+    try {
+      const res = await fetch(`${API}/legions`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ legions: data.legions });
+    } catch { /* silent */ }
+  },
+
+  sendLegion: async (fromCircleId, toQ, toR, mission, units) => {
+    try {
+      const res = await fetch(`${API}/legions/send`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ fromCircleId, toQ, toR, mission, units }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      await get().loadLegions();
+      await get().loadCircle();
+      return data;
+    } catch (err) {
+      set({ error: err.message });
+      throw err;
+    }
+  },
+
+  recallLegion: async (legionId) => {
+    try {
+      const res = await fetch(`${API}/legions/${legionId}/recall`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      await get().loadLegions();
+      return data;
+    } catch (err) {
+      set({ error: err.message });
+      throw err;
+    }
+  },
+
   // ── Tick resources locally (visual interpolation) ──
   tickResources: () => set((state) => {
     if (!state.resources) return {};
