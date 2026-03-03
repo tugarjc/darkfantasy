@@ -14,6 +14,7 @@ import MarketPanel from '../components/MarketPanel';
 import ChatPanel from '../components/ChatPanel';
 import AdminPanel from '../components/AdminPanel';
 import EventPanel from '../components/EventPanel';
+import MissionPanel from '../components/MissionPanel';
 
 export default function Play() {
   const { player, logout } = useAuthStore();
@@ -96,6 +97,7 @@ export default function Play() {
         <TabBtn label="Marche" active={tab === 'market'} onClick={() => setTab('market')} />
         <TabBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
         <TabBtn label="Evenements" active={tab === 'events'} onClick={() => setTab('events')} />
+        <TabBtn label="Missions" active={tab === 'missions'} onClick={() => setTab('missions')} />
         <TabBtn label="Chat" active={tab === 'chat'} onClick={() => setTab('chat')} />
         <TabBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
         {player?.is_admin && <TabBtn label="Admin" active={tab === 'admin'} onClick={() => setTab('admin')} />}
@@ -130,6 +132,7 @@ export default function Play() {
           {tab === 'market' && <MarketPanel />}
           {tab === 'alliance' && <AlliancePanel />}
           {tab === 'events' && <EventPanel />}
+          {tab === 'missions' && <MissionPanel />}
           {tab === 'chat' && <ChatPanel />}
           {tab === 'reports' && <ReportsPanel />}
           {tab === 'admin' && player?.is_admin && <AdminPanel />}
@@ -147,6 +150,7 @@ export default function Play() {
         <NavBtn label="Marche" active={tab === 'market'} onClick={() => setTab('market')} />
         <NavBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
         <NavBtn label="Events" active={tab === 'events'} onClick={() => setTab('events')} />
+        <NavBtn label="Missions" active={tab === 'missions'} onClick={() => setTab('missions')} />
         <NavBtn label="Chat" active={tab === 'chat'} onClick={() => setTab('chat')} />
         <NavBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
         {player?.is_admin && <NavBtn label="Admin" active={tab === 'admin'} onClick={() => setTab('admin')} />}

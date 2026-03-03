@@ -613,6 +613,35 @@ export const useGameStore = create((set, get) => ({
     return data;
   },
 
+  // ── Missions state ──
+  missionsData: null,
+  missionsLoading: false,
+
+  loadMissions: async () => {
+    set({ missionsLoading: true });
+    try {
+      const res = await fetch(`${API}/missions`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ missionsData: data, missionsLoading: false });
+      else set({ missionsLoading: false });
+    } catch {
+      set({ missionsLoading: false });
+    }
+  },
+
+  claimMission: async (index) => {
+    const res = await fetch(`${API}/missions/claim`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ index }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadMissions();
+    await get().loadCircle();
+    return data;
+  },
+
   // ── Tick resources locally (visual interpolation) ──
   tickResources: () => set((state) => {
     if (!state.resources) return {};

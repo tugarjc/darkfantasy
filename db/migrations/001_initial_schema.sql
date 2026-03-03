@@ -369,8 +369,9 @@ CREATE TABLE daily_missions (
   id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   player_id   UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
   day         DATE NOT NULL DEFAULT CURRENT_DATE,
-  missions    JSONB NOT NULL DEFAULT '[]',
-  completed   INT NOT NULL DEFAULT 0,
+  missions      JSONB NOT NULL DEFAULT '[]',
+  completed     INT NOT NULL DEFAULT 0,
+  bonus_claimed JSONB NOT NULL DEFAULT '{}',
   UNIQUE (player_id, day)
 );
 
