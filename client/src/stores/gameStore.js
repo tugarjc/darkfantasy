@@ -561,6 +561,45 @@ export const useGameStore = create((set, get) => ({
     } catch { /* silent */ }
   },
 
+  // ── Events state ──
+  events: [],
+  eventDetail: null,
+  eventsLoading: false,
+
+  loadEvents: async () => {
+    set({ eventsLoading: true });
+    try {
+      const res = await fetch(`${API}/events`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ events: data.events, eventsLoading: false });
+      else set({ eventsLoading: false });
+    } catch {
+      set({ eventsLoading: false });
+    }
+  },
+
+  loadEventDetail: async (eventId) => {
+    try {
+      const res = await fetch(`${API}/events/${eventId}`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ eventDetail: data });
+    } catch { /* silent */ }
+  },
+
+  attackEvent: async (eventId, units) => {
+    const res = await fetch(`${API}/events/${eventId}/attack`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ units }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadEvents();
+    await get().loadCircle();
+    await get().loadUnits();
+    return data;
+  },
+
   // ── Tick resources locally (visual interpolation) ──
   tickResources: () => set((state) => {
     if (!state.resources) return {};

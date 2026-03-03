@@ -16,7 +16,9 @@ const allianceRoutes = require('./routes/alliances');
 const heroRoutes = require('./routes/heroes');
 const marketRoutes = require('./routes/market');
 const adminRoutes = require('./routes/admin');
+const eventRoutes = require('./routes/events');
 const { startLegionProcessor } = require('./game/legionProcessor');
+const { startEventProcessor } = require('./game/eventProcessor');
 const { setupChat } = require('./chat');
 
 const app = express();
@@ -42,6 +44,7 @@ app.use('/api/alliances', allianceRoutes);
 app.use('/api/heroes', heroRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/events', eventRoutes);
 
 // ── WebSocket + Chat ──
 setupChat(io);
@@ -63,6 +66,9 @@ async function boot() {
 
   // Start legion arrival processor (every 5 seconds)
   startLegionProcessor(5000);
+
+  // Start event processor (every 60 seconds)
+  startEventProcessor(60000);
 
   httpServer.listen(PORT, () => {
     console.log(`Inferno Domini server running on port ${PORT}`);

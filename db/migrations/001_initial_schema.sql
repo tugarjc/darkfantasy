@@ -350,6 +350,20 @@ CREATE TABLE audit_logs (
 
 CREATE INDEX idx_audit_logs_created ON audit_logs(created_at DESC);
 
+-- Contributions aux événements
+CREATE TABLE event_contributions (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id    UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  player_id   UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+  damage      BIGINT NOT NULL DEFAULT 0,
+  units_lost  JSONB NOT NULL DEFAULT '{}',
+  rewarded    BOOLEAN NOT NULL DEFAULT false,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_event_contrib_event ON event_contributions(event_id);
+CREATE INDEX idx_event_contrib_player ON event_contributions(player_id);
+
 -- Missions journalières
 CREATE TABLE daily_missions (
   id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
