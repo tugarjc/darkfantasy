@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { pool } = require('../db');
 const { redis } = require('../redis');
+const { recalcRates } = require('../game/resources');
 
 const router = Router();
 
@@ -79,6 +80,9 @@ router.post('/register', async (req, res) => {
         [circleId, type, level]
       );
     }
+
+    // Recalculate production rates based on starting buildings
+    await recalcRates(circleId);
 
     const tokens = generateTokens(player);
 
