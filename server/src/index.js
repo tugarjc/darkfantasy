@@ -6,6 +6,8 @@ const { connectDB } = require('./db');
 const { connectRedis } = require('./redis');
 const authRoutes = require('./routes/auth');
 const circleRoutes = require('./routes/circles');
+const buildingRoutes = require('./routes/buildings');
+const unitRoutes = require('./routes/units');
 
 const app = express();
 const httpServer = createServer(app);
@@ -20,6 +22,8 @@ app.get('/api/health', (_req, res) => {
 });
 app.use('/api/auth', authRoutes);
 app.use('/api/circles', circleRoutes);
+app.use('/api/circles', buildingRoutes);
+app.use('/api/circles', unitRoutes);
 
 // ── WebSocket ──
 io.on('connection', (socket) => {

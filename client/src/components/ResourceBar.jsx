@@ -3,6 +3,8 @@ import { useGameStore } from '../stores/gameStore';
 export default function ResourceBar() {
   const resources = useGameStore((s) => s.resources);
 
+  if (!resources) return null;
+
   return (
     <div className="bg-surface border-b border-border px-4 py-2 flex flex-wrap items-center gap-6">
       <ResourceItem
@@ -23,7 +25,7 @@ export default function ResourceBar() {
       />
       <ResourceItem
         icon={<SoulsIcon />}
-        name="mes"
+        name="Ames"
         value={resources.souls}
         rate={resources.souls_rate}
         cap={resources.souls_cap}

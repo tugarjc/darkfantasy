@@ -1,57 +1,142 @@
 import { create } from 'zustand';
 
-// Mock data for Phase 0 — will be replaced by API calls in Phase 1
-const MOCK_RESOURCES = {
-  iron: 500,
-  essence: 300,
-  souls: 0,
-  iron_rate: 30,
-  essence_rate: 20,
-  souls_rate: 0,
-  iron_cap: 10000,
-  essence_cap: 10000,
-  souls_cap: 5000,
-};
+const API = '/api';
 
-const MOCK_BUILDINGS = [
-  { type: 'forge_damnes', level: 1, upgrade_end: null },
-  { type: 'sanctuaire_neant', level: 1, upgrade_end: null },
-  { type: 'bibliotheque_obscure', level: 1, upgrade_end: null },
-  { type: 'mur_ames', level: 0, upgrade_end: null },
-  { type: 'entrepot_damnes', level: 1, upgrade_end: null },
-];
+function authHeaders() {
+  const token = localStorage.getItem('accessToken');
+  return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+}
 
-const BUILDING_NAMES = {
-  forge_damnes: 'Forge des Damnés',
-  sanctuaire_neant: 'Sanctuaire du Néant',
-  puits_ames: 'Puits des Âmes',
-  serre_tenebres: 'Serre des Ténèbres',
-  mur_ames: 'Mur des Âmes',
-  tour_chaos: 'Tour du Chaos',
-  portail_invocation: "Portail d'Invocation",
-  bouclier_infernal: 'Bouclier Infernal',
-  crypte_souterraine: 'Crypte Souterraine',
-  caserne_damnes: 'Caserne des Damnés',
-  antre_betes: 'Antre des Bêtes',
-  forge_ames_liees: 'Forge des Âmes Liées',
-  autel_sacrifice: "Autel du Sacrifice",
-  bibliotheque_obscure: 'Bibliothèque Obscure',
-  tour_vigie: 'Tour de Vigie',
-  marche_demoniaque: 'Marché Démoniaque',
-  palais_infernal: 'Palais Infernal',
-  entrepot_damnes: 'Entrepôt des Damnés',
-};
-
-export const useGameStore = create((set) => ({
-  circle: { name: 'Cercle Infernal', coord_q: 0, coord_r: 0 },
-  resources: { ...MOCK_RESOURCES },
-  buildings: [...MOCK_BUILDINGS],
+export const useGameStore = create((set, get) => ({
+  circleId: null,
+  circle: null,
+  resources: null,
+  buildings: [],
   units: [],
+  loading: false,
+  error: null,
 
-  getBuildingName: (type) => BUILDING_NAMES[type] || type,
+  // ── Load circle data from API ──
+  loadCircle: async () => {
+    set({ loading: true, error: null });
+    try {
+      // Get player's circles
+      const listRes = await fetch(`${API}/circles`, { headers: authHeaders() });
+      const listData = await listRes.json();
+      if (!listRes.ok) throw new Error(listData.error);
 
-  // Simulate resource tick (called every second in the UI)
+      const primary = listData.circles.find((c) => c.is_primary) || listData.circles[0];
+      if (!primary) throw new Error('No circle found');
+
+      // Get full circle data
+      const detailRes = await fetch(`${API}/circles/${primary.id}`, { headers: authHeaders() });
+      const detailData = await detailRes.json();
+      if (!detailRes.ok) throw new Error(detailData.error);
+
+      set({
+        circleId: primary.id,
+        circle: detailData.circle,
+        resources: detailData.resources,
+        buildings: detailData.buildings,
+        units: detailData.units,
+        loading: false,
+      });
+    } catch (err) {
+      set({ error: err.message, loading: false });
+    }
+  },
+
+  // ── Load buildings with costs ──
+  loadBuildings: async () => {
+    const { circleId } = get();
+    if (!circleId) return;
+    try {
+      const res = await fetch(`${API}/circles/${circleId}/buildings`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ buildings: data.buildings });
+    } catch { /* silent */ }
+  },
+
+  // ── Load units ──
+  loadUnits: async () => {
+    const { circleId } = get();
+    if (!circleId) return;
+    try {
+      const res = await fetch(`${API}/circles/${circleId}/units`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ units: data.units });
+    } catch { /* silent */ }
+  },
+
+  // ── Upgrade building ──
+  upgradeBuilding: async (buildingType) => {
+    const { circleId } = get();
+    if (!circleId) return;
+    try {
+      const res = await fetch(`${API}/circles/${circleId}/buildings/upgrade`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ buildingType }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // Reload circle data
+      await get().loadCircle();
+      await get().loadBuildings();
+      return data;
+    } catch (err) {
+      set({ error: err.message });
+      throw err;
+    }
+  },
+
+  // ── Complete building upgrade ──
+  completeBuilding: async (buildingType) => {
+    const { circleId } = get();
+    if (!circleId) return;
+    try {
+      const res = await fetch(`${API}/circles/${circleId}/buildings/complete`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ buildingType }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      await get().loadCircle();
+      await get().loadBuildings();
+      return data;
+    } catch (err) {
+      set({ error: err.message });
+    }
+  },
+
+  // ── Train units ──
+  trainUnits: async (unitType, quantity) => {
+    const { circleId } = get();
+    if (!circleId) return;
+    try {
+      const res = await fetch(`${API}/circles/${circleId}/units/train`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ unitType, quantity }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      await get().loadCircle();
+      await get().loadUnits();
+      return data;
+    } catch (err) {
+      set({ error: err.message });
+      throw err;
+    }
+  },
+
+  // ── Tick resources locally (visual interpolation) ──
   tickResources: () => set((state) => {
+    if (!state.resources) return {};
     const r = state.resources;
     return {
       resources: {
@@ -62,4 +147,6 @@ export const useGameStore = create((set) => ({
       },
     };
   }),
+
+  clearError: () => set({ error: null }),
 }));
