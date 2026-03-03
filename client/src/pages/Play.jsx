@@ -7,6 +7,7 @@ import UnitPanel from '../components/UnitPanel';
 import HexMap from '../components/HexMap';
 import LegionPanel from '../components/LegionPanel';
 import ReportsPanel from '../components/ReportsPanel';
+import ResearchPanel from '../components/ResearchPanel';
 
 export default function Play() {
   const { player, logout } = useAuthStore();
@@ -70,6 +71,7 @@ export default function Play() {
         <TabBtn label="Unites" active={tab === 'units'} onClick={() => setTab('units')} />
         <TabBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
         <TabBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
+        <TabBtn label="Recherche" active={tab === 'research'} onClick={() => setTab('research')} />
         <TabBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
       </div>
 
@@ -78,6 +80,7 @@ export default function Play() {
         <div className="max-w-6xl mx-auto">
           {tab === 'buildings' && <BuildingGrid />}
           {tab === 'units' && <UnitPanel />}
+          {tab === 'research' && <ResearchPanel />}
           {tab === 'map' && (
             <div className="flex flex-col lg:flex-row gap-4" style={{ minHeight: 500 }}>
               <div className="flex-1">

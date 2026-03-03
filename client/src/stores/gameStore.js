@@ -200,6 +200,57 @@ export const useGameStore = create((set, get) => ({
     }
   },
 
+  // ── Researches state ──
+  researches: [],
+  researchLoading: false,
+
+  loadResearches: async () => {
+    set({ researchLoading: true });
+    try {
+      const res = await fetch(`${API}/researches`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ researches: data.researches, researchLoading: false });
+      else set({ researchLoading: false });
+    } catch {
+      set({ researchLoading: false });
+    }
+  },
+
+  startResearch: async (researchType) => {
+    try {
+      const res = await fetch(`${API}/researches/start`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ researchType }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      await get().loadResearches();
+      await get().loadCircle();
+      return data;
+    } catch (err) {
+      set({ error: err.message });
+      throw err;
+    }
+  },
+
+  completeResearch: async (researchType) => {
+    try {
+      const res = await fetch(`${API}/researches/complete`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ researchType }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      await get().loadResearches();
+      await get().loadCircle();
+      return data;
+    } catch (err) {
+      set({ error: err.message });
+    }
+  },
+
   // ── Reports state ──
   battleReports: [],
   spyReports: [],
