@@ -9,6 +9,8 @@ import LegionPanel from '../components/LegionPanel';
 import ReportsPanel from '../components/ReportsPanel';
 import ResearchPanel from '../components/ResearchPanel';
 import AlliancePanel from '../components/AlliancePanel';
+import HeroPanel from '../components/HeroPanel';
+import MarketPanel from '../components/MarketPanel';
 
 export default function Play() {
   const { player, logout } = useAuthStore();
@@ -73,6 +75,8 @@ export default function Play() {
         <TabBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
         <TabBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
         <TabBtn label="Recherche" active={tab === 'research'} onClick={() => setTab('research')} />
+        <TabBtn label="Heros" active={tab === 'heroes'} onClick={() => setTab('heroes')} />
+        <TabBtn label="Marche" active={tab === 'market'} onClick={() => setTab('market')} />
         <TabBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
         <TabBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
       </div>
@@ -102,6 +106,8 @@ export default function Play() {
           {tab === 'legions' && (
             <LegionPanel targetHex={null} onClearTarget={() => {}} />
           )}
+          {tab === 'heroes' && <HeroPanel />}
+          {tab === 'market' && <MarketPanel />}
           {tab === 'alliance' && <AlliancePanel />}
           {tab === 'reports' && <ReportsPanel />}
         </div>
@@ -112,6 +118,11 @@ export default function Play() {
         <NavBtn label="Cercle" active={tab === 'buildings'} onClick={() => setTab('buildings')} />
         <NavBtn label="Unites" active={tab === 'units'} onClick={() => setTab('units')} />
         <NavBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
+        <NavBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
+        <NavBtn label="Recherche" active={tab === 'research'} onClick={() => setTab('research')} />
+        <NavBtn label="Heros" active={tab === 'heroes'} onClick={() => setTab('heroes')} />
+        <NavBtn label="Marche" active={tab === 'market'} onClick={() => setTab('market')} />
+        <NavBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
         <NavBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
       </nav>
     </div>

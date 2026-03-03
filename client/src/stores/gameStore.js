@@ -346,6 +346,114 @@ export const useGameStore = create((set, get) => ({
     return data;
   },
 
+  // ── Heroes state ──
+  heroes: [],
+  heroesLoading: false,
+
+  loadHeroes: async () => {
+    set({ heroesLoading: true });
+    try {
+      const res = await fetch(`${API}/heroes`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ heroes: data.heroes, heroesLoading: false });
+      else set({ heroesLoading: false });
+    } catch {
+      set({ heroesLoading: false });
+    }
+  },
+
+  summonHero: async (heroType) => {
+    const res = await fetch(`${API}/heroes/summon`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ heroType }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadHeroes();
+    await get().loadCircle();
+    return data;
+  },
+
+  reviveHero: async (heroType) => {
+    const res = await fetch(`${API}/heroes/revive`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ heroType }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadHeroes();
+    await get().loadCircle();
+    return data;
+  },
+
+  assignHero: async (heroType, legionId) => {
+    const res = await fetch(`${API}/heroes/assign`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ heroType, legionId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadHeroes();
+    await get().loadLegions();
+    return data;
+  },
+
+  // ── Market state ──
+  marketData: null,
+  marketLoading: false,
+
+  loadMarket: async () => {
+    set({ marketLoading: true });
+    try {
+      const res = await fetch(`${API}/market`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ marketData: data, marketLoading: false });
+      else set({ marketLoading: false });
+    } catch {
+      set({ marketLoading: false });
+    }
+  },
+
+  createOffer: async (resourceFrom, resourceTo, amount, ratio, targetUsername) => {
+    const res = await fetch(`${API}/market/create`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ resourceFrom, resourceTo, amount, ratio, targetUsername: targetUsername || undefined }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadMarket();
+    await get().loadCircle();
+    return data;
+  },
+
+  acceptOffer: async (offerId) => {
+    const res = await fetch(`${API}/market/${offerId}/accept`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadMarket();
+    await get().loadCircle();
+    return data;
+  },
+
+  cancelOffer: async (offerId) => {
+    const res = await fetch(`${API}/market/${offerId}/cancel`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadMarket();
+    await get().loadCircle();
+    return data;
+  },
+
   // ── Reports state ──
   battleReports: [],
   spyReports: [],
