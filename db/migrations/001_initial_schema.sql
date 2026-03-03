@@ -116,6 +116,7 @@ CREATE TABLE players (
   relics          INT NOT NULL DEFAULT 0,
   is_premium      BOOLEAN NOT NULL DEFAULT false,
   is_banned       BOOLEAN NOT NULL DEFAULT false,
+  is_admin        BOOLEAN NOT NULL DEFAULT false,
   last_login      TIMESTAMPTZ,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (server_id, username),

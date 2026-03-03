@@ -483,6 +483,84 @@ export const useGameStore = create((set, get) => ({
     } catch { /* silent */ }
   },
 
+  // ── Admin state ──
+  adminStats: null,
+  adminPlayers: null,
+  adminPlayerDetail: null,
+  adminAudit: null,
+  adminLoading: false,
+
+  loadAdminStats: async () => {
+    set({ adminLoading: true });
+    try {
+      const res = await fetch(`${API}/admin/stats`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ adminStats: data, adminLoading: false });
+      else set({ adminLoading: false });
+    } catch {
+      set({ adminLoading: false });
+    }
+  },
+
+  loadAdminPlayers: async (q = '', page = 1) => {
+    try {
+      const params = new URLSearchParams({ page });
+      if (q) params.set('q', q);
+      const res = await fetch(`${API}/admin/players?${params}`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ adminPlayers: data });
+    } catch { /* silent */ }
+  },
+
+  loadAdminPlayerDetail: async (playerId) => {
+    try {
+      const res = await fetch(`${API}/admin/players/${playerId}`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ adminPlayerDetail: data });
+    } catch { /* silent */ }
+  },
+
+  adminBanPlayer: async (playerId, banned) => {
+    const res = await fetch(`${API}/admin/players/${playerId}/ban`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ banned }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
+
+  adminSetResources: async (playerId, resources) => {
+    const res = await fetch(`${API}/admin/players/${playerId}/resources`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(resources),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
+
+  adminAnnounce: async (message) => {
+    const res = await fetch(`${API}/admin/announce`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ message }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
+
+  loadAdminAudit: async (page = 1) => {
+    try {
+      const res = await fetch(`${API}/admin/audit?page=${page}`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ adminAudit: data });
+    } catch { /* silent */ }
+  },
+
   // ── Tick resources locally (visual interpolation) ──
   tickResources: () => set((state) => {
     if (!state.resources) return {};

@@ -12,6 +12,7 @@ import AlliancePanel from '../components/AlliancePanel';
 import HeroPanel from '../components/HeroPanel';
 import MarketPanel from '../components/MarketPanel';
 import ChatPanel from '../components/ChatPanel';
+import AdminPanel from '../components/AdminPanel';
 
 export default function Play() {
   const { player, logout } = useAuthStore();
@@ -81,6 +82,7 @@ export default function Play() {
         <TabBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
         <TabBtn label="Chat" active={tab === 'chat'} onClick={() => setTab('chat')} />
         <TabBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
+        {player?.is_admin && <TabBtn label="Admin" active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </div>
 
       {/* Main content */}
@@ -113,6 +115,7 @@ export default function Play() {
           {tab === 'alliance' && <AlliancePanel />}
           {tab === 'chat' && <ChatPanel />}
           {tab === 'reports' && <ReportsPanel />}
+          {tab === 'admin' && player?.is_admin && <AdminPanel />}
         </div>
       </main>
 
@@ -128,6 +131,7 @@ export default function Play() {
         <NavBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
         <NavBtn label="Chat" active={tab === 'chat'} onClick={() => setTab('chat')} />
         <NavBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
+        {player?.is_admin && <NavBtn label="Admin" active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </nav>
     </div>
   );

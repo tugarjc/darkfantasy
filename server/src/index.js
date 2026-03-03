@@ -15,6 +15,7 @@ const researchRoutes = require('./routes/researches');
 const allianceRoutes = require('./routes/alliances');
 const heroRoutes = require('./routes/heroes');
 const marketRoutes = require('./routes/market');
+const adminRoutes = require('./routes/admin');
 const { startLegionProcessor } = require('./game/legionProcessor');
 const { setupChat } = require('./chat');
 
@@ -40,6 +41,7 @@ app.use('/api/researches', researchRoutes);
 app.use('/api/alliances', allianceRoutes);
 app.use('/api/heroes', heroRoutes);
 app.use('/api/market', marketRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ── WebSocket + Chat ──
 setupChat(io);

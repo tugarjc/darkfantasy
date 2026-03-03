@@ -106,7 +106,7 @@ router.post('/login', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT id, username, email, password_hash, faction, score, is_banned FROM players WHERE email = $1 AND server_id = $2',
+      'SELECT id, username, email, password_hash, faction, score, is_banned, is_admin FROM players WHERE email = $1 AND server_id = $2',
       [email, '00000000-0000-0000-0000-000000000001']
     );
 
@@ -131,7 +131,7 @@ router.post('/login', async (req, res) => {
     const tokens = generateTokens(player);
     await redis.set(`refresh:${player.id}`, tokens.refreshToken, { EX: REFRESH_EXPIRY_SECONDS });
 
-    const { password_hash, is_banned, ...safePlayer } = player;
+    const { password_hash, ...safePlayer } = player;
     res.json({ player: safePlayer, ...tokens });
   } catch (err) {
     console.error('Login error:', err);
