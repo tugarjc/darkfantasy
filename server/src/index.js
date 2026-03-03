@@ -10,6 +10,8 @@ const buildingRoutes = require('./routes/buildings');
 const unitRoutes = require('./routes/units');
 const mapRoutes = require('./routes/map');
 const legionRoutes = require('./routes/legions');
+const reportRoutes = require('./routes/reports');
+const { startLegionProcessor } = require('./game/legionProcessor');
 
 const app = express();
 const httpServer = createServer(app);
@@ -28,6 +30,7 @@ app.use('/api/circles', buildingRoutes);
 app.use('/api/circles', unitRoutes);
 app.use('/api/map', mapRoutes);
 app.use('/api/legions', legionRoutes);
+app.use('/api/reports', reportRoutes);
 
 // ── WebSocket ──
 io.on('connection', (socket) => {
@@ -49,6 +52,9 @@ async function boot() {
     VALUES ('00000000-0000-0000-0000-000000000001', 'Pandémonium Alpha', 'standard', 1.0)
     ON CONFLICT (id) DO NOTHING
   `);
+
+  // Start legion arrival processor (every 5 seconds)
+  startLegionProcessor(5000);
 
   httpServer.listen(PORT, () => {
     console.log(`Inferno Domini server running on port ${PORT}`);

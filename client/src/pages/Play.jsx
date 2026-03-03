@@ -6,6 +6,7 @@ import BuildingGrid from '../components/BuildingGrid';
 import UnitPanel from '../components/UnitPanel';
 import HexMap from '../components/HexMap';
 import LegionPanel from '../components/LegionPanel';
+import ReportsPanel from '../components/ReportsPanel';
 
 export default function Play() {
   const { player, logout } = useAuthStore();
@@ -69,6 +70,7 @@ export default function Play() {
         <TabBtn label="Unites" active={tab === 'units'} onClick={() => setTab('units')} />
         <TabBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
         <TabBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
+        <TabBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
       </div>
 
       {/* Main content */}
@@ -95,6 +97,7 @@ export default function Play() {
           {tab === 'legions' && (
             <LegionPanel targetHex={null} onClearTarget={() => {}} />
           )}
+          {tab === 'reports' && <ReportsPanel />}
         </div>
       </main>
 
@@ -103,7 +106,7 @@ export default function Play() {
         <NavBtn label="Cercle" active={tab === 'buildings'} onClick={() => setTab('buildings')} />
         <NavBtn label="Unites" active={tab === 'units'} onClick={() => setTab('units')} />
         <NavBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
-        <NavBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
+        <NavBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
       </nav>
     </div>
   );

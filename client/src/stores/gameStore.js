@@ -200,6 +200,35 @@ export const useGameStore = create((set, get) => ({
     }
   },
 
+  // ── Reports state ──
+  battleReports: [],
+  spyReports: [],
+  reportsSummary: null,
+
+  loadBattleReports: async () => {
+    try {
+      const res = await fetch(`${API}/reports/battles`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ battleReports: data.reports });
+    } catch { /* silent */ }
+  },
+
+  loadSpyReports: async () => {
+    try {
+      const res = await fetch(`${API}/reports/espionage`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ spyReports: data.reports });
+    } catch { /* silent */ }
+  },
+
+  loadReportsSummary: async () => {
+    try {
+      const res = await fetch(`${API}/reports/summary`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ reportsSummary: data });
+    } catch { /* silent */ }
+  },
+
   // ── Tick resources locally (visual interpolation) ──
   tickResources: () => set((state) => {
     if (!state.resources) return {};
