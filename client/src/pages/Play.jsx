@@ -17,7 +17,7 @@ import EventPanel from '../components/EventPanel';
 
 export default function Play() {
   const { player, logout } = useAuthStore();
-  const { circle, loading, loadCircle, loadBuildings, loadUnits, tickResources, error, clearError } = useGameStore();
+  const { circle, circles, loading, loadCircle, loadBuildings, loadUnits, switchCircle, tickResources, error, clearError } = useGameStore();
   const [tab, setTab] = useState('buildings');
   const [legionTarget, setLegionTarget] = useState(null);
 
@@ -50,7 +50,21 @@ export default function Play() {
         <div className="flex items-center gap-4">
           <h1 className="font-display text-xl text-gold">INFERNO DOMINI</h1>
           <span className="text-muted text-sm">|</span>
-          <span className="text-parchment text-sm">{circle?.name || 'Cercle'}</span>
+          {circles.length > 1 ? (
+            <select
+              value={circle?.id || ''}
+              onChange={(e) => switchCircle(e.target.value)}
+              className="bg-surface border border-border rounded px-2 py-1 text-sm text-parchment outline-none focus:border-gold/50"
+            >
+              {circles.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} ({c.coord_q},{c.coord_r}){c.is_primary ? ' *' : ''}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="text-parchment text-sm">{circle?.name || 'Cercle'}</span>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <span className="text-muted text-sm">{player?.username || 'Seigneur'}</span>

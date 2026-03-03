@@ -5,7 +5,7 @@
 
 const { pool } = require('../db');
 const { resolveCombat, wallBonus, calculatePlunder } = require('./combat');
-const { flushResources } = require('./resources');
+const { recalcRates, flushResources } = require('./resources');
 const { hexDistance } = require('./hex');
 
 const SPEED_BASE = 10;
@@ -301,8 +301,66 @@ async function processColonisation(legion, client) {
     return;
   }
 
-  // TODO: Create new circle at location (future phase)
-  await setReturn(legion, client, {});
+  // Check max circles (palais_infernal level on primary circle)
+  const primaryCircle = await client.query(
+    "SELECT c.id FROM circles c WHERE c.player_id = $1 AND c.is_primary = true",
+    [legion.player_id]
+  );
+  const palais = await client.query(
+    "SELECT level FROM buildings WHERE circle_id = $1 AND type = 'palais_infernal'",
+    [primaryCircle.rows[0]?.id]
+  );
+  const palaisLevel = palais.rows[0]?.level || 0;
+  const maxCircles = 1 + Math.floor(palaisLevel / 5); // 1 base + 1 per 5 levels
+
+  const currentCircles = await client.query(
+    'SELECT COUNT(*) as c FROM circles WHERE player_id = $1',
+    [legion.player_id]
+  );
+  if (parseInt(currentCircles.rows[0].c) >= maxCircles) {
+    // Max circles reached — return home
+    await setReturn(legion, client, {});
+    return;
+  }
+
+  // Get player username for circle name
+  const player = await client.query('SELECT username FROM players WHERE id = $1', [legion.player_id]);
+  const username = player.rows[0]?.username || 'Inconnu';
+  const circleCount = parseInt(currentCircles.rows[0].c) + 1;
+
+  // Create new circle
+  const newCircle = await client.query(
+    `INSERT INTO circles (player_id, name, coord_q, coord_r, is_primary)
+     VALUES ($1, $2, $3, $4, false) RETURNING id`,
+    [legion.player_id, `Colonie ${circleCount} de ${username}`, legion.to_coord_q, legion.to_coord_r]
+  );
+  const newCircleId = newCircle.rows[0].id;
+
+  // Init resources
+  await client.query('INSERT INTO resources (circle_id) VALUES ($1)', [newCircleId]);
+
+  // Init starter buildings (same as registration but lower level)
+  const starterBuildings = [
+    ['forge_damnes', 1], ['sanctuaire_neant', 1], ['entrepot_damnes', 1],
+  ];
+  for (const [type, level] of starterBuildings) {
+    await client.query(
+      'INSERT INTO buildings (circle_id, type, level) VALUES ($1, $2, $3)',
+      [newCircleId, type, level]
+    );
+  }
+
+  // Recalculate rates for the new circle
+  await recalcRates(newCircleId, client);
+
+  // Add score for colonisation
+  await client.query('UPDATE players SET score = score + 500 WHERE id = $1', [legion.player_id]);
+
+  // Units used for colonisation are consumed (they settle the colony)
+  // Delete the legion directly (units are consumed)
+  await client.query('DELETE FROM legions WHERE id = $1', [legion.id]);
+
+  console.log(`[COLONISATION] ${username} colonised (${legion.to_coord_q},${legion.to_coord_r}) — circle #${circleCount}`);
 }
 
 // ── DEFENSE ALLIEE ──

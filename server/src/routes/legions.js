@@ -87,6 +87,37 @@ router.post('/send', authenticateToken, async (req, res) => {
       }
     }
 
+    // Colonisation: check max circles
+    if (mission === 'colonisation') {
+      const primaryC = await client.query(
+        "SELECT c.id FROM circles c WHERE c.player_id = $1 AND c.is_primary = true",
+        [req.user.id]
+      );
+      const palaisCol = await client.query(
+        "SELECT level FROM buildings WHERE circle_id = $1 AND type = 'palais_infernal'",
+        [primaryC.rows[0]?.id]
+      );
+      const pLevel = palaisCol.rows[0]?.level || 0;
+      if (pLevel < 5) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Palais Infernal niveau 5 requis pour coloniser' });
+      }
+      const maxCircles = 1 + Math.floor(pLevel / 5);
+      const curCircles = await client.query('SELECT COUNT(*) as c FROM circles WHERE player_id = $1', [req.user.id]);
+      if (parseInt(curCircles.rows[0].c) >= maxCircles) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: `Maximum de cercles atteint (${maxCircles}). Ameliorez le Palais Infernal.` });
+      }
+      const targetOccupied = await client.query(
+        'SELECT 1 FROM circles WHERE coord_q = $1 AND coord_r = $2',
+        [toQ, toR]
+      );
+      if (targetOccupied.rows.length > 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Cet emplacement est deja occupe' });
+      }
+    }
+
     // Calculate distance and travel time
     const distance = hexDistance(fromQ, fromR, toQ, toR);
     if (distance === 0) {
@@ -99,7 +130,17 @@ router.post('/send', authenticateToken, async (req, res) => {
       "SELECT level FROM researches WHERE player_id = $1 AND type = 'vitesse_infernale'",
       [req.user.id]
     );
-    const speedBonus = 1 + 0.10 * (speedResearch.rows[0]?.level || 0);
+    let speedBonus = 1 + 0.10 * (speedResearch.rows[0]?.level || 0);
+
+    // Colonisation rapide bonus
+    if (mission === 'colonisation') {
+      const colonResearch = await client.query(
+        "SELECT level FROM researches WHERE player_id = $1 AND type = 'colonisation_rapide'",
+        [req.user.id]
+      );
+      speedBonus *= 1 + 0.10 * (colonResearch.rows[0]?.level || 0);
+    }
+
     const travelMinutes = (distance * SPEED_BASE) / speedBonus;
     const travelMs = travelMinutes * 60 * 1000;
 

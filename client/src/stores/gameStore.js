@@ -10,6 +10,7 @@ function authHeaders() {
 export const useGameStore = create((set, get) => ({
   circleId: null,
   circle: null,
+  circles: [], // all player circles
   resources: null,
   buildings: [],
   units: [],
@@ -17,7 +18,7 @@ export const useGameStore = create((set, get) => ({
   error: null,
 
   // ── Load circle data from API ──
-  loadCircle: async () => {
+  loadCircle: async (targetCircleId) => {
     set({ loading: true, error: null });
     try {
       // Get player's circles
@@ -25,17 +26,22 @@ export const useGameStore = create((set, get) => ({
       const listData = await listRes.json();
       if (!listRes.ok) throw new Error(listData.error);
 
-      const primary = listData.circles.find((c) => c.is_primary) || listData.circles[0];
-      if (!primary) throw new Error('No circle found');
+      // Pick target circle, or current, or primary
+      const currentId = targetCircleId || get().circleId;
+      const selected = (currentId && listData.circles.find((c) => c.id === currentId))
+        || listData.circles.find((c) => c.is_primary)
+        || listData.circles[0];
+      if (!selected) throw new Error('No circle found');
 
       // Get full circle data
-      const detailRes = await fetch(`${API}/circles/${primary.id}`, { headers: authHeaders() });
+      const detailRes = await fetch(`${API}/circles/${selected.id}`, { headers: authHeaders() });
       const detailData = await detailRes.json();
       if (!detailRes.ok) throw new Error(detailData.error);
 
       set({
-        circleId: primary.id,
+        circleId: selected.id,
         circle: detailData.circle,
+        circles: listData.circles,
         resources: detailData.resources,
         buildings: detailData.buildings,
         units: detailData.units,
@@ -44,6 +50,13 @@ export const useGameStore = create((set, get) => ({
     } catch (err) {
       set({ error: err.message, loading: false });
     }
+  },
+
+  // ── Switch to another circle ──
+  switchCircle: async (circleId) => {
+    await get().loadCircle(circleId);
+    await get().loadBuildings();
+    await get().loadUnits();
   },
 
   // ── Load buildings with costs ──
