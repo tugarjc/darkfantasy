@@ -251,6 +251,101 @@ export const useGameStore = create((set, get) => ({
     }
   },
 
+  // ── Alliance state ──
+  alliance: null,
+  allianceLoading: false,
+  allianceSearchResults: [],
+
+  loadAlliance: async () => {
+    set({ allianceLoading: true });
+    try {
+      const res = await fetch(`${API}/alliances/mine`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ alliance: data.alliance, allianceLoading: false });
+      else set({ allianceLoading: false });
+    } catch {
+      set({ allianceLoading: false });
+    }
+  },
+
+  createAlliance: async (name, tag) => {
+    const res = await fetch(`${API}/alliances/create`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ name, tag }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadAlliance();
+    return data;
+  },
+
+  searchAlliances: async (q) => {
+    try {
+      const res = await fetch(`${API}/alliances/search?q=${encodeURIComponent(q)}`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ allianceSearchResults: data.alliances });
+    } catch { /* silent */ }
+  },
+
+  joinAlliance: async (allianceId) => {
+    const res = await fetch(`${API}/alliances/${allianceId}/join`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadAlliance();
+    return data;
+  },
+
+  leaveAlliance: async () => {
+    const res = await fetch(`${API}/alliances/leave`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    set({ alliance: null });
+    return data;
+  },
+
+  kickMember: async (playerId) => {
+    const res = await fetch(`${API}/alliances/kick`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ playerId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadAlliance();
+    return data;
+  },
+
+  promoteMember: async (playerId, role) => {
+    const res = await fetch(`${API}/alliances/promote`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ playerId, role }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadAlliance();
+    return data;
+  },
+
+  setDiplomacy: async (targetAllianceId, status) => {
+    const res = await fetch(`${API}/alliances/diplomacy`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ targetAllianceId, status }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadAlliance();
+    return data;
+  },
+
   // ── Reports state ──
   battleReports: [],
   spyReports: [],

@@ -12,6 +12,7 @@ const mapRoutes = require('./routes/map');
 const legionRoutes = require('./routes/legions');
 const reportRoutes = require('./routes/reports');
 const researchRoutes = require('./routes/researches');
+const allianceRoutes = require('./routes/alliances');
 const { startLegionProcessor } = require('./game/legionProcessor');
 
 const app = express();
@@ -33,6 +34,7 @@ app.use('/api/map', mapRoutes);
 app.use('/api/legions', legionRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/researches', researchRoutes);
+app.use('/api/alliances', allianceRoutes);
 
 // ── WebSocket ──
 io.on('connection', (socket) => {

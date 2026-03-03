@@ -8,6 +8,7 @@ import HexMap from '../components/HexMap';
 import LegionPanel from '../components/LegionPanel';
 import ReportsPanel from '../components/ReportsPanel';
 import ResearchPanel from '../components/ResearchPanel';
+import AlliancePanel from '../components/AlliancePanel';
 
 export default function Play() {
   const { player, logout } = useAuthStore();
@@ -72,6 +73,7 @@ export default function Play() {
         <TabBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
         <TabBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
         <TabBtn label="Recherche" active={tab === 'research'} onClick={() => setTab('research')} />
+        <TabBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
         <TabBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
       </div>
 
@@ -100,6 +102,7 @@ export default function Play() {
           {tab === 'legions' && (
             <LegionPanel targetHex={null} onClearTarget={() => {}} />
           )}
+          {tab === 'alliance' && <AlliancePanel />}
           {tab === 'reports' && <ReportsPanel />}
         </div>
       </main>
