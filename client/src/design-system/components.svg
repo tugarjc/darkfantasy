@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+
+  <!--
+    INFERNO DOMINI — SVG Design System Components
+    6 composants de base réutilisables via <use href="#id"/>
+  -->
+
+  <!-- ============================================================
+       1. ICÔNE FER MAUDIT — Enclume + flammes
+       ============================================================ -->
+  <symbol id="icon-iron" viewBox="0 0 48 48">
+    <defs>
+      <linearGradient id="iron-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#D4783C"/>
+        <stop offset="100%" stop-color="#8B3A0F"/>
+      </linearGradient>
+    </defs>
+    <!-- Anvil body -->
+    <path d="M10 30 L14 22 L34 22 L38 30 L40 30 L40 34 L8 34 L8 30 Z"
+          fill="url(#iron-grad)" stroke="#5A2A0A" stroke-width="1.5"/>
+    <!-- Anvil horn -->
+    <path d="M14 22 L6 24 L8 28 L14 26" fill="#B0592A" stroke="#5A2A0A" stroke-width="1"/>
+    <!-- Flames -->
+    <path d="M20 20 Q22 12 24 16 Q26 10 28 18 Q26 14 24 20 Z"
+          fill="#FF6633" opacity="0.8">
+      <animate attributeName="d"
+        values="M20 20 Q22 12 24 16 Q26 10 28 18 Q26 14 24 20 Z;
+                M20 20 Q21 14 24 17 Q27 11 28 18 Q25 13 24 20 Z;
+                M20 20 Q22 12 24 16 Q26 10 28 18 Q26 14 24 20 Z"
+        dur="1.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M22 19 Q23 14 24 17 Q25 13 26 19 Z" fill="#FFCC33" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0.5;0.9" dur="1s" repeatCount="indefinite"/>
+    </path>
+    <!-- Base -->
+    <rect x="12" y="34" width="24" height="4" rx="1" fill="#3A1A08"/>
+  </symbol>
+
+  <!-- ============================================================
+       2. ICÔNE ESSENCE DÉMONIAQUE — Œil tourbillonnant
+       ============================================================ -->
+  <symbol id="icon-essence" viewBox="0 0 48 48">
+    <defs>
+      <radialGradient id="essence-grad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#9B59B6"/>
+        <stop offset="70%" stop-color="#6B2FA0"/>
+        <stop offset="100%" stop-color="#2D1650"/>
+      </radialGradient>
+    </defs>
+    <!-- Outer eye shape -->
+    <path d="M4 24 Q14 8 24 8 Q34 8 44 24 Q34 40 24 40 Q14 40 4 24 Z"
+          fill="url(#essence-grad)" stroke="#9B59B6" stroke-width="1.5"/>
+    <!-- Iris -->
+    <circle cx="24" cy="24" r="8" fill="#1B0A30" stroke="#B87FD8" stroke-width="1"/>
+    <!-- Pupil -->
+    <circle cx="24" cy="24" r="3.5" fill="#D8A8F0"/>
+    <!-- Swirl lines -->
+    <path d="M24 16 Q28 20 24 24 Q20 28 24 32"
+          fill="none" stroke="#B87FD8" stroke-width="0.8" opacity="0.6">
+      <animateTransform attributeName="transform" type="rotate"
+        from="0 24 24" to="360 24 24" dur="8s" repeatCount="indefinite"/>
+    </path>
+    <path d="M16 24 Q20 20 24 24 Q28 28 32 24"
+          fill="none" stroke="#B87FD8" stroke-width="0.8" opacity="0.6">
+      <animateTransform attributeName="transform" type="rotate"
+        from="0 24 24" to="-360 24 24" dur="10s" repeatCount="indefinite"/>
+    </path>
+  </symbol>
+
+  <!-- ============================================================
+       3. ICÔNE ÂMES CORROMPUES — Crâne rayonnant
+       ============================================================ -->
+  <symbol id="icon-souls" viewBox="0 0 48 48">
+    <defs>
+      <radialGradient id="soul-glow" cx="50%" cy="40%" r="50%">
+        <stop offset="0%" stop-color="#5AE89A" stop-opacity="0.4"/>
+        <stop offset="100%" stop-color="#2D5A3D" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <!-- Glow -->
+    <circle cx="24" cy="22" r="18" fill="url(#soul-glow)">
+      <animate attributeName="r" values="18;20;18" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Skull -->
+    <path d="M16 22 Q16 12 24 10 Q32 12 32 22 L32 28 L28 30 L28 26 L26 28
+             L24 26 L22 28 L20 26 L20 30 L16 28 Z"
+          fill="#E8E0D0" stroke="#3CA66B" stroke-width="1.2"/>
+    <!-- Eye sockets -->
+    <ellipse cx="20" cy="20" rx="2.5" ry="3" fill="#2D5A3D"/>
+    <ellipse cx="28" cy="20" rx="2.5" ry="3" fill="#2D5A3D"/>
+    <!-- Eye glow -->
+    <ellipse cx="20" cy="20" rx="1" ry="1.5" fill="#5AE89A" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="28" cy="20" rx="1" ry="1.5" fill="#5AE89A" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+    </ellipse>
+    <!-- Nose -->
+    <path d="M23 23 L24 25 L25 23" fill="none" stroke="#3CA66B" stroke-width="0.8"/>
+    <!-- Jaw -->
+    <path d="M18 30 L20 32 L22 30 L24 32 L26 30 L28 32 L30 30"
+          fill="none" stroke="#3CA66B" stroke-width="1"/>
+  </symbol>
+
+  <!-- ============================================================
+       4. HEXAGONE DE CARTE — Tuile de base du Pandémonium
+       ============================================================ -->
+  <symbol id="hex-tile" viewBox="0 0 100 87">
+    <polygon points="50,0 100,22 100,65 50,87 0,65 0,22"
+             fill="var(--hex-fill, #1A1A24)"
+             stroke="var(--hex-stroke, #2E2E3A)"
+             stroke-width="1.5"/>
+    <!-- Inner texture lines -->
+    <line x1="25" y1="11" x2="75" y2="11" stroke="#2E2E3A" stroke-width="0.3" opacity="0.3"/>
+    <line x1="10" y1="33" x2="90" y2="33" stroke="#2E2E3A" stroke-width="0.3" opacity="0.2"/>
+    <line x1="10" y1="55" x2="90" y2="55" stroke="#2E2E3A" stroke-width="0.3" opacity="0.2"/>
+    <line x1="25" y1="76" x2="75" y2="76" stroke="#2E2E3A" stroke-width="0.3" opacity="0.3"/>
+  </symbol>
+
+  <!-- ============================================================
+       5. BOUCLIER / BLASON — Cadre pour faction ou Cercle
+       ============================================================ -->
+  <symbol id="shield-frame" viewBox="0 0 64 80">
+    <defs>
+      <linearGradient id="shield-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2A2A36"/>
+        <stop offset="100%" stop-color="#14141C"/>
+      </linearGradient>
+    </defs>
+    <!-- Shield shape -->
+    <path d="M4 8 L4 48 Q4 72 32 78 Q60 72 60 48 L60 8 Q52 4 32 2 Q12 4 4 8 Z"
+          fill="url(#shield-grad)"
+          stroke="#C9A84C" stroke-width="2"/>
+    <!-- Inner border -->
+    <path d="M8 12 L8 46 Q8 68 32 74 Q56 68 56 46 L56 12 Q48 8 32 6 Q16 8 8 12 Z"
+          fill="none" stroke="#C9A84C" stroke-width="0.5" opacity="0.4"/>
+    <!-- Top ornament -->
+    <path d="M26 2 L32 0 L38 2" fill="none" stroke="#C9A84C" stroke-width="1.5"/>
+    <!-- Corner rivets -->
+    <circle cx="10" cy="12" r="2" fill="#C9A84C" opacity="0.6"/>
+    <circle cx="54" cy="12" r="2" fill="#C9A84C" opacity="0.6"/>
+  </symbol>
+
+  <!-- ============================================================
+       6. BOUTON INFERNAL — Composant UI interactif
+       ============================================================ -->
+  <symbol id="btn-infernal" viewBox="0 0 200 48">
+    <defs>
+      <linearGradient id="btn-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#3A1010"/>
+        <stop offset="50%" stop-color="#8B1A1A"/>
+        <stop offset="100%" stop-color="#3A1010"/>
+      </linearGradient>
+    </defs>
+    <!-- Button body -->
+    <rect x="2" y="2" width="196" height="44" rx="6"
+          fill="url(#btn-grad)" stroke="#C9A84C" stroke-width="1.5"/>
+    <!-- Inner glow line -->
+    <rect x="6" y="6" width="188" height="36" rx="4"
+          fill="none" stroke="#C9A84C" stroke-width="0.5" opacity="0.2"/>
+    <!-- Left ornament -->
+    <path d="M12 14 L16 24 L12 34" fill="none" stroke="#C9A84C" stroke-width="1" opacity="0.5"/>
+    <!-- Right ornament -->
+    <path d="M188 14 L184 24 L188 34" fill="none" stroke="#C9A84C" stroke-width="1" opacity="0.5"/>
+  </symbol>
+
+</svg>

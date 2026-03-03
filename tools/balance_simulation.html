@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Inferno Domini — Simulation d'Équilibrage 30 Jours</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0A0A0F; color: #F0E6D2; padding: 24px; }
+  h1 { color: #C9A84C; margin-bottom: 8px; font-size: 1.5rem; }
+  h2 { color: #B22222; margin: 24px 0 8px; font-size: 1.1rem; }
+  p.desc { color: #9B8E7E; font-size: 0.85rem; margin-bottom: 16px; }
+  .controls { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: #9B8E7E; }
+  .controls input, .controls select {
+    background: #1A1A24; border: 1px solid #2E2E3A; color: #F0E6D2;
+    padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; width: 140px;
+  }
+  button {
+    background: #8B1A1A; color: #F0E6D2; border: 1px solid #C9A84C;
+    padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+    align-self: flex-end;
+  }
+  button:hover { background: #B22222; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.75rem; margin-bottom: 24px; }
+  th { background: #1A1A24; color: #C9A84C; padding: 6px 8px; text-align: right;
+       border: 1px solid #2E2E3A; position: sticky; top: 0; }
+  th:first-child { text-align: center; }
+  td { padding: 4px 8px; text-align: right; border: 1px solid #1A1A24; }
+  td:first-child { text-align: center; color: #9B8E7E; }
+  tr:nth-child(even) { background: #111118; }
+  tr:nth-child(odd) { background: #0D0D14; }
+  .iron { color: #D4783C; }
+  .essence { color: #9B59B6; }
+  .souls { color: #5AE89A; }
+  .cost { color: #FF6666; }
+  .time { color: #AAAACC; }
+  .score { color: #C9A84C; }
+  .note { color: #9B8E7E; font-size: 0.75rem; font-style: italic; margin-top: 8px; }
+  .section { overflow-x: auto; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+  .card { background: #1A1A24; border: 1px solid #2E2E3A; border-radius: 8px; padding: 12px; }
+  .card h3 { font-size: 0.85rem; color: #C9A84C; margin-bottom: 6px; }
+  .card .val { font-size: 1.3rem; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Inferno Domini — Simulation d'Équilibrage</h1>
+<p class="desc">Tableur interactif : valide les formules de production, coûts, temps de construction et progression sur 30 jours. Modifiez les paramètres et cliquez "Simuler".</p>
+
+<div class="controls">
+  <label>Vitesse serveur
+    <select id="speed"><option value="1">×1 Standard</option><option value="2">×2 Rapide</option><option value="3">×3 Saisonnier</option><option value="5">×5</option><option value="10">×10 Événement</option></select>
+  </label>
+  <label>Heures de jeu/jour
+    <input id="hoursPerDay" type="number" value="4" min="1" max="24">
+  </label>
+  <label>Pillagé/jour (%)
+    <input id="raidLoss" type="number" value="5" min="0" max="50">
+  </label>
+  <label>Premium (2 files)
+    <select id="premium"><option value="0">Non</option><option value="1">Oui</option></select>
+  </label>
+  <button onclick="simulate()">Simuler</button>
+</div>
+
+<div id="summary" class="summary"></div>
+
+<h2>Production & Stockage journalier</h2>
+<div class="section"><table id="tbl-prod"></table></div>
+
+<h2>Progression bâtiments (Forge, Sanctuaire, Bibliothèque)</h2>
+<div class="section"><table id="tbl-build"></table></div>
+
+<h2>Coûts & Temps de construction (Forge des Damnés nv 1-30)</h2>
+<div class="section"><table id="tbl-costs"></table></div>
+
+<h2>Score estimé</h2>
+<div class="section"><table id="tbl-score"></table></div>
+
+<p class="note">Formules issues du GDD v2 — base_rate × 1.1^n (production), base × 1.5^(n-1) (coûts), base_time × 1.6^(n-1) / (1 + 0.05 × nv_biblio) (temps).</p>
+
+<script>
+// ── FORMULES GDD ──
+const BASE_RATES = { iron: 30, essence: 20, souls: 10 };
+const BASE_STORAGE = { iron: 10000, essence: 10000, souls: 5000 };
+const BUILDINGS = {
+  forge:       { baseFer: 60,  baseEss: 15,  baseAme: 0,  baseTime: 120 },
+  sanctuaire:  { baseFer: 50,  baseEss: 30,  baseAme: 0,  baseTime: 150 },
+  puits:       { baseFer: 100, baseEss: 50,  baseAme: 20, baseTime: 300 },
+  biblio:      { baseFer: 100, baseEss: 80,  baseAme: 0,  baseTime: 180 },
+  entrepot:    { baseFer: 80,  baseEss: 30,  baseAme: 0,  baseTime: 120 },
+};
+
+function prodRate(base, level) { return base * Math.pow(1.1, level); }
+function storageCap(base, level) { return base * Math.pow(2, level / 5); }
+function buildCost(base, n) { return Math.round(base * Math.pow(1.5, n - 1)); }
+function buildTime(baseT, n, biblioLv) { return Math.max(10, baseT * Math.pow(1.6, n - 1) / (1 + 0.05 * biblioLv)); }
+
+function fmt(n) {
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  return Math.round(n).toLocaleString('fr-FR');
+}
+
+function fmtTime(seconds) {
+  if (seconds < 60) return Math.round(seconds) + 's';
+  if (seconds < 3600) return Math.floor(seconds / 60) + 'm ' + Math.round(seconds % 60) + 's';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  if (h < 24) return h + 'h ' + m + 'm';
+  const d = Math.floor(h / 24);
+  return d + 'j ' + (h % 24) + 'h';
+}
+
+function simulate() {
+  const speed = parseInt(document.getElementById('speed').value);
+  const hoursPerDay = parseInt(document.getElementById('hoursPerDay').value);
+  const raidLossPct = parseInt(document.getElementById('raidLoss').value) / 100;
+  const premium = parseInt(document.getElementById('premium').value);
+
+  // Strategy: player upgrades Forge, then Sanctuaire, then Biblio, repeat
+  // They build during active hours and produce 24h
+  const state = {
+    forgeLv: 1, sanctLv: 1, puitsLv: 0, biblioLv: 1, entrepotLv: 1,
+    iron: 500, essence: 300, souls: 0,
+    score: 0, totalBuilt: 0,
+    day: 0
+  };
+
+  const days = [];
+  const buildQueue = ['forge', 'sanctuaire', 'biblio', 'entrepot'];
+  let queueIdx = 0;
+  let pendingBuild = null;
+  let buildRemaining = 0;
+
+  for (let d = 1; d <= 30; d++) {
+    state.day = d;
+
+    // 24h production (passive)
+    const ironRate = prodRate(BASE_RATES.iron, state.forgeLv) * speed;
+    const essRate  = prodRate(BASE_RATES.essence, state.sanctLv) * speed;
+    const soulRate = state.puitsLv > 0 ? prodRate(BASE_RATES.souls, state.puitsLv) * speed : 0;
+
+    const ironCap = storageCap(BASE_STORAGE.iron, state.entrepotLv);
+    const essCap  = storageCap(BASE_STORAGE.essence, state.entrepotLv);
+    const soulCap = storageCap(BASE_STORAGE.souls, state.entrepotLv);
+
+    state.iron = Math.min(state.iron + ironRate * 24, ironCap);
+    state.essence = Math.min(state.essence + essRate * 24, essCap);
+    state.souls = Math.min(state.souls + soulRate * 24, soulCap);
+
+    // Raid losses
+    state.iron *= (1 - raidLossPct * 0.8);
+    state.essence *= (1 - raidLossPct * 0.8);
+    state.souls *= (1 - raidLossPct * 0.5);
+
+    // Build during active hours
+    let activeSeconds = hoursPerDay * 3600 * speed;
+    const buildSlots = premium ? 2 : 1;
+    let builtToday = [];
+
+    for (let slot = 0; slot < buildSlots; slot++) {
+      let timeLeft = activeSeconds;
+      while (timeLeft > 0) {
+        if (!pendingBuild) {
+          // Pick next building to upgrade
+          const target = buildQueue[queueIdx % buildQueue.length];
+          let targetLv;
+          switch (target) {
+            case 'forge':       targetLv = state.forgeLv + 1; break;
+            case 'sanctuaire':  targetLv = state.sanctLv + 1; break;
+            case 'biblio':      targetLv = state.biblioLv + 1; break;
+            case 'entrepot':    targetLv = state.entrepotLv + 1; break;
+          }
+
+          if (targetLv > 30) { queueIdx++; continue; }
+
+          const b = BUILDINGS[target];
+          const costIron = buildCost(b.baseFer, targetLv);
+          const costEss  = buildCost(b.baseEss, targetLv);
+          const costAme  = buildCost(b.baseAme, targetLv);
+
+          if (state.iron >= costIron && state.essence >= costEss && state.souls >= costAme) {
+            state.iron -= costIron;
+            state.essence -= costEss;
+            state.souls -= costAme;
+            const t = buildTime(b.baseTime, targetLv, state.biblioLv);
+            pendingBuild = { target, level: targetLv };
+            buildRemaining = t;
+          } else {
+            break; // Not enough resources, wait
+          }
+        }
+
+        if (pendingBuild) {
+          if (buildRemaining <= timeLeft) {
+            timeLeft -= buildRemaining;
+            buildRemaining = 0;
+            // Complete build
+            switch (pendingBuild.target) {
+              case 'forge':       state.forgeLv = pendingBuild.level; break;
+              case 'sanctuaire':  state.sanctLv = pendingBuild.level; break;
+              case 'biblio':      state.biblioLv = pendingBuild.level; break;
+              case 'entrepot':    state.entrepotLv = pendingBuild.level; break;
+            }
+            builtToday.push(`${pendingBuild.target} → ${pendingBuild.level}`);
+            state.totalBuilt++;
+            queueIdx++;
+            pendingBuild = null;
+
+            // Unlock puits at forge lv 5
+            if (state.forgeLv >= 5 && state.puitsLv === 0) state.puitsLv = 1;
+          } else {
+            buildRemaining -= timeLeft;
+            timeLeft = 0;
+          }
+        }
+      }
+    }
+
+    // Score: sum of all building levels × 100
+    const totalLevels = state.forgeLv + state.sanctLv + state.puitsLv + state.biblioLv + state.entrepotLv;
+    state.score = totalLevels * 100;
+
+    days.push({
+      day: d,
+      forgeLv: state.forgeLv, sanctLv: state.sanctLv, puitsLv: state.puitsLv,
+      biblioLv: state.biblioLv, entrepotLv: state.entrepotLv,
+      iron: Math.round(state.iron), essence: Math.round(state.essence), souls: Math.round(state.souls),
+      ironRate: Math.round(ironRate), essRate: Math.round(essRate), soulRate: Math.round(soulRate),
+      ironCap: Math.round(ironCap), essCap: Math.round(essCap), soulCap: Math.round(soulCap),
+      score: state.score,
+      built: builtToday.join(', ') || '—'
+    });
+  }
+
+  // ── Summary cards ──
+  const last = days[days.length - 1];
+  document.getElementById('summary').innerHTML = `
+    <div class="card"><h3>Jour 30 — Stock</h3>
+      <div class="val iron">${fmt(last.iron)} Fer</div>
+      <div class="val essence">${fmt(last.essence)} Ess</div>
+      <div class="val souls">${fmt(last.souls)} Âmes</div></div>
+    <div class="card"><h3>Production /h</h3>
+      <div class="val iron">${fmt(last.ironRate)}/h</div>
+      <div class="val essence">${fmt(last.essRate)}/h</div>
+      <div class="val souls">${fmt(last.soulRate)}/h</div></div>
+    <div class="card"><h3>Bâtiments J30</h3>
+      <div class="val">Forge ${last.forgeLv} | Sanct ${last.sanctLv}</div>
+      <div class="val">Biblio ${last.biblioLv} | Entrep ${last.entrepotLv}</div>
+      <div class="val">Puits ${last.puitsLv}</div></div>
+    <div class="card"><h3>Score</h3>
+      <div class="val score">${fmt(last.score)}</div></div>
+  `;
+
+  // ── Production table ──
+  let prodHTML = '<tr><th>Jour</th><th>Fer/h</th><th>Ess/h</th><th>Âmes/h</th><th>Stock Fer</th><th>Stock Ess</th><th>Stock Âmes</th><th>Cap Fer</th><th>Cap Ess</th><th>Cap Âmes</th></tr>';
+  for (const d of days) {
+    prodHTML += `<tr><td>${d.day}</td><td class="iron">${fmt(d.ironRate)}</td><td class="essence">${fmt(d.essRate)}</td><td class="souls">${fmt(d.soulRate)}</td><td class="iron">${fmt(d.iron)}</td><td class="essence">${fmt(d.essence)}</td><td class="souls">${fmt(d.souls)}</td><td>${fmt(d.ironCap)}</td><td>${fmt(d.essCap)}</td><td>${fmt(d.soulCap)}</td></tr>`;
+  }
+  document.getElementById('tbl-prod').innerHTML = prodHTML;
+
+  // ── Build progression table ──
+  let buildHTML = '<tr><th>Jour</th><th>Forge</th><th>Sanctuaire</th><th>Puits</th><th>Bibliothèque</th><th>Entrepôt</th><th>Constructions</th></tr>';
+  for (const d of days) {
+    buildHTML += `<tr><td>${d.day}</td><td>${d.forgeLv}</td><td>${d.sanctLv}</td><td>${d.puitsLv}</td><td>${d.biblioLv}</td><td>${d.entrepotLv}</td><td style="text-align:left;color:#9B8E7E">${d.built}</td></tr>`;
+  }
+  document.getElementById('tbl-build').innerHTML = buildHTML;
+
+  // ── Cost reference table ──
+  const forgeB = BUILDINGS.forge;
+  let costHTML = '<tr><th>Nv</th><th>Coût Fer</th><th>Coût Ess</th><th>Temps (Biblio 0)</th><th>Temps (Biblio 5)</th><th>Temps (Biblio 10)</th><th>Temps (Biblio 15)</th></tr>';
+  for (let n = 1; n <= 30; n++) {
+    const cIron = buildCost(forgeB.baseFer, n);
+    const cEss = buildCost(forgeB.baseEss, n);
+    costHTML += `<tr><td>${n}</td><td class="cost">${fmt(cIron)}</td><td class="cost">${fmt(cEss)}</td><td class="time">${fmtTime(buildTime(forgeB.baseTime, n, 0))}</td><td class="time">${fmtTime(buildTime(forgeB.baseTime, n, 5))}</td><td class="time">${fmtTime(buildTime(forgeB.baseTime, n, 10))}</td><td class="time">${fmtTime(buildTime(forgeB.baseTime, n, 15))}</td></tr>`;
+  }
+  document.getElementById('tbl-costs').innerHTML = costHTML;
+
+  // ── Score table ──
+  let scoreHTML = '<tr><th>Jour</th><th>Score éco</th><th>Niveaux totaux</th></tr>';
+  for (const d of days) {
+    const totalLv = d.forgeLv + d.sanctLv + d.puitsLv + d.biblioLv + d.entrepotLv;
+    scoreHTML += `<tr><td>${d.day}</td><td class="score">${fmt(d.score)}</td><td>${totalLv}</td></tr>`;
+  }
+  document.getElementById('tbl-score').innerHTML = scoreHTML;
+}
+
+// Run initial simulation on load
+simulate();
+</script>
+
+</body>
+</html>
