@@ -16,6 +16,7 @@ const allianceRoutes = require('./routes/alliances');
 const heroRoutes = require('./routes/heroes');
 const marketRoutes = require('./routes/market');
 const { startLegionProcessor } = require('./game/legionProcessor');
+const { setupChat } = require('./chat');
 
 const app = express();
 const httpServer = createServer(app);
@@ -40,11 +41,8 @@ app.use('/api/alliances', allianceRoutes);
 app.use('/api/heroes', heroRoutes);
 app.use('/api/market', marketRoutes);
 
-// ── WebSocket ──
-io.on('connection', (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
-  socket.on('disconnect', () => console.log(`Socket disconnected: ${socket.id}`));
-});
+// ── WebSocket + Chat ──
+setupChat(io);
 
 // ── Boot ──
 const PORT = process.env.PORT || 3000;

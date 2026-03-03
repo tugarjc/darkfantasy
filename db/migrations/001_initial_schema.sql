@@ -327,6 +327,16 @@ CREATE TABLE fortress (
   UNIQUE (server_id)
 );
 
+-- Chat messages
+CREATE TABLE chat_messages (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  channel     VARCHAR(128) NOT NULL,  -- 'global', 'alliance:<id>', 'dm:<id1>:<id2>'
+  sender_id   UUID NOT NULL REFERENCES players(id),
+  content     TEXT NOT NULL CHECK (char_length(content) BETWEEN 1 AND 500),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_chat_channel_time ON chat_messages (channel, created_at DESC);
+
 -- Audit logs (admin)
 CREATE TABLE audit_logs (
   id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

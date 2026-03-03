@@ -11,6 +11,7 @@ import ResearchPanel from '../components/ResearchPanel';
 import AlliancePanel from '../components/AlliancePanel';
 import HeroPanel from '../components/HeroPanel';
 import MarketPanel from '../components/MarketPanel';
+import ChatPanel from '../components/ChatPanel';
 
 export default function Play() {
   const { player, logout } = useAuthStore();
@@ -78,6 +79,7 @@ export default function Play() {
         <TabBtn label="Heros" active={tab === 'heroes'} onClick={() => setTab('heroes')} />
         <TabBtn label="Marche" active={tab === 'market'} onClick={() => setTab('market')} />
         <TabBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
+        <TabBtn label="Chat" active={tab === 'chat'} onClick={() => setTab('chat')} />
         <TabBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
       </div>
 
@@ -109,6 +111,7 @@ export default function Play() {
           {tab === 'heroes' && <HeroPanel />}
           {tab === 'market' && <MarketPanel />}
           {tab === 'alliance' && <AlliancePanel />}
+          {tab === 'chat' && <ChatPanel />}
           {tab === 'reports' && <ReportsPanel />}
         </div>
       </main>
@@ -123,6 +126,7 @@ export default function Play() {
         <NavBtn label="Heros" active={tab === 'heroes'} onClick={() => setTab('heroes')} />
         <NavBtn label="Marche" active={tab === 'market'} onClick={() => setTab('market')} />
         <NavBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
+        <NavBtn label="Chat" active={tab === 'chat'} onClick={() => setTab('chat')} />
         <NavBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
       </nav>
     </div>
