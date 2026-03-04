@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { io } from 'socket.io-client';
 import { useAuthStore } from '../stores/authStore';
 
 const CHANNELS = {
-  global: { label: 'Global', color: 'text-parchment' },
-  alliance: { label: 'Alliance', color: 'text-essence' },
-  dm: { label: 'Prive', color: 'text-gold' },
+  global: { label: 'chat.global', color: 'text-parchment' },
+  alliance: { label: 'chat.alliance_chat', color: 'text-essence' },
+  dm: { label: 'chat.private', color: 'text-gold' },
 };
 
 const FACTION_COLORS = {
@@ -35,6 +36,7 @@ export function disconnectChat() {
 }
 
 export default function ChatPanel() {
+  const { t } = useTranslation();
   const player = useAuthStore((s) => s.player);
   const [channel, setChannel] = useState('global');
   const [dmTarget, setDmTarget] = useState('');
@@ -162,11 +164,11 @@ export default function ChatPanel() {
                 : 'border-border text-muted hover:text-parchment hover:border-gold/30'
             }`}
           >
-            {meta.label}
+            {t(meta.label)}
           </button>
         ))}
         <span className={`ml-auto text-[10px] ${connected ? 'text-green-400' : 'text-blood-glow'}`}>
-          {connected ? 'Connecte' : 'Deconnecte'}
+          {connected ? t('chat.connected') : t('chat.disconnected')}
         </span>
       </div>
 
@@ -179,20 +181,20 @@ export default function ChatPanel() {
             onChange={(e) => setDmTarget(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && startDm()}
             className="flex-1 bg-base border border-border rounded px-3 py-1.5 text-sm text-parchment focus:border-gold focus:outline-none"
-            placeholder="Nom du joueur..."
+            placeholder={t('chat.player_name')}
           />
           <button onClick={startDm}
             className="px-3 py-1.5 text-xs bg-surface border border-border rounded text-parchment hover:border-gold transition-colors">
-            Ouvrir
+            {t('chat.open')}
           </button>
         </div>
       )}
 
       {channel === 'dm' && activeDm && (
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs text-gold">Conversation avec {activeDm}</span>
+          <span className="text-xs text-gold">{t('chat.conversation_with', { name: activeDm })}</span>
           <button onClick={() => setActiveDm(null)}
-            className="text-xs text-muted hover:text-parchment">&times; Fermer</button>
+            className="text-xs text-muted hover:text-parchment">&times; {t('chat.close_dm')}</button>
         </div>
       )}
 
@@ -204,7 +206,7 @@ export default function ChatPanel() {
       {/* Messages */}
       <div className="flex-1 bg-base border border-border rounded-lg p-3 overflow-y-auto mb-2">
         {currentMessages.length === 0 && (
-          <p className="text-muted text-xs text-center mt-4">Aucun message</p>
+          <p className="text-muted text-xs text-center mt-4">{t('chat.no_messages')}</p>
         )}
         {currentMessages.map((msg) => (
           <div key={msg.id} className="mb-1.5">
@@ -230,12 +232,12 @@ export default function ChatPanel() {
           maxLength={500}
           disabled={!connected || (channel === 'dm' && !activeDm)}
           className="flex-1 bg-base border border-border rounded px-3 py-2 text-sm text-parchment focus:border-gold focus:outline-none disabled:opacity-50"
-          placeholder={channel === 'dm' && !activeDm ? 'Selectionnez un joueur...' : 'Votre message...'}
+          placeholder={channel === 'dm' && !activeDm ? t('chat.select_player') : t('chat.your_message')}
         />
         <button type="submit"
           disabled={!connected || !input.trim() || (channel === 'dm' && !activeDm)}
           className="px-4 py-2 text-sm bg-blood border border-gold rounded text-parchment hover:bg-blood-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          Envoyer
+          {t('chat.send')}
         </button>
       </form>
     </div>

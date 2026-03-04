@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useGameStore } from '../stores/gameStore';
 
 const CATEGORY_META = {
-  production: { label: 'Forge Infernale', color: '#B0592A', icon: '⚒' },
-  combat: { label: 'Arts Martiaux', color: '#8B1A1A', icon: '⚔' },
-  mobility: { label: 'Propulsion', color: '#3CA66B', icon: '🌀' },
-  special: { label: 'Occultisme', color: '#6B2FA0', icon: '👁' },
-  legendary: { label: 'Arcanes Legendaires', color: '#C9A84C', icon: '✦' },
+  production: { label: 'research.categories.production', color: '#B0592A', icon: '⚒' },
+  combat: { label: 'research.categories.combat', color: '#8B1A1A', icon: '⚔' },
+  mobility: { label: 'research.categories.mobility', color: '#3CA66B', icon: '🌀' },
+  special: { label: 'research.categories.special', color: '#6B2FA0', icon: '👁' },
+  legendary: { label: 'research.categories.legendary', color: '#C9A84C', icon: '✦' },
 };
 
 function fmtNum(n) {
@@ -16,7 +18,7 @@ function fmtNum(n) {
 }
 
 function fmtTime(seconds) {
-  if (seconds <= 0) return 'Termine';
+  if (seconds <= 0) return i18n.t('common.done');
   const d = Math.floor(seconds / 86400);
   const h = Math.floor((seconds % 86400) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
@@ -28,6 +30,7 @@ function fmtTime(seconds) {
 }
 
 export default function ResearchPanel() {
+  const { t } = useTranslation();
   const researches = useGameStore((s) => s.researches);
   const resources = useGameStore((s) => s.resources);
   const researchLoading = useGameStore((s) => s.researchLoading);
@@ -89,7 +92,7 @@ export default function ResearchPanel() {
             <p className="text-sm text-gold font-medium">
               {activeResearch.name} → Nv.{activeResearch.level + 1}
             </p>
-            <p className="text-xs text-muted">En cours de recherche</p>
+            <p className="text-xs text-muted">{t('research.researching')}</p>
           </div>
           <p className="text-gold text-sm font-display">
             {fmtTime(Math.max(0, (new Date(activeResearch.researchEnd).getTime() - now) / 1000))}
@@ -109,12 +112,12 @@ export default function ResearchPanel() {
                 : 'border-border text-muted hover:text-parchment hover:border-gold/30'
             }`}
           >
-            {meta.icon} {meta.label}
+            {meta.icon} {t(meta.label)}
           </button>
         ))}
       </div>
 
-      {researchLoading && <p className="text-gold text-sm animate-pulse mb-4">Chargement...</p>}
+      {researchLoading && <p className="text-gold text-sm animate-pulse mb-4">{t('common.loading')}</p>}
 
       {/* Research grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -146,7 +149,7 @@ export default function ResearchPanel() {
                 )}
               </div>
               {!r.prereqsMet && !r.isMaxed && (
-                <p className="text-[10px] text-blood-light mt-1">Prerequis manquants</p>
+                <p className="text-[10px] text-blood-light mt-1">{t('research.prereqs_missing')}</p>
               )}
             </div>
           );
@@ -169,6 +172,7 @@ export default function ResearchPanel() {
 }
 
 function ResearchDetail({ research: r, resources, now, activeResearch, onStart, onClose }) {
+  const { t } = useTranslation();
   const meta = CATEGORY_META[r.category];
   const isResearching = r.isResearching && r.researchEnd && new Date(r.researchEnd).getTime() > now;
   const remaining = isResearching ? Math.max(0, (new Date(r.researchEnd).getTime() - now) / 1000) : 0;
@@ -190,7 +194,7 @@ function ResearchDetail({ research: r, resources, now, activeResearch, onStart, 
             {r.name}
           </h3>
           <p className="text-muted text-sm">
-            Niveau {r.level}{r.isMaxed ? ' (MAX)' : ` / ${r.maxLevel}`}
+            {t('common.level')} {r.level}{r.isMaxed ? ' (MAX)' : ` / ${r.maxLevel}`}
           </p>
           <p className="text-muted text-xs mt-1">{r.description}</p>
         </div>
@@ -200,7 +204,7 @@ function ResearchDetail({ research: r, resources, now, activeResearch, onStart, 
       {/* Prerequisites */}
       {r.prerequisites.length > 0 && (
         <div className="mb-4">
-          <p className="text-xs text-muted mb-1">Prerequis :</p>
+          <p className="text-xs text-muted mb-1">{t('research.prereqs')}</p>
           <div className="flex flex-wrap gap-1">
             {r.prerequisites.map((p, i) => (
               <span key={i} className={`text-[10px] px-2 py-0.5 rounded ${p.met ? 'bg-green-900/30 text-green-400' : 'bg-blood/20 text-blood-glow'}`}>
@@ -214,7 +218,7 @@ function ResearchDetail({ research: r, resources, now, activeResearch, onStart, 
       {isResearching && (
         <div className="mb-4">
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gold">En recherche → Nv.{r.level + 1}</span>
+            <span className="text-gold">{t('research.in_progress')} → {t('common.lvl')}{r.level + 1}</span>
             <span className="text-gold">{fmtTime(remaining)}</span>
           </div>
           <div className="h-2 bg-base rounded-full overflow-hidden">
@@ -227,16 +231,16 @@ function ResearchDetail({ research: r, resources, now, activeResearch, onStart, 
       {next && !isResearching && (
         <div>
           <p className="text-sm text-parchment mb-3">
-            Recherche niveau {next.level} ({fmtTime(next.time)}) :
+            {t('research.research_to', { level: next.level, time: fmtTime(next.time) })}
           </p>
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <CostItem label="Fer" cost={next.costFer} available={resources?.iron} color="text-iron" />
-            <CostItem label="Essence" cost={next.costEssence} available={resources?.essence} color="text-essence" />
-            <CostItem label="Ames" cost={next.costAmes} available={resources?.souls} color="text-souls" />
+            <CostItem label={t('common.iron')} cost={next.costFer} available={resources?.iron} color="text-iron" />
+            <CostItem label={t('common.essence')} cost={next.costEssence} available={resources?.essence} color="text-essence" />
+            <CostItem label={t('common.souls')} cost={next.costAmes} available={resources?.souls} color="text-souls" />
           </div>
 
           {activeResearch && !isResearching && (
-            <p className="text-xs text-gold mb-2 text-center">Une recherche est deja en cours</p>
+            <p className="text-xs text-gold mb-2 text-center">{t('research.already_researching')}</p>
           )}
 
           <button
@@ -248,15 +252,15 @@ function ResearchDetail({ research: r, resources, now, activeResearch, onStart, 
                 : 'bg-base border border-border text-muted cursor-not-allowed'
             }`}
           >
-            {!r.prereqsMet ? 'Prerequis manquants' :
-             activeResearch ? 'Recherche en cours...' :
-             canAfford ? 'Rechercher' : 'Ressources insuffisantes'}
+            {!r.prereqsMet ? t('research.prereqs_missing') :
+             activeResearch ? t('research.already_researching') :
+             canAfford ? t('research.start') : t('common.insufficient_resources')}
           </button>
         </div>
       )}
 
       {r.isMaxed && !isResearching && (
-        <p className="text-gold text-sm text-center">Recherche au niveau maximum</p>
+        <p className="text-gold text-sm text-center">{t('research.max_level')}</p>
       )}
     </div>
   );

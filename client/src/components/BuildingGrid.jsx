@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 
 const BUILDING_ICONS = {
@@ -28,8 +29,8 @@ function fmtNum(n) {
   return Math.round(n).toLocaleString('fr-FR');
 }
 
-function fmtTime(seconds) {
-  if (seconds <= 0) return 'Termine';
+function fmtTime(seconds, t) {
+  if (seconds <= 0) return t('common.done');
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
@@ -39,6 +40,7 @@ function fmtTime(seconds) {
 }
 
 export default function BuildingGrid() {
+  const { t } = useTranslation();
   const buildings = useGameStore((s) => s.buildings);
   const resources = useGameStore((s) => s.resources);
   const upgradeBuilding = useGameStore((s) => s.upgradeBuilding);
@@ -112,7 +114,7 @@ export default function BuildingGrid() {
               </p>
 
               {isUpgrading && (
-                <p className="text-center text-xs text-gold mt-1">{fmtTime(remaining)}</p>
+                <p className="text-center text-xs text-gold mt-1">{fmtTime(remaining, t)}</p>
               )}
             </div>
           );
@@ -134,6 +136,7 @@ export default function BuildingGrid() {
 }
 
 function BuildingDetail({ building: b, resources, now, onUpgrade, onClose }) {
+  const { t } = useTranslation();
   const icon = BUILDING_ICONS[b.type] || { color: '#555' };
   const isUpgrading = b.upgrade_end && new Date(b.upgrade_end).getTime() > now;
   const remaining = isUpgrading ? Math.max(0, (new Date(b.upgrade_end).getTime() - now) / 1000) : 0;
@@ -153,7 +156,7 @@ function BuildingDetail({ building: b, resources, now, onUpgrade, onClose }) {
             {b.name || b.type}
           </h3>
           <p className="text-muted text-sm">
-            Niveau {b.level}{b.isMaxed ? ' (MAX)' : ` / ${b.maxLevel}`}
+            {t('common.level')} {b.level}{b.isMaxed ? ' (MAX)' : ` / ${b.maxLevel}`}
           </p>
         </div>
         <button onClick={onClose} className="text-muted hover:text-parchment text-lg">&times;</button>
@@ -162,8 +165,8 @@ function BuildingDetail({ building: b, resources, now, onUpgrade, onClose }) {
       {isUpgrading && (
         <div className="mb-4">
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gold">En construction → Nv.{b.level + 1}</span>
-            <span className="text-gold">{fmtTime(remaining)}</span>
+            <span className="text-gold">{t('buildings.in_construction')} → {t('common.lvl')}{b.level + 1}</span>
+            <span className="text-gold">{fmtTime(remaining, t)}</span>
           </div>
           <div className="h-2 bg-base rounded-full overflow-hidden">
             <div className="h-full bg-gold/60 rounded-full transition-all duration-1000 animate-pulse"
@@ -174,11 +177,11 @@ function BuildingDetail({ building: b, resources, now, onUpgrade, onClose }) {
 
       {next && !isUpgrading && (
         <div>
-          <p className="text-sm text-parchment mb-3">Amelioration vers niveau {next.level} :</p>
+          <p className="text-sm text-parchment mb-3">{t('buildings.upgrade_to', { level: next.level })}</p>
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <CostItem label="Fer" cost={next.costFer} available={resources?.iron} color="text-iron" />
-            <CostItem label="Essence" cost={next.costEssence} available={resources?.essence} color="text-essence" />
-            <CostItem label="Ames" cost={next.costAmes} available={resources?.souls} color="text-souls" />
+            <CostItem label={t('common.iron')} cost={next.costFer} available={resources?.iron} color="text-iron" />
+            <CostItem label={t('common.essence')} cost={next.costEssence} available={resources?.essence} color="text-essence" />
+            <CostItem label={t('common.souls')} cost={next.costAmes} available={resources?.souls} color="text-souls" />
           </div>
           <button
             onClick={() => onUpgrade(b.type)}
@@ -189,13 +192,13 @@ function BuildingDetail({ building: b, resources, now, onUpgrade, onClose }) {
                 : 'bg-base border border-border text-muted cursor-not-allowed'
             }`}
           >
-            {canAfford ? 'Ameliorer' : 'Ressources insuffisantes'}
+            {canAfford ? t('buildings.upgrade') : t('common.insufficient_resources')}
           </button>
         </div>
       )}
 
       {b.isMaxed && !isUpgrading && (
-        <p className="text-gold text-sm text-center">Structure au niveau maximum</p>
+        <p className="text-gold text-sm text-center">{t('buildings.max_level')}</p>
       )}
     </div>
   );

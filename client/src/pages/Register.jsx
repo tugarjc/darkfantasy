@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 
 export default function Register() {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,7 +16,7 @@ export default function Register() {
     e.preventDefault();
     setLocalError('');
     if (password !== confirm) {
-      setLocalError('Les mots de passe ne correspondent pas');
+      setLocalError(t('auth.password_mismatch'));
       return;
     }
     register(username, email, password);
@@ -30,7 +32,7 @@ export default function Register() {
         </Link>
 
         <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-lg p-8">
-          <h2 className="font-display text-2xl text-parchment mb-6 text-center">Devenir Seigneur</h2>
+          <h2 className="font-display text-2xl text-parchment mb-6 text-center">{t('auth.register_title')}</h2>
 
           {displayError && (
             <div className="bg-blood/20 border border-blood rounded p-3 mb-4 text-sm text-blood-glow">
@@ -40,7 +42,7 @@ export default function Register() {
           )}
 
           <label className="block mb-4">
-            <span className="text-muted text-sm">Nom de Seigneur</span>
+            <span className="text-muted text-sm">{t('auth.username')}</span>
             <input
               type="text"
               value={username}
@@ -55,7 +57,7 @@ export default function Register() {
           </label>
 
           <label className="block mb-4">
-            <span className="text-muted text-sm">Email</span>
+            <span className="text-muted text-sm">{t('auth.email')}</span>
             <input
               type="email"
               value={email}
@@ -68,7 +70,7 @@ export default function Register() {
           </label>
 
           <label className="block mb-4">
-            <span className="text-muted text-sm">Mot de passe (min. 8 caractres)</span>
+            <span className="text-muted text-sm">{t('auth.password_min')}</span>
             <input
               type="password"
               value={password}
@@ -82,7 +84,7 @@ export default function Register() {
           </label>
 
           <label className="block mb-6">
-            <span className="text-muted text-sm">Confirmer le mot de passe</span>
+            <span className="text-muted text-sm">{t('auth.confirm_password')}</span>
             <input
               type="password"
               value={confirm}
@@ -101,13 +103,13 @@ export default function Register() {
             className="w-full py-3 bg-blood border border-gold rounded font-display text-lg text-parchment
                        hover:bg-blood-light disabled:opacity-50 transition-all duration-300"
           >
-            {loading ? 'Invocation...' : 'Forger mon Cercle Infernal'}
+            {loading ? t('auth.register_loading') : t('auth.register_button')}
           </button>
 
           <p className="mt-6 text-center text-sm text-muted">
-            Dj un compte ?{' '}
+            {t('auth.has_account')}{' '}
             <Link to="/login" className="text-gold hover:text-gold-light transition-colors">
-              Connexion
+              {t('auth.login_title')}
             </Link>
           </p>
         </form>

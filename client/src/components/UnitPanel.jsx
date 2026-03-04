@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 
 function fmtNum(n) {
@@ -16,9 +17,9 @@ function fmtTime(seconds) {
   return `${s}s`;
 }
 
-const CATEGORY_LABELS = {
-  ground: 'Terrestres',
-  air: 'Aeriennes',
+const CATEGORY_KEYS = {
+  ground: 'units.ground',
+  air: 'units.air',
 };
 
 const UNIT_COLORS = {
@@ -27,6 +28,7 @@ const UNIT_COLORS = {
 };
 
 export default function UnitPanel() {
+  const { t } = useTranslation();
   const units = useGameStore((s) => s.units);
   const resources = useGameStore((s) => s.resources);
   const trainUnits = useGameStore((s) => s.trainUnits);
@@ -50,11 +52,11 @@ export default function UnitPanel() {
   return (
     <div>
       {[
-        { label: 'Terrestres', items: groundUnits },
-        { label: 'Aeriennes', items: airUnits },
-      ].map(({ label, items }) => (
-        <div key={label} className="mb-6">
-          <h3 className="font-display text-lg text-gold mb-3">{label}</h3>
+        { key: 'ground', items: groundUnits },
+        { key: 'air', items: airUnits },
+      ].map(({ key, items }) => (
+        <div key={key} className="mb-6">
+          <h3 className="font-display text-lg text-gold mb-3">{t(CATEGORY_KEYS[key])}</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {items.map((u) => (
               <UnitCard
@@ -77,7 +79,7 @@ export default function UnitPanel() {
                 {selectedUnit.name}
               </h3>
               <p className="text-muted text-sm">
-                {selectedUnit.unlocked ? `Possedes : ${selectedUnit.quantity}` : 'Verrouille'}
+                {selectedUnit.unlocked ? t('units.owned', { count: selectedUnit.quantity }) : t('common.locked')}
               </p>
             </div>
             <button onClick={() => setSelected(null)} className="text-muted hover:text-parchment text-lg">&times;</button>
@@ -85,24 +87,24 @@ export default function UnitPanel() {
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <StatBox label="Attaque" value={selectedUnit.attack} color="text-blood-glow" />
-            <StatBox label="Defense" value={selectedUnit.defense} color="text-infernal-light" />
-            <StatBox label="Pillage" value={selectedUnit.plunder} color="text-gold" />
+            <StatBox label={t('units.attack')} value={selectedUnit.attack} color="text-blood-glow" />
+            <StatBox label={t('units.defense')} value={selectedUnit.defense} color="text-infernal-light" />
+            <StatBox label={t('units.plunder')} value={selectedUnit.plunder} color="text-gold" />
           </div>
 
           {selectedUnit.unlocked ? (
             <>
               {/* Cost per unit */}
-              <p className="text-sm text-muted mb-2">Cout unitaire :</p>
+              <p className="text-sm text-muted mb-2">{t('units.unit_cost')}</p>
               <div className="grid grid-cols-3 gap-3 mb-4">
-                <CostItem label="Fer" cost={selectedUnit.cost.iron * qty} available={resources?.iron} color="text-iron" />
-                <CostItem label="Essence" cost={selectedUnit.cost.essence * qty} available={resources?.essence} color="text-essence" />
-                <CostItem label="Ames" cost={selectedUnit.cost.souls * qty} available={resources?.souls} color="text-souls" />
+                <CostItem label={t('common.iron')} cost={selectedUnit.cost.iron * qty} available={resources?.iron} color="text-iron" />
+                <CostItem label={t('common.essence')} cost={selectedUnit.cost.essence * qty} available={resources?.essence} color="text-essence" />
+                <CostItem label={t('common.souls')} cost={selectedUnit.cost.souls * qty} available={resources?.souls} color="text-souls" />
               </div>
 
               {/* Quantity selector */}
               <div className="flex items-center gap-3 mb-4">
-                <label className="text-sm text-muted">Quantite :</label>
+                <label className="text-sm text-muted">{t('common.quantity')} :</label>
                 <div className="flex gap-1">
                   {[1, 5, 10, 50, 100].map((n) => (
                     <button
@@ -128,12 +130,12 @@ export default function UnitPanel() {
                     : 'bg-base border border-border text-muted cursor-not-allowed'
                 }`}
               >
-                {training ? 'Entrainement...' : `Entrainer ${qty}x ${selectedUnit.name}`}
+                {training ? t('units.training') : t('units.train', { qty, name: selectedUnit.name })}
               </button>
             </>
           ) : (
             <p className="text-blood-light text-sm text-center py-4">
-              Structure requise non disponible
+              {t('units.building_required')}
             </p>
           )}
         </div>
@@ -152,6 +154,7 @@ function canAfford(unit, qty, resources) {
 }
 
 function UnitCard({ unit, isSelected, onClick }) {
+  const { t } = useTranslation();
   const color = UNIT_COLORS[unit.category] || '#555';
   return (
     <div
@@ -172,7 +175,7 @@ function UnitCard({ unit, isSelected, onClick }) {
         <span>D:{unit.defense}</span>
         <span>P:{unit.plunder}</span>
       </div>
-      {!unit.unlocked && <p className="text-[10px] text-blood-light mt-1">Verrouille</p>}
+      {!unit.unlocked && <p className="text-[10px] text-blood-light mt-1">{t('common.locked')}</p>}
     </div>
   );
 }

@@ -1,28 +1,30 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 
 const FACTION_LABELS = {
-  none: 'Aucune',
-  legion_cendres: 'Legion des Cendres',
-  ordre_vide: 'Ordre du Vide',
-  pacte_chaines: 'Pacte des Chaines',
-  culte_sang: 'Culte du Sang',
+  none: 'factions.none',
+  legion_cendres: 'factions.legion_cendres',
+  ordre_vide: 'factions.ordre_vide',
+  pacte_chaines: 'factions.pacte_chaines',
+  culte_sang: 'factions.culte_sang',
 };
 
 export default function AdminPanel() {
+  const { t } = useTranslation();
   const [view, setView] = useState('stats');
 
   return (
     <div>
-      <h2 className="font-display text-2xl text-gold mb-4">Panneau d'Administration</h2>
+      <h2 className="font-display text-2xl text-gold mb-4">{t('admin.title')}</h2>
 
       {/* Sub-navigation */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {[
-          ['stats', 'Statistiques'],
-          ['players', 'Joueurs'],
-          ['announce', 'Annonce'],
-          ['audit', 'Journal'],
+          ['stats', t('admin.stats')],
+          ['players', t('admin.players')],
+          ['announce', t('admin.announce')],
+          ['audit', t('admin.audit')],
         ].map(([key, label]) => (
           <button
             key={key}
@@ -46,23 +48,24 @@ export default function AdminPanel() {
 
 /* ── Stats View ── */
 function StatsView() {
+  const { t } = useTranslation();
   const { adminStats, adminLoading, loadAdminStats } = useGameStore();
 
   useEffect(() => { loadAdminStats(); }, []);
 
   if (adminLoading || !adminStats) {
-    return <p className="text-muted animate-pulse">Chargement des statistiques...</p>;
+    return <p className="text-muted animate-pulse">{t('admin.loading_stats')}</p>;
   }
 
   const stats = [
-    ['Joueurs total', adminStats.totalPlayers],
-    ['En ligne (15min)', adminStats.onlinePlayers],
-    ['Bannis', adminStats.bannedPlayers],
-    ['Cercles', adminStats.totalCircles],
-    ['Alliances', adminStats.totalAlliances],
-    ['Legions actives', adminStats.activeLegions],
-    ['Offres marche', adminStats.activeOffers],
-    ['Messages chat', adminStats.totalMessages],
+    [t('admin.total_players'), adminStats.totalPlayers],
+    [t('admin.online_15min'), adminStats.onlinePlayers],
+    [t('admin.banned'), adminStats.bannedPlayers],
+    [t('admin.circles'), adminStats.totalCircles],
+    [t('admin.alliances'), adminStats.totalAlliances],
+    [t('admin.active_legions'), adminStats.activeLegions],
+    [t('admin.market_offers'), adminStats.activeOffers],
+    [t('admin.chat_messages'), adminStats.totalMessages],
   ];
 
   return (
@@ -80,16 +83,16 @@ function StatsView() {
       {/* Top 10 */}
       {adminStats.topPlayers?.length > 0 && (
         <div>
-          <h3 className="font-display text-lg text-parchment mb-3">Top 10 Joueurs</h3>
+          <h3 className="font-display text-lg text-parchment mb-3">{t('admin.top_10')}</h3>
           <div className="bg-surface border border-border rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-muted">
                   <th className="px-3 py-2 text-left">#</th>
-                  <th className="px-3 py-2 text-left">Joueur</th>
-                  <th className="px-3 py-2 text-left">Faction</th>
-                  <th className="px-3 py-2 text-right">Score</th>
-                  <th className="px-3 py-2 text-center">Statut</th>
+                  <th className="px-3 py-2 text-left">{t('admin.player_header')}</th>
+                  <th className="px-3 py-2 text-left">{t('admin.faction_header')}</th>
+                  <th className="px-3 py-2 text-right">{t('admin.score_header')}</th>
+                  <th className="px-3 py-2 text-center">{t('admin.status_header')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -97,7 +100,7 @@ function StatsView() {
                   <tr key={p.id} className="border-b border-border/50 hover:bg-deep/50">
                     <td className="px-3 py-2 text-muted">{i + 1}</td>
                     <td className="px-3 py-2 text-parchment">{p.username}</td>
-                    <td className="px-3 py-2 text-muted">{FACTION_LABELS[p.faction] || p.faction}</td>
+                    <td className="px-3 py-2 text-muted">{t(FACTION_LABELS[p.faction] || p.faction)}</td>
                     <td className="px-3 py-2 text-right text-gold">{p.score?.toLocaleString()}</td>
                     <td className="px-3 py-2 text-center">
                       {p.is_admin && <span className="text-xs bg-gold/20 text-gold px-2 py-0.5 rounded">Admin</span>}
@@ -116,6 +119,7 @@ function StatsView() {
 
 /* ── Players View ── */
 function PlayersView() {
+  const { t } = useTranslation();
   const { adminPlayers, loadAdminPlayers, adminPlayerDetail, loadAdminPlayerDetail, adminBanPlayer, adminSetResources } = useGameStore();
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState(null);
@@ -153,17 +157,17 @@ function PlayersView() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && doSearch()}
-            placeholder="Rechercher un joueur..."
+            placeholder={t('admin.search_player')}
             className="flex-1 bg-deep border border-border rounded px-3 py-2 text-sm text-parchment placeholder:text-muted/50 focus:border-gold/50 outline-none"
           />
           <button onClick={doSearch} className="bg-gold/20 text-gold px-4 py-2 rounded text-sm hover:bg-gold/30 transition-colors">
-            Chercher
+            {t('common.search')}
           </button>
         </div>
 
         {adminPlayers && (
           <>
-            <p className="text-xs text-muted mb-2">{adminPlayers.total} joueur(s) — page {adminPlayers.page}/{adminPlayers.totalPages || 1}</p>
+            <p className="text-xs text-muted mb-2">{t('admin.player_count', { count: adminPlayers.total })} — page {adminPlayers.page}/{adminPlayers.totalPages || 1}</p>
             <div className="space-y-1">
               {adminPlayers.players?.map((p) => (
                 <div
@@ -176,7 +180,7 @@ function PlayersView() {
                   <div>
                     <span className="text-parchment text-sm font-medium">{p.username}</span>
                     {p.alliance_tag && <span className="text-muted text-xs ml-2">[{p.alliance_tag}]</span>}
-                    <div className="text-xs text-muted">{FACTION_LABELS[p.faction] || p.faction} — Score: {p.score?.toLocaleString()}</div>
+                    <div className="text-xs text-muted">{t(FACTION_LABELS[p.faction] || p.faction)} — Score: {p.score?.toLocaleString()}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     {p.is_admin && <span className="text-xs bg-gold/20 text-gold px-2 py-0.5 rounded">Admin</span>}
@@ -188,7 +192,7 @@ function PlayersView() {
                           p.is_banned ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-blood/20 text-blood-glow hover:bg-blood/30'
                         }`}
                       >
-                        {p.is_banned ? 'Debannir' : 'Bannir'}
+                        {p.is_banned ? t('admin.unban') : t('admin.ban')}
                       </button>
                     )}
                   </div>
@@ -201,13 +205,13 @@ function PlayersView() {
               <div className="flex gap-2 mt-4 justify-center">
                 {adminPlayers.page > 1 && (
                   <button onClick={() => loadAdminPlayers(search, adminPlayers.page - 1)} className="text-xs text-muted hover:text-parchment px-3 py-1 bg-surface rounded border border-border">
-                    Precedent
+                    {t('common.previous')}
                   </button>
                 )}
                 <span className="text-xs text-muted py-1">{adminPlayers.page} / {adminPlayers.totalPages}</span>
                 {adminPlayers.page < adminPlayers.totalPages && (
                   <button onClick={() => loadAdminPlayers(search, adminPlayers.page + 1)} className="text-xs text-muted hover:text-parchment px-3 py-1 bg-surface rounded border border-border">
-                    Suivant
+                    {t('common.next')}
                   </button>
                 )}
               </div>
@@ -223,7 +227,7 @@ function PlayersView() {
           <PlayerDetail detail={adminPlayerDetail} onMsg={setMsg} />
         ) : (
           <div className="text-muted text-sm bg-surface border border-border rounded-lg p-8 text-center">
-            Selectionnez un joueur pour voir les details
+            {t('admin.select_player')}
           </div>
         )}
       </div>
@@ -233,6 +237,7 @@ function PlayersView() {
 
 /* ── Player Detail ── */
 function PlayerDetail({ detail, onMsg }) {
+  const { t } = useTranslation();
   const { adminSetResources, loadAdminPlayerDetail } = useGameStore();
   const { player, circles, heroes, researches } = detail;
   const [iron, setIron] = useState('');
@@ -269,10 +274,10 @@ function PlayerDetail({ detail, onMsg }) {
         <h3 className="font-display text-lg text-gold">{player.username}</h3>
         <div className="text-xs text-muted space-y-1 mt-1">
           <div>Email: {player.email}</div>
-          <div>Faction: {FACTION_LABELS[player.faction] || player.faction}</div>
+          <div>Faction: {t(FACTION_LABELS[player.faction] || player.faction)}</div>
           <div>Score: {player.score?.toLocaleString()}</div>
-          <div>Inscription: {new Date(player.created_at).toLocaleDateString('fr-FR')}</div>
-          <div>Derniere connexion: {player.last_login ? new Date(player.last_login).toLocaleString('fr-FR') : 'Jamais'}</div>
+          <div>{t('admin.registration') + ':'} {new Date(player.created_at).toLocaleDateString('fr-FR')}</div>
+          <div>{t('admin.last_login') + ':'} {player.last_login ? new Date(player.last_login).toLocaleString('fr-FR') : t('admin.never')}</div>
           {player.alliance_name && <div>Alliance: [{player.alliance_tag}] {player.alliance_name}</div>}
           <div className="flex gap-2 mt-1">
             {player.is_premium && <span className="text-xs bg-purple-900/30 text-purple-400 px-2 py-0.5 rounded">Premium</span>}
@@ -285,11 +290,11 @@ function PlayerDetail({ detail, onMsg }) {
       {/* Circles */}
       {circles?.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium text-parchment mb-1">Cercles ({circles.length})</h4>
+          <h4 className="text-sm font-medium text-parchment mb-1">{t('admin.circles_label')} ({circles.length})</h4>
           <div className="space-y-1">
             {circles.map((c) => (
               <div key={c.id} className="text-xs text-muted bg-deep rounded p-2">
-                {c.name} ({c.coord_q},{c.coord_r}) {c.is_primary && '(Principal)'}
+                {c.name} ({c.coord_q},{c.coord_r}) {c.is_primary && `(${t('admin.primary')})`}
                 <span className="ml-2">Fer:{Math.floor(c.iron)} Ess:{Math.floor(c.essence)} Ames:{Math.floor(c.souls)}</span>
               </div>
             ))}
@@ -300,7 +305,7 @@ function PlayerDetail({ detail, onMsg }) {
       {/* Resource editor */}
       {primaryCircle && (
         <div>
-          <h4 className="text-sm font-medium text-parchment mb-2">Modifier ressources (cercle principal)</h4>
+          <h4 className="text-sm font-medium text-parchment mb-2">{t('admin.edit_resources')}</h4>
           <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="text-xs text-muted">Fer</label>
@@ -316,7 +321,7 @@ function PlayerDetail({ detail, onMsg }) {
             </div>
           </div>
           <button onClick={saveResources} className="mt-2 bg-gold/20 text-gold px-4 py-1.5 rounded text-sm hover:bg-gold/30 transition-colors">
-            Appliquer
+            {t('common.apply')}
           </button>
         </div>
       )}
@@ -324,7 +329,7 @@ function PlayerDetail({ detail, onMsg }) {
       {/* Heroes */}
       {heroes?.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium text-parchment mb-1">Heros ({heroes.length})</h4>
+          <h4 className="text-sm font-medium text-parchment mb-1">{t('admin.heroes_label')} ({heroes.length})</h4>
           <div className="flex flex-wrap gap-2">
             {heroes.map((h) => (
               <div key={h.type} className="text-xs bg-deep rounded px-2 py-1 text-muted">
@@ -340,7 +345,7 @@ function PlayerDetail({ detail, onMsg }) {
       {/* Researches */}
       {researches?.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium text-parchment mb-1">Recherches ({researches.length})</h4>
+          <h4 className="text-sm font-medium text-parchment mb-1">{t('admin.researches_label')} ({researches.length})</h4>
           <div className="flex flex-wrap gap-2">
             {researches.map((r) => (
               <span key={r.type} className="text-xs bg-deep rounded px-2 py-1 text-muted">
@@ -356,6 +361,7 @@ function PlayerDetail({ detail, onMsg }) {
 
 /* ── Announce View ── */
 function AnnounceView() {
+  const { t } = useTranslation();
   const { adminAnnounce } = useGameStore();
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState('');
@@ -364,7 +370,7 @@ function AnnounceView() {
     if (!message.trim()) return;
     try {
       await adminAnnounce(message.trim());
-      setStatus('Annonce envoyee !');
+      setStatus(t('admin.announce_sent'));
       setMessage('');
     } catch (err) {
       setStatus(err.message);
@@ -373,21 +379,21 @@ function AnnounceView() {
 
   return (
     <div className="max-w-lg">
-      <h3 className="font-display text-lg text-parchment mb-3">Annonce systeme</h3>
-      <p className="text-xs text-muted mb-3">Le message sera envoye dans le chat global avec le prefixe [SYSTEME].</p>
+      <h3 className="font-display text-lg text-parchment mb-3">{t('admin.system_announce')}</h3>
+      <p className="text-xs text-muted mb-3">{t('admin.announce_desc')}</p>
 
       <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         maxLength={500}
         rows={4}
-        placeholder="Votre annonce..."
+        placeholder={t('admin.your_announce')}
         className="w-full bg-deep border border-border rounded px-3 py-2 text-sm text-parchment placeholder:text-muted/50 focus:border-gold/50 outline-none resize-none"
       />
       <div className="flex items-center justify-between mt-2">
         <span className="text-xs text-muted">{message.length}/500</span>
         <button onClick={send} disabled={!message.trim()} className="bg-gold/20 text-gold px-6 py-2 rounded text-sm hover:bg-gold/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-          Envoyer
+          {t('common.send')}
         </button>
       </div>
       {status && <p className="text-sm text-gold mt-3">{status}</p>}
@@ -397,6 +403,7 @@ function AnnounceView() {
 
 /* ── Audit View ── */
 function AuditView() {
+  const { t } = useTranslation();
   const { adminAudit, loadAdminAudit } = useGameStore();
 
   useEffect(() => { loadAdminAudit(); }, []);
@@ -405,18 +412,18 @@ function AuditView() {
 
   return (
     <div>
-      <h3 className="font-display text-lg text-parchment mb-3">Journal d'audit</h3>
-      <p className="text-xs text-muted mb-3">{adminAudit.total} entree(s) — page {adminAudit.page}</p>
+      <h3 className="font-display text-lg text-parchment mb-3">{t('admin.audit_log')}</h3>
+      <p className="text-xs text-muted mb-3">{adminAudit.total} {t('admin.entries')} — page {adminAudit.page}</p>
 
       <div className="bg-surface border border-border rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-muted">
-              <th className="px-3 py-2 text-left">Date</th>
-              <th className="px-3 py-2 text-left">Admin</th>
-              <th className="px-3 py-2 text-left">Action</th>
-              <th className="px-3 py-2 text-left">Cible</th>
-              <th className="px-3 py-2 text-left">Details</th>
+              <th className="px-3 py-2 text-left">{t('admin.date')}</th>
+              <th className="px-3 py-2 text-left">{t('admin.admin_col')}</th>
+              <th className="px-3 py-2 text-left">{t('admin.action')}</th>
+              <th className="px-3 py-2 text-left">{t('admin.target')}</th>
+              <th className="px-3 py-2 text-left">{t('admin.details')}</th>
             </tr>
           </thead>
           <tbody>
@@ -440,7 +447,7 @@ function AuditView() {
               </tr>
             ))}
             {(!adminAudit.logs || adminAudit.logs.length === 0) && (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted">Aucune entree</td></tr>
+              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted">{t('admin.no_entries')}</td></tr>
             )}
           </tbody>
         </table>
@@ -450,12 +457,12 @@ function AuditView() {
       <div className="flex gap-2 mt-4 justify-center">
         {adminAudit.page > 1 && (
           <button onClick={() => loadAdminAudit(adminAudit.page - 1)} className="text-xs text-muted hover:text-parchment px-3 py-1 bg-surface rounded border border-border">
-            Precedent
+            {t('common.previous')}
           </button>
         )}
         {adminAudit.logs?.length >= 30 && (
           <button onClick={() => loadAdminAudit(adminAudit.page + 1)} className="text-xs text-muted hover:text-parchment px-3 py-1 bg-surface rounded border border-border">
-            Suivant
+            {t('common.next')}
           </button>
         )}
       </div>

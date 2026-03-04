@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 import { useGameStore } from '../stores/gameStore';
 import ResourceBar from '../components/ResourceBar';
@@ -17,6 +18,7 @@ import EventPanel from '../components/EventPanel';
 import MissionPanel from '../components/MissionPanel';
 
 export default function Play() {
+  const { t, i18n } = useTranslation();
   const { player, logout } = useAuthStore();
   const { circle, circles, loading, loadCircle, loadBuildings, loadUnits, switchCircle, tickResources, error, clearError } = useGameStore();
   const [tab, setTab] = useState('buildings');
@@ -39,7 +41,7 @@ export default function Play() {
   if (loading && !circle) {
     return (
       <div className="min-h-screen bg-deep flex items-center justify-center">
-        <p className="font-display text-xl text-gold animate-pulse">Invocation du Cercle...</p>
+        <p className="font-display text-xl text-gold animate-pulse">{t('play.summoning_circle')}</p>
       </div>
     );
   }
@@ -69,8 +71,11 @@ export default function Play() {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-muted text-sm">{player?.username || 'Seigneur'}</span>
+          <button onClick={() => { const next = i18n.language === 'fr' ? 'en' : 'fr'; i18n.changeLanguage(next); localStorage.setItem('lang', next); }} className="text-xs text-muted hover:text-gold transition-colors px-2">
+            {i18n.language === 'fr' ? 'EN' : 'FR'}
+          </button>
           <button onClick={logout} className="text-sm text-muted hover:text-blood-glow transition-colors">
-            Deconnexion
+            {t('common.disconnection')}
           </button>
         </div>
       </header>
@@ -88,19 +93,19 @@ export default function Play() {
 
       {/* Tab navigation */}
       <div className="bg-surface border-b border-border px-4 flex gap-1">
-        <TabBtn label="Structures" active={tab === 'buildings'} onClick={() => setTab('buildings')} />
-        <TabBtn label="Unites" active={tab === 'units'} onClick={() => setTab('units')} />
-        <TabBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
-        <TabBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
-        <TabBtn label="Recherche" active={tab === 'research'} onClick={() => setTab('research')} />
-        <TabBtn label="Heros" active={tab === 'heroes'} onClick={() => setTab('heroes')} />
-        <TabBtn label="Marche" active={tab === 'market'} onClick={() => setTab('market')} />
-        <TabBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
-        <TabBtn label="Evenements" active={tab === 'events'} onClick={() => setTab('events')} />
-        <TabBtn label="Missions" active={tab === 'missions'} onClick={() => setTab('missions')} />
-        <TabBtn label="Chat" active={tab === 'chat'} onClick={() => setTab('chat')} />
-        <TabBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
-        {player?.is_admin && <TabBtn label="Admin" active={tab === 'admin'} onClick={() => setTab('admin')} />}
+        <TabBtn label={t('nav.structures')} active={tab === 'buildings'} onClick={() => setTab('buildings')} />
+        <TabBtn label={t('nav.units')} active={tab === 'units'} onClick={() => setTab('units')} />
+        <TabBtn label={t('nav.map')} active={tab === 'map'} onClick={() => setTab('map')} />
+        <TabBtn label={t('nav.legions')} active={tab === 'legions'} onClick={() => setTab('legions')} />
+        <TabBtn label={t('nav.research')} active={tab === 'research'} onClick={() => setTab('research')} />
+        <TabBtn label={t('nav.heroes')} active={tab === 'heroes'} onClick={() => setTab('heroes')} />
+        <TabBtn label={t('nav.market')} active={tab === 'market'} onClick={() => setTab('market')} />
+        <TabBtn label={t('nav.alliance')} active={tab === 'alliance'} onClick={() => setTab('alliance')} />
+        <TabBtn label={t('nav.events')} active={tab === 'events'} onClick={() => setTab('events')} />
+        <TabBtn label={t('nav.missions')} active={tab === 'missions'} onClick={() => setTab('missions')} />
+        <TabBtn label={t('nav.chat')} active={tab === 'chat'} onClick={() => setTab('chat')} />
+        <TabBtn label={t('nav.reports')} active={tab === 'reports'} onClick={() => setTab('reports')} />
+        {player?.is_admin && <TabBtn label={t('nav.admin')} active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </div>
 
       {/* Main content */}
@@ -141,19 +146,19 @@ export default function Play() {
 
       {/* Bottom nav (mobile) */}
       <nav className="md:hidden bg-base border-t border-border flex justify-around py-2">
-        <NavBtn label="Cercle" active={tab === 'buildings'} onClick={() => setTab('buildings')} />
-        <NavBtn label="Unites" active={tab === 'units'} onClick={() => setTab('units')} />
-        <NavBtn label="Carte" active={tab === 'map'} onClick={() => setTab('map')} />
-        <NavBtn label="Legions" active={tab === 'legions'} onClick={() => setTab('legions')} />
-        <NavBtn label="Recherche" active={tab === 'research'} onClick={() => setTab('research')} />
-        <NavBtn label="Heros" active={tab === 'heroes'} onClick={() => setTab('heroes')} />
-        <NavBtn label="Marche" active={tab === 'market'} onClick={() => setTab('market')} />
-        <NavBtn label="Alliance" active={tab === 'alliance'} onClick={() => setTab('alliance')} />
-        <NavBtn label="Events" active={tab === 'events'} onClick={() => setTab('events')} />
-        <NavBtn label="Missions" active={tab === 'missions'} onClick={() => setTab('missions')} />
-        <NavBtn label="Chat" active={tab === 'chat'} onClick={() => setTab('chat')} />
-        <NavBtn label="Rapports" active={tab === 'reports'} onClick={() => setTab('reports')} />
-        {player?.is_admin && <NavBtn label="Admin" active={tab === 'admin'} onClick={() => setTab('admin')} />}
+        <NavBtn label={t('nav.circle')} active={tab === 'buildings'} onClick={() => setTab('buildings')} />
+        <NavBtn label={t('nav.units')} active={tab === 'units'} onClick={() => setTab('units')} />
+        <NavBtn label={t('nav.map')} active={tab === 'map'} onClick={() => setTab('map')} />
+        <NavBtn label={t('nav.legions')} active={tab === 'legions'} onClick={() => setTab('legions')} />
+        <NavBtn label={t('nav.research')} active={tab === 'research'} onClick={() => setTab('research')} />
+        <NavBtn label={t('nav.heroes')} active={tab === 'heroes'} onClick={() => setTab('heroes')} />
+        <NavBtn label={t('nav.market')} active={tab === 'market'} onClick={() => setTab('market')} />
+        <NavBtn label={t('nav.alliance')} active={tab === 'alliance'} onClick={() => setTab('alliance')} />
+        <NavBtn label={t('nav.events')} active={tab === 'events'} onClick={() => setTab('events')} />
+        <NavBtn label={t('nav.missions')} active={tab === 'missions'} onClick={() => setTab('missions')} />
+        <NavBtn label={t('nav.chat')} active={tab === 'chat'} onClick={() => setTab('chat')} />
+        <NavBtn label={t('nav.reports')} active={tab === 'reports'} onClick={() => setTab('reports')} />
+        {player?.is_admin && <NavBtn label={t('nav.admin')} active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </nav>
     </div>
   );

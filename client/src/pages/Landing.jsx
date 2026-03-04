@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function Landing() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-deep flex flex-col">
       {/* Hero Section */}
@@ -34,11 +36,10 @@ export default function Landing() {
           INFERNO DOMINI
         </h1>
         <p className="font-display text-xl md:text-2xl text-blood-light text-center mb-2 relative z-10">
-          Le Rgne des Seigneurs des Tnbres
+          {t('landing.subtitle')}
         </p>
         <p className="text-muted text-center max-w-xl mb-10 relative z-10">
-          Btissez votre empire infernal sur une carte hexagonale, levez vos lgions dmoniaques
-          et crasez vos rivaux dans ce jeu de stratgie multijoueur dark fantasy.
+          {t('landing.description')}
         </p>
 
         <div className="flex gap-4 relative z-10">
@@ -47,14 +48,14 @@ export default function Landing() {
             className="px-8 py-3 bg-blood border border-gold rounded font-display text-lg text-parchment
                        hover:bg-blood-light hover:shadow-[0_0_20px_rgba(139,26,26,0.5)] transition-all duration-300"
           >
-            Rejoindre le Pandmonium
+            {t('landing.join')}
           </Link>
           <Link
             to="/login"
             className="px-8 py-3 border border-border rounded font-body text-muted
                        hover:border-gold hover:text-parchment transition-all duration-300"
           >
-            Connexion
+            {t('auth.login_title')}
           </Link>
         </div>
       </section>
@@ -64,25 +65,25 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           <FeatureCard
             icon={<IronIcon />}
-            title="Empire Infernal"
-            desc="Construisez 18 structures, grez 3 ressources et dveloppez votre Cercle Infernal."
+            title={t('landing.feature_empire_title')}
+            desc={t('landing.feature_empire_desc')}
           />
           <FeatureCard
             icon={<SwordsIcon />}
-            title="PvP Stratgique"
-            desc="Espionnez, attaquez, pillez. Chaque dcision compte dans la guerre des Tnbres."
+            title={t('landing.feature_pvp_title')}
+            desc={t('landing.feature_pvp_desc')}
           />
           <FeatureCard
             icon={<AllianceIcon />}
-            title="Pactes Dmoniaques"
-            desc="Forgez des alliances, btissez la Forteresse et dominez le Pandmonium."
+            title={t('landing.feature_pact_title')}
+            desc={t('landing.feature_pact_desc')}
           />
         </div>
       </section>
 
       {/* Footer */}
       <footer className="bg-deep border-t border-border py-6 px-4 text-center text-sm text-muted">
-        Inferno Domini — Free-to-Play, Anti-Pay-to-Win
+        {t('landing.footer')}
       </footer>
     </div>
   );

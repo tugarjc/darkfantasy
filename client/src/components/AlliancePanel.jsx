@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 
-const ROLE_LABELS = { leader: 'Seigneur', officer: 'Officier', member: 'Membre' };
+const ROLE_LABELS = { leader: 'alliance.roles.leader', officer: 'alliance.roles.officer', member: 'alliance.roles.member' };
 const ROLE_COLORS = { leader: 'text-gold', officer: 'text-essence', member: 'text-muted' };
 
 const DIPLO_LABELS = {
-  neutralite: 'Neutralite',
-  guerre: 'Guerre',
-  paix: 'Paix',
-  alliance_militaire: 'Alliance Militaire',
+  neutralite: 'alliance.diplo_status.neutralite',
+  guerre: 'alliance.diplo_status.guerre',
+  paix: 'alliance.diplo_status.paix',
+  alliance_militaire: 'alliance.diplo_status.alliance_militaire',
 };
 const DIPLO_COLORS = {
   neutralite: 'text-muted',
@@ -18,6 +19,7 @@ const DIPLO_COLORS = {
 };
 
 export default function AlliancePanel() {
+  const { t } = useTranslation();
   const alliance = useGameStore((s) => s.alliance);
   const allianceLoading = useGameStore((s) => s.allianceLoading);
   const loadAlliance = useGameStore((s) => s.loadAlliance);
@@ -27,7 +29,7 @@ export default function AlliancePanel() {
   }, []);
 
   if (allianceLoading && !alliance) {
-    return <p className="text-gold text-sm animate-pulse">Chargement...</p>;
+    return <p className="text-gold text-sm animate-pulse">{t('common.loading')}</p>;
   }
 
   return alliance ? <AllianceView /> : <NoAllianceView />;
@@ -35,13 +37,14 @@ export default function AlliancePanel() {
 
 // ── No Alliance: Create or Join ──
 function NoAllianceView() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState('search'); // 'search' | 'create'
 
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="font-display text-2xl text-gold mb-2">Alliances</h2>
-        <p className="text-muted text-sm">Rejoignez une alliance ou fondez la votre</p>
+        <h2 className="font-display text-2xl text-gold mb-2">{t('alliance.title')}</h2>
+        <p className="text-muted text-sm">{t('alliance.subtitle')}</p>
       </div>
 
       <div className="flex gap-2 mb-4 justify-center">
@@ -51,7 +54,7 @@ function NoAllianceView() {
             mode === 'search' ? 'border-gold text-gold bg-gold/10' : 'border-border text-muted hover:text-parchment'
           }`}
         >
-          Rechercher
+          {t('alliance.search')}
         </button>
         <button
           onClick={() => setMode('create')}
@@ -59,7 +62,7 @@ function NoAllianceView() {
             mode === 'create' ? 'border-gold text-gold bg-gold/10' : 'border-border text-muted hover:text-parchment'
           }`}
         >
-          Creer une Alliance
+          {t('alliance.create')}
         </button>
       </div>
 
@@ -69,6 +72,7 @@ function NoAllianceView() {
 }
 
 function CreateAlliance() {
+  const { t } = useTranslation();
   const createAlliance = useGameStore((s) => s.createAlliance);
   const [name, setName] = useState('');
   const [tag, setTag] = useState('');
@@ -90,12 +94,12 @@ function CreateAlliance() {
 
   return (
     <form onSubmit={handleCreate} className="max-w-md mx-auto bg-surface border border-border rounded-lg p-6">
-      <h3 className="font-display text-lg text-gold mb-4">Fonder une Alliance</h3>
+      <h3 className="font-display text-lg text-gold mb-4">{t('alliance.found')}</h3>
 
       {error && <p className="text-blood-glow text-sm mb-3">{error}</p>}
 
       <div className="mb-4">
-        <label className="block text-xs text-muted mb-1">Nom (3-64 caracteres)</label>
+        <label className="block text-xs text-muted mb-1">{t('alliance.name_label')}</label>
         <input
           type="text"
           value={name}
@@ -107,7 +111,7 @@ function CreateAlliance() {
       </div>
 
       <div className="mb-4">
-        <label className="block text-xs text-muted mb-1">Tag (2-8 caracteres)</label>
+        <label className="block text-xs text-muted mb-1">{t('alliance.tag_label')}</label>
         <input
           type="text"
           value={tag}
@@ -123,13 +127,14 @@ function CreateAlliance() {
         disabled={creating || name.length < 3 || tag.length < 2}
         className="w-full py-2.5 rounded font-display text-base transition-all duration-300 bg-blood border border-gold text-parchment hover:bg-blood-light hover:shadow-[0_0_15px_rgba(139,26,26,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {creating ? 'Fondation...' : 'Fonder'}
+        {creating ? t('alliance.founding') : t('alliance.found_button')}
       </button>
     </form>
   );
 }
 
 function SearchAlliance() {
+  const { t } = useTranslation();
   const searchAlliances = useGameStore((s) => s.searchAlliances);
   const joinAlliance = useGameStore((s) => s.joinAlliance);
   const results = useGameStore((s) => s.allianceSearchResults);
@@ -163,14 +168,14 @@ function SearchAlliance() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           className="flex-1 bg-base border border-border rounded px-3 py-2 text-sm text-parchment focus:border-gold focus:outline-none"
-          placeholder="Nom ou tag de l'alliance..."
+          placeholder={t('alliance.search_placeholder')}
         />
         <button
           onClick={handleSearch}
           disabled={query.length < 2}
           className="px-4 py-2 text-sm bg-surface border border-border rounded text-parchment hover:border-gold transition-colors disabled:opacity-50"
         >
-          Chercher
+          {t('common.search')}
         </button>
       </div>
 
@@ -186,8 +191,8 @@ function SearchAlliance() {
                   <span className="text-parchment text-sm">{a.name}</span>
                 </div>
                 <div className="flex gap-3 text-xs text-muted mt-1">
-                  <span>Chef: {a.leader_name}</span>
-                  <span>Membres: {a.member_count}</span>
+                  <span>{t('alliance.leader')}: {a.leader_name}</span>
+                  <span>{t('alliance.members')}: {a.member_count}</span>
                   <span>Score: {Number(a.total_score).toLocaleString('fr-FR')}</span>
                 </div>
               </div>
@@ -196,7 +201,7 @@ function SearchAlliance() {
                 disabled={joining === a.id}
                 className="px-3 py-1.5 text-xs bg-blood border border-gold rounded text-parchment hover:bg-blood-light transition-colors disabled:opacity-50"
               >
-                {joining === a.id ? '...' : 'Rejoindre'}
+                {joining === a.id ? '...' : t('alliance.join')}
               </button>
             </div>
           ))}
@@ -204,7 +209,7 @@ function SearchAlliance() {
       )}
 
       {results.length === 0 && query.length >= 2 && (
-        <p className="text-muted text-sm text-center">Aucune alliance trouvee</p>
+        <p className="text-muted text-sm text-center">{t('alliance.no_results')}</p>
       )}
     </div>
   );
@@ -212,6 +217,7 @@ function SearchAlliance() {
 
 // ── Alliance View ──
 function AllianceView() {
+  const { t } = useTranslation();
   const alliance = useGameStore((s) => s.alliance);
   const leaveAlliance = useGameStore((s) => s.leaveAlliance);
   const kickMember = useGameStore((s) => s.kickMember);
@@ -261,12 +267,12 @@ function AllianceView() {
               [{alliance.tag}] {alliance.name}
             </h2>
             <p className="text-muted text-sm">
-              Chef: {alliance.leader_name} | {alliance.members?.length || 0}/30 membres
+              {t('alliance.leader')}: {alliance.leader_name} | {alliance.members?.length || 0}/30 membres
             </p>
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-xs px-2 py-1 rounded bg-base ${ROLE_COLORS[myRole]}`}>
-              {ROLE_LABELS[myRole]}
+              {t(ROLE_LABELS[myRole])}
             </span>
           </div>
         </div>
@@ -287,7 +293,7 @@ function AllianceView() {
             section === 'members' ? 'border-gold text-gold bg-gold/10' : 'border-border text-muted hover:text-parchment'
           }`}
         >
-          Membres ({alliance.members?.length || 0})
+          {t('alliance.members')} ({alliance.members?.length || 0})
         </button>
         <button
           onClick={() => setSection('diplomacy')}
@@ -295,7 +301,7 @@ function AllianceView() {
             section === 'diplomacy' ? 'border-gold text-gold bg-gold/10' : 'border-border text-muted hover:text-parchment'
           }`}
         >
-          Diplomatie ({alliance.diplomacy?.length || 0})
+          {t('alliance.diplomacy')} ({alliance.diplomacy?.length || 0})
         </button>
       </div>
 
@@ -309,7 +315,7 @@ function AllianceView() {
                   <div className="flex items-center gap-2">
                     <span className={`text-sm font-medium ${ROLE_COLORS[m.role]}`}>{m.username}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded bg-base ${ROLE_COLORS[m.role]}`}>
-                      {ROLE_LABELS[m.role]}
+                      {t(ROLE_LABELS[m.role])}
                     </span>
                   </div>
                   <div className="flex gap-3 text-xs text-muted mt-0.5">
@@ -326,35 +332,35 @@ function AllianceView() {
                     <button
                       onClick={() => handlePromote(m.id, 'officer')}
                       className="px-2 py-1 text-[10px] bg-base border border-border rounded text-essence hover:border-essence/50 transition-colors"
-                      title="Promouvoir Officier"
+                      title={t('alliance.promote_officer')}
                     >
-                      Officier
+                      {t('alliance.promote_officer')}
                     </button>
                   )}
                   {isLeader && m.role === 'officer' && (
                     <button
                       onClick={() => handlePromote(m.id, 'member')}
                       className="px-2 py-1 text-[10px] bg-base border border-border rounded text-muted hover:border-gold/50 transition-colors"
-                      title="Retrograder"
+                      title={t('alliance.demote')}
                     >
-                      Retrograder
+                      {t('alliance.demote')}
                     </button>
                   )}
                   {isLeader && (
                     <button
                       onClick={() => handlePromote(m.id, 'leader')}
                       className="px-2 py-1 text-[10px] bg-base border border-border rounded text-gold hover:border-gold/50 transition-colors"
-                      title="Transferer le commandement"
+                      title={t('alliance.transfer_leader')}
                     >
-                      Chef
+                      {t('alliance.transfer_leader')}
                     </button>
                   )}
                   <button
                     onClick={() => handleKick(m.id)}
                     className="px-2 py-1 text-[10px] bg-base border border-border rounded text-blood-glow hover:border-blood transition-colors"
-                    title="Expulser"
+                    title={t('alliance.kick')}
                   >
-                    Expulser
+                    {t('alliance.kick')}
                   </button>
                 </div>
               )}
@@ -385,22 +391,22 @@ function AllianceView() {
             onClick={() => setConfirmLeave(true)}
             className="text-sm text-muted hover:text-blood-glow transition-colors"
           >
-            Quitter l'alliance
+            {t('alliance.leave')}
           </button>
         ) : (
           <div className="flex items-center gap-3">
-            <span className="text-sm text-blood-glow">Confirmer ?</span>
+            <span className="text-sm text-blood-glow">{t('alliance.leave_confirm')}</span>
             <button
               onClick={handleLeave}
               className="px-3 py-1 text-xs bg-blood border border-blood rounded text-parchment hover:bg-blood-light"
             >
-              Oui, quitter
+              {t('alliance.leave_yes')}
             </button>
             <button
               onClick={() => setConfirmLeave(false)}
               className="px-3 py-1 text-xs border border-border rounded text-muted hover:text-parchment"
             >
-              Annuler
+              {t('common.cancel')}
             </button>
           </div>
         )}
@@ -410,6 +416,7 @@ function AllianceView() {
 }
 
 function DiplomacySection({ diplomacy, isLeader, onSetDiplomacy }) {
+  const { t } = useTranslation();
   const [targetId, setTargetId] = useState('');
   const [status, setStatus] = useState('neutralite');
 
@@ -426,7 +433,7 @@ function DiplomacySection({ diplomacy, isLeader, onSetDiplomacy }) {
                   <span className="text-parchment text-sm">{d.otherAlliance.name}</span>
                 </div>
                 <span className={`text-xs ${DIPLO_COLORS[d.status]}`}>
-                  {DIPLO_LABELS[d.status]}
+                  {t(DIPLO_LABELS[d.status])}
                 </span>
               </div>
               {isLeader && (
@@ -439,7 +446,7 @@ function DiplomacySection({ diplomacy, isLeader, onSetDiplomacy }) {
                         onClick={() => onSetDiplomacy(d.otherAlliance.id, key)}
                         className={`px-2 py-1 text-[10px] bg-base border border-border rounded transition-colors hover:border-gold/50 ${DIPLO_COLORS[key]}`}
                       >
-                        {label}
+                        {t(label)}
                       </button>
                     ))}
                 </div>
@@ -448,7 +455,7 @@ function DiplomacySection({ diplomacy, isLeader, onSetDiplomacy }) {
           ))}
         </div>
       ) : (
-        <p className="text-muted text-sm mb-4">Aucune relation diplomatique</p>
+        <p className="text-muted text-sm mb-4">{t('alliance.no_diplomacy')}</p>
       )}
     </div>
   );

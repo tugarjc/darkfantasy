@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 
 export default function ResourceBar() {
+  const { t } = useTranslation();
   const resources = useGameStore((s) => s.resources);
 
   if (!resources) return null;
@@ -9,7 +11,7 @@ export default function ResourceBar() {
     <div className="bg-surface border-b border-border px-4 py-2 flex flex-wrap items-center gap-6">
       <ResourceItem
         icon={<IronIcon />}
-        name="Fer Maudit"
+        name={t('resources.iron_name')}
         value={resources.iron}
         rate={resources.iron_rate}
         cap={resources.iron_cap}
@@ -17,7 +19,7 @@ export default function ResourceBar() {
       />
       <ResourceItem
         icon={<EssenceIcon />}
-        name="Essence"
+        name={t('resources.essence_name')}
         value={resources.essence}
         rate={resources.essence_rate}
         cap={resources.essence_cap}
@@ -25,7 +27,7 @@ export default function ResourceBar() {
       />
       <ResourceItem
         icon={<SoulsIcon />}
-        name="Ames"
+        name={t('resources.souls_name')}
         value={resources.souls}
         rate={resources.souls_rate}
         cap={resources.souls_cap}

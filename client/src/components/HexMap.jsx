@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useGameStore } from '../stores/gameStore';
 
 const HEX_SIZE = 40;
@@ -36,7 +38,7 @@ const HEX_STROKES = {
 };
 
 function fmtTime(seconds) {
-  if (seconds <= 0) return 'Arrive';
+  if (seconds <= 0) return i18n.t('map.arrived');
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   if (m > 0) return `${m}m ${s}s`;
@@ -44,6 +46,7 @@ function fmtTime(seconds) {
 }
 
 export default function HexMap({ onSelectHex }) {
+  const { t } = useTranslation();
   const mapHexes = useGameStore((s) => s.mapHexes);
   const mapLegions = useGameStore((s) => s.mapLegions);
   const mapCenter = useGameStore((s) => s.mapCenter);
@@ -114,7 +117,7 @@ export default function HexMap({ onSelectHex }) {
       {/* Map controls */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <button onClick={goHome} className="px-3 py-1 text-xs bg-surface border border-border rounded hover:border-gold text-parchment">
-          Cercle
+          {t('nav.circle')}
         </button>
         <div className="flex gap-1">
           <button onClick={() => navigate(-3, 0)} className="px-2 py-1 text-xs bg-surface border border-border rounded hover:border-gold/50 text-muted">&larr;</button>
@@ -123,9 +126,9 @@ export default function HexMap({ onSelectHex }) {
           <button onClick={() => navigate(3, 0)} className="px-2 py-1 text-xs bg-surface border border-border rounded hover:border-gold/50 text-muted">&rarr;</button>
         </div>
         <span className="text-muted text-xs ml-2">
-          Centre: ({mapCenter.q}, {mapCenter.r})
+          {t('map.center')}: ({mapCenter.q}, {mapCenter.r})
         </span>
-        {mapLoading && <span className="text-gold text-xs animate-pulse ml-2">Chargement...</span>}
+        {mapLoading && <span className="text-gold text-xs animate-pulse ml-2">{t('common.loading')}</span>}
       </div>
 
       {/* SVG Map */}
@@ -245,11 +248,12 @@ export default function HexMap({ onSelectHex }) {
 }
 
 function HexInfoPanel({ hex, onClose, onSelectHex }) {
+  const { t } = useTranslation();
   const typeLabels = {
-    vide: 'Terrain Vide',
-    terre_maudite: 'Terre Maudite',
-    faille: 'Faille Dimensionnelle',
-    cercle: 'Cercle',
+    vide: t('map.empty_terrain'),
+    terre_maudite: t('map.cursed_land'),
+    faille: t('map.dimensional_rift'),
+    cercle: t('map.circle'),
   };
 
   return (
@@ -259,14 +263,14 @@ function HexInfoPanel({ hex, onClose, onSelectHex }) {
           <h4 className="font-display text-sm text-gold">
             {hex.type === 'cercle' ? hex.circle?.name || hex.circle?.username : typeLabels[hex.type]}
           </h4>
-          <p className="text-muted text-xs">Coordonnees: ({hex.q}, {hex.r})</p>
+          <p className="text-muted text-xs">{t('map.coordinates')}: ({hex.q}, {hex.r})</p>
         </div>
         <button onClick={onClose} className="text-muted hover:text-parchment">&times;</button>
       </div>
 
       {hex.type === 'cercle' && hex.circle && (
         <div className="mt-2 text-xs space-y-1">
-          <p className="text-parchment">Seigneur: <span className={hex.circle.isOwn ? 'text-green-400' : 'text-blood-glow'}>{hex.circle.username}</span></p>
+          <p className="text-parchment">{t('common.lord')}: <span className={hex.circle.isOwn ? 'text-green-400' : 'text-blood-glow'}>{hex.circle.username}</span></p>
           <p className="text-muted">Score: {hex.circle.score?.toLocaleString()}</p>
           {hex.circle.alliance && (
             <p className="text-purple-400">[{hex.circle.alliance.tag}] {hex.circle.alliance.name}</p>
@@ -276,21 +280,21 @@ function HexInfoPanel({ hex, onClose, onSelectHex }) {
               onClick={() => onSelectHex && onSelectHex(hex)}
               className="mt-2 w-full py-1.5 bg-blood border border-gold/50 text-parchment text-xs rounded hover:bg-blood-light"
             >
-              Envoyer une Legion
+              {t('map.send_legion')}
             </button>
           )}
         </div>
       )}
 
       {hex.type === 'terre_maudite' && (
-        <p className="mt-2 text-xs text-muted">Terrain hostile. Les troupes subissent des malus en traversant.</p>
+        <p className="mt-2 text-xs text-muted">{t('map.cursed_land_desc')}</p>
       )}
 
       {hex.type === 'faille' && hex.event && (
         <div className="mt-2 text-xs space-y-1">
           <p className="text-purple-400">PV: {hex.event.hpRemaining} / {hex.event.hpMax}</p>
           <button className="mt-1 w-full py-1.5 bg-purple-900/50 border border-purple-500/50 text-parchment text-xs rounded hover:bg-purple-900/70">
-            Attaquer la Faille
+            {t('map.attack_rift')}
           </button>
         </div>
       )}
@@ -301,7 +305,7 @@ function HexInfoPanel({ hex, onClose, onSelectHex }) {
             onClick={() => onSelectHex && onSelectHex(hex)}
             className="w-full py-1.5 bg-surface border border-border text-parchment text-xs rounded hover:border-gold/50"
           >
-            Envoyer une Legion
+            {t('map.send_legion')}
           </button>
         </div>
       )}

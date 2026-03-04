@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 
 const UNIT_NAMES = {
@@ -20,6 +21,7 @@ const EVENT_COLORS = {
 };
 
 export default function EventPanel() {
+  const { t } = useTranslation();
   const { events, eventsLoading, loadEvents, eventDetail, loadEventDetail, units } = useGameStore();
   const [selectedId, setSelectedId] = useState(null);
   const [showAttack, setShowAttack] = useState(false);
@@ -39,17 +41,17 @@ export default function EventPanel() {
   }, []);
 
   if (eventsLoading && events.length === 0) {
-    return <p className="text-muted animate-pulse">Recherche d'evenements...</p>;
+    return <p className="text-muted animate-pulse">{t('events.searching')}</p>;
   }
 
   return (
     <div>
-      <h2 className="font-display text-2xl text-gold mb-4">Evenements Mondiaux</h2>
+      <h2 className="font-display text-2xl text-gold mb-4">{t('events.title')}</h2>
 
       {events.length === 0 ? (
         <div className="bg-surface border border-border rounded-lg p-8 text-center">
-          <p className="text-muted">Aucun evenement actif pour le moment.</p>
-          <p className="text-xs text-muted/60 mt-2">Les evenements apparaissent periodiquement sur la carte.</p>
+          <p className="text-muted">{t('events.no_events')}</p>
+          <p className="text-xs text-muted/60 mt-2">{t('events.events_appear')}</p>
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row gap-4">
@@ -76,7 +78,7 @@ export default function EventPanel() {
                       onClick={() => setShowAttack(!showAttack)}
                       className="w-full bg-blood/20 text-blood-glow py-2 rounded hover:bg-blood/30 transition-colors text-sm font-medium"
                     >
-                      {showAttack ? 'Annuler' : 'Attaquer cet evenement'}
+                      {showAttack ? t('events.cancel') : t('events.attack_event')}
                     </button>
                     {showAttack && <AttackForm eventId={selectedId} onDone={() => { setShowAttack(false); selectEvent(selectedId); }} />}
                   </>
@@ -84,7 +86,7 @@ export default function EventPanel() {
               </div>
             ) : (
               <div className="bg-surface border border-border rounded-lg p-8 text-center text-muted text-sm">
-                Selectionnez un evenement pour voir les details
+                {t('events.select_event')}
               </div>
             )}
           </div>
@@ -95,6 +97,7 @@ export default function EventPanel() {
 }
 
 function EventCard({ event, selected, onClick }) {
+  const { t } = useTranslation();
   const hpPercent = event.hpMax > 0 ? (event.hpRemaining / event.hpMax) * 100 : 0;
   const timeLeft = Math.max(0, new Date(event.endTime) - Date.now());
   const hoursLeft = Math.floor(timeLeft / 3600000);
@@ -124,19 +127,20 @@ function EventCard({ event, selected, onClick }) {
         />
       </div>
       <div className="flex justify-between text-xs text-muted">
-        <span>PV: {event.hpRemaining.toLocaleString()} / {event.hpMax.toLocaleString()}</span>
-        <span>{hoursLeft}h {minsLeft}m restant</span>
+        <span>{t('events.hp') + ':'} {event.hpRemaining.toLocaleString()} / {event.hpMax.toLocaleString()}</span>
+        <span>{hoursLeft}h {minsLeft}m {t('events.remaining')}</span>
       </div>
 
       <div className="flex justify-between text-xs text-muted mt-2">
-        <span>{event.contributors} participant(s)</span>
-        {event.myDamage > 0 && <span className="text-gold">Mes degats: {event.myDamage.toLocaleString()}</span>}
+        <span>{event.contributors} {t('events.participants')}</span>
+        {event.myDamage > 0 && <span className="text-gold">{t('events.my_damage') + ':'} {event.myDamage.toLocaleString()}</span>}
       </div>
     </div>
   );
 }
 
 function EventDetailView({ detail }) {
+  const { t } = useTranslation();
   const { event, leaderboard } = detail;
   const hpPercent = event.hpMax > 0 ? (event.hpRemaining / event.hpMax) * 100 : 0;
   const defeated = event.hpRemaining <= 0;
@@ -150,8 +154,8 @@ function EventDetailView({ detail }) {
 
       {defeated ? (
         <div className="bg-green-900/20 border border-green-800 rounded p-3 mb-3 text-center">
-          <span className="text-green-400 font-medium">Evenement vaincu !</span>
-          <p className="text-xs text-muted mt-1">Les recompenses sont distribuees automatiquement.</p>
+          <span className="text-green-400 font-medium">{t('events.defeated')}</span>
+          <p className="text-xs text-muted mt-1">{t('events.rewards_distributed')}</p>
         </div>
       ) : (
         <>
@@ -171,11 +175,11 @@ function EventDetailView({ detail }) {
 
       <div className="grid grid-cols-2 gap-2 text-xs mb-4">
         <div className="bg-deep rounded p-2">
-          <span className="text-muted">Position</span>
+          <span className="text-muted">{t('events.position')}</span>
           <div className="text-parchment">({event.coordQ}, {event.coordR})</div>
         </div>
         <div className="bg-deep rounded p-2">
-          <span className="text-muted">Fin</span>
+          <span className="text-muted">{t('events.end')}</span>
           <div className="text-parchment">{new Date(event.endTime).toLocaleString('fr-FR')}</div>
         </div>
       </div>
@@ -183,7 +187,7 @@ function EventDetailView({ detail }) {
       {/* Leaderboard */}
       {leaderboard?.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium text-parchment mb-2">Classement</h4>
+          <h4 className="text-sm font-medium text-parchment mb-2">{t('events.ranking')}</h4>
           <div className="space-y-1">
             {leaderboard.map((entry, i) => (
               <div key={entry.playerId} className="flex items-center justify-between bg-deep rounded px-3 py-1.5">
@@ -193,7 +197,7 @@ function EventDetailView({ detail }) {
                   </span>
                   <span className="text-sm text-parchment">{entry.username}</span>
                 </div>
-                <span className="text-xs text-gold">{entry.damage.toLocaleString()} degats</span>
+                <span className="text-xs text-gold">{entry.damage.toLocaleString()} {t('events.damage')}</span>
               </div>
             ))}
           </div>
@@ -204,6 +208,7 @@ function EventDetailView({ detail }) {
 }
 
 function AttackForm({ eventId, onDone }) {
+  const { t } = useTranslation();
   const { units, loadUnits, attackEvent } = useGameStore();
   const [selected, setSelected] = useState({});
   const [result, setResult] = useState(null);
@@ -246,10 +251,10 @@ function AttackForm({ eventId, onDone }) {
 
   return (
     <div className="bg-surface border border-border rounded-lg p-4">
-      <h4 className="text-sm font-medium text-parchment mb-3">Envoyer des troupes</h4>
+      <h4 className="text-sm font-medium text-parchment mb-3">{t('events.send_troops')}</h4>
 
       {available.length === 0 ? (
-        <p className="text-xs text-muted">Aucune unite disponible.</p>
+        <p className="text-xs text-muted">{t('events.no_units')}</p>
       ) : (
         <div className="space-y-2 mb-4">
           {available.map(u => (
@@ -276,16 +281,16 @@ function AttackForm({ eventId, onDone }) {
 
       {result && (
         <div className="bg-deep rounded p-3 mb-3 text-sm space-y-1">
-          <p className="text-gold">Degats infliges: {result.damage.toLocaleString()}</p>
+          <p className="text-gold">{t('events.damage_dealt') + ':'} {result.damage.toLocaleString()}</p>
           {Object.keys(result.losses).length > 0 && (
             <p className="text-blood-glow">
-              Pertes: {Object.entries(result.losses).map(([t, q]) => `${UNIT_NAMES[t] || t} x${q}`).join(', ')}
+              {t('events.losses') + ':'} {Object.entries(result.losses).map(([uType, q]) => `${UNIT_NAMES[uType] || uType} x${q}`).join(', ')}
             </p>
           )}
           {result.eventDefeated && (
-            <p className="text-green-400 font-medium">Evenement vaincu !</p>
+            <p className="text-green-400 font-medium">{t('events.defeated')}</p>
           )}
-          <button onClick={onDone} className="text-xs text-muted hover:text-parchment mt-2">Fermer</button>
+          <button onClick={onDone} className="text-xs text-muted hover:text-parchment mt-2">{t('common.close')}</button>
         </div>
       )}
 
@@ -295,7 +300,7 @@ function AttackForm({ eventId, onDone }) {
           disabled={totalSelected === 0 || loading}
           className="w-full bg-blood/30 text-blood-glow py-2 rounded hover:bg-blood/40 transition-colors text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          {loading ? 'Attaque en cours...' : `Attaquer (${totalSelected} unites)`}
+          {loading ? t('events.attacking') : t('events.attack_units', { count: totalSelected })}
         </button>
       )}
     </div>

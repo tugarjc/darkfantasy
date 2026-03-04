@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useGameStore } from '../stores/gameStore';
 
 const MISSION_LABELS = {
-  attaque: { label: 'Attaque', color: '#8B1A1A', icon: '⚔' },
-  espionnage: { label: 'Espionnage', color: '#6B2FA0', icon: '👁' },
-  transport: { label: 'Transport', color: '#3CA66B', icon: '📦' },
-  colonisation: { label: 'Colonisation', color: '#C9A84C', icon: '🏴' },
-  farming: { label: 'Raid', color: '#B0592A', icon: '💀' },
-  defense_alliee: { label: 'Defense Alliee', color: '#4A6B8B', icon: '🛡' },
+  attaque: { label: 'legions.missions.attaque', color: '#8B1A1A', icon: '⚔' },
+  espionnage: { label: 'legions.missions.espionnage', color: '#6B2FA0', icon: '👁' },
+  transport: { label: 'legions.missions.transport', color: '#3CA66B', icon: '📦' },
+  colonisation: { label: 'legions.missions.colonisation', color: '#C9A84C', icon: '🏴' },
+  farming: { label: 'legions.missions.farming', color: '#B0592A', icon: '💀' },
+  defense_alliee: { label: 'legions.missions.defense_alliee', color: '#4A6B8B', icon: '🛡' },
 };
 
 function fmtTime(seconds) {
-  if (seconds <= 0) return 'Arrive';
+  if (seconds <= 0) return i18n.t('map.arrived');
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
@@ -21,6 +23,7 @@ function fmtTime(seconds) {
 }
 
 export default function LegionPanel({ targetHex, onClearTarget }) {
+  const { t } = useTranslation();
   const units = useGameStore((s) => s.units);
   const circleId = useGameStore((s) => s.circleId);
   const legions = useGameStore((s) => s.legions);
@@ -82,9 +85,9 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
         <div className="bg-elevated border border-gold/30 rounded-lg p-4">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="font-display text-lg text-gold">Envoyer une Legion</h3>
+              <h3 className="font-display text-lg text-gold">{t('legions.send_legion')}</h3>
               <p className="text-muted text-xs">
-                Destination: ({targetHex.q}, {targetHex.r})
+                {t('legions.destination')}: ({targetHex.q}, {targetHex.r})
                 {targetHex.type === 'cercle' && targetHex.circle && (
                   <span className="text-blood-glow ml-1">- {targetHex.circle.username}</span>
                 )}
@@ -95,7 +98,7 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
 
           {/* Mission type */}
           <div className="mb-4">
-            <p className="text-xs text-muted mb-2">Type de mission :</p>
+            <p className="text-xs text-muted mb-2">{t('legions.mission_type')}</p>
             <div className="flex flex-wrap gap-2">
               {Object.entries(MISSION_LABELS).map(([key, val]) => (
                 <button
@@ -107,7 +110,7 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
                       : 'border-border text-muted hover:text-parchment hover:border-gold/30'
                   }`}
                 >
-                  {val.icon} {val.label}
+                  {val.icon} {t(val.label)}
                 </button>
               ))}
             </div>
@@ -115,9 +118,9 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
 
           {/* Unit composition */}
           <div className="mb-4">
-            <p className="text-xs text-muted mb-2">Composition ({totalUnits} unites) :</p>
+            <p className="text-xs text-muted mb-2">{t('legions.composition', { count: totalUnits })}</p>
             {availableUnits.length === 0 ? (
-              <p className="text-blood-light text-xs">Aucune unite disponible</p>
+              <p className="text-blood-light text-xs">{t('legions.no_units')}</p>
             ) : (
               <div className="space-y-2">
                 {availableUnits.map((u) => (
@@ -168,17 +171,17 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
                 : 'bg-base border border-border text-muted cursor-not-allowed'
             }`}
           >
-            {sending ? 'Envoi...' : `Envoyer ${totalUnits} unites en ${MISSION_LABELS[mission]?.label}`}
+            {sending ? t('legions.sending') : t('legions.send_units', { count: totalUnits, mission: t(MISSION_LABELS[mission]?.label) })}
           </button>
         </div>
       )}
 
       {/* Active Legions */}
       <div>
-        <h3 className="font-display text-lg text-gold mb-3">Legions en cours</h3>
+        <h3 className="font-display text-lg text-gold mb-3">{t('legions.active_legions')}</h3>
         {legions.length === 0 ? (
           <p className="text-muted text-sm text-center py-6 bg-surface rounded-lg border border-border">
-            Aucune legion active
+            {t('legions.no_legions')}
           </p>
         ) : (
           <div className="space-y-2">
@@ -195,10 +198,10 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-medium" style={{ color: missionInfo.color }}>
-                          {missionInfo.label}
+                          {t(missionInfo.label)}
                         </span>
                         <span className="text-[10px] text-muted">
-                          {leg.status === 'rappel' ? '(Rappel)' : leg.status === 'retour' ? '(Retour)' : ''}
+                          {leg.status === 'rappel' ? t('legions.recalled') : leg.status === 'retour' ? t('legions.returning') : ''}
                         </span>
                       </div>
                       <p className="text-[10px] text-muted truncate">
@@ -212,7 +215,7 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
                           onClick={() => handleRecall(leg.id)}
                           className="text-[10px] text-muted hover:text-blood-glow mt-0.5"
                         >
-                          Rappeler
+                          {t('legions.recall')}
                         </button>
                       )}
                     </div>

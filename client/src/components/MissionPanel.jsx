@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 
 const MISSION_ICONS = {
-  build: 'Batiment',
-  build_multi: 'Batiments',
-  train: 'Entrainement',
-  train_heavy: 'Aerien',
-  attack: 'Attaque',
-  trade: 'Commerce',
-  research: 'Recherche',
-  event: 'Evenement',
-  chat: 'Social',
-  spy: 'Espionnage',
+  build: 'missions.types.build',
+  build_multi: 'missions.types.build_multi',
+  train: 'missions.types.train',
+  train_heavy: 'missions.types.train_heavy',
+  attack: 'missions.types.attack',
+  trade: 'missions.types.trade',
+  research: 'missions.types.research',
+  event: 'missions.types.event',
+  chat: 'missions.types.chat',
+  spy: 'missions.types.spy',
 };
 
 export default function MissionPanel() {
+  const { t } = useTranslation();
   const { missionsData, missionsLoading, loadMissions, claimMission } = useGameStore();
   const [msg, setMsg] = useState('');
 
@@ -40,8 +42,8 @@ export default function MissionPanel() {
 
   return (
     <div>
-      <h2 className="font-display text-2xl text-gold mb-2">Missions Journalieres</h2>
-      <p className="text-xs text-muted mb-4">{completed}/5 missions completees</p>
+      <h2 className="font-display text-2xl text-gold mb-2">{t('missions.title')}</h2>
+      <p className="text-xs text-muted mb-4">{t('missions.completed_count', { count: completed })}</p>
 
       {msg && <div className="text-sm text-gold bg-gold/10 border border-gold/30 rounded p-2 mb-4">{msg}</div>}
 
@@ -53,7 +55,7 @@ export default function MissionPanel() {
           }`}>
             <div className="flex items-center gap-3 flex-1">
               <span className="text-xs bg-deep rounded px-2 py-1 text-muted font-medium min-w-[80px] text-center">
-                {MISSION_ICONS[m.type] || m.type}
+                {t(MISSION_ICONS[m.type] || m.type)}
               </span>
               <div>
                 <p className="text-sm text-parchment">{m.description}</p>
@@ -77,14 +79,14 @@ export default function MissionPanel() {
               </div>
               {m.completed && !m.claimed && (
                 <button onClick={() => claim(i)} className="bg-gold/20 text-gold px-3 py-1.5 rounded text-xs hover:bg-gold/30 transition-colors">
-                  Reclamer
+                  {t('missions.claim')}
                 </button>
               )}
               {m.claimed && (
-                <span className="text-xs text-green-400 px-3 py-1.5">Recu</span>
+                <span className="text-xs text-green-400 px-3 py-1.5">{t('missions.claimed')}</span>
               )}
               {!m.completed && (
-                <span className="text-xs text-muted px-3 py-1.5">En cours</span>
+                <span className="text-xs text-muted px-3 py-1.5">{t('missions.in_progress')}</span>
               )}
             </div>
           </div>
@@ -92,7 +94,7 @@ export default function MissionPanel() {
       </div>
 
       {/* Completion bonuses */}
-      <h3 className="font-display text-lg text-parchment mb-3">Bonus de completion</h3>
+      <h3 className="font-display text-lg text-parchment mb-3">{t('missions.completion_bonus')}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {Object.entries(bonuses).map(([count, bonus]) => {
           const needed = parseInt(count);
@@ -112,10 +114,10 @@ export default function MissionPanel() {
                 </div>
                 {unlocked && !claimed && (
                   <button onClick={() => claim(`bonus_${count}`)} className="bg-gold/20 text-gold px-3 py-1.5 rounded text-xs hover:bg-gold/30 transition-colors">
-                    Reclamer
+                    {t('missions.claim')}
                   </button>
                 )}
-                {claimed && <span className="text-xs text-green-400">Recu</span>}
+                {claimed && <span className="text-xs text-green-400">{t('missions.claimed')}</span>}
                 {!unlocked && <span className="text-xs text-muted">{completed}/{needed}</span>}
               </div>
             </div>

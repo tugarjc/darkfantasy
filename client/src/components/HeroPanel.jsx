@@ -1,24 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 
 const CATEGORY_META = {
-  combat: { label: 'Guerrier', color: '#8B1A1A' },
-  special: { label: 'Special', color: '#6B2FA0' },
-  economy: { label: 'Economie', color: '#B0592A' },
+  combat: { label: 'heroes.categories.combat', color: '#8B1A1A' },
+  special: { label: 'heroes.categories.special', color: '#6B2FA0' },
+  economy: { label: 'heroes.categories.economy', color: '#B0592A' },
 };
 
 const BONUS_LABELS = {
-  attackAll: 'ATK toutes unites',
-  attackGround: 'ATK terrestres',
-  defenseAll: 'DEF toutes unites',
-  plunder: 'Pillage',
-  espionage: 'Espionnage',
-  lossReduction: 'Reduction pertes',
-  wallBonus: 'Murs',
-  productionIron: 'Prod. Fer',
-  productionEssence: 'Prod. Essence',
-  productionSouls: 'Prod. Ames',
-  researchSpeed: 'Vitesse recherche',
+  attackAll: 'heroes.bonus_labels.attackAll',
+  attackGround: 'heroes.bonus_labels.attackGround',
+  defenseAll: 'heroes.bonus_labels.defenseAll',
+  plunder: 'heroes.bonus_labels.plunder',
+  espionage: 'heroes.bonus_labels.espionage',
+  lossReduction: 'heroes.bonus_labels.lossReduction',
+  wallBonus: 'heroes.bonus_labels.wallBonus',
+  productionIron: 'heroes.bonus_labels.productionIron',
+  productionEssence: 'heroes.bonus_labels.productionEssence',
+  productionSouls: 'heroes.bonus_labels.productionSouls',
+  researchSpeed: 'heroes.bonus_labels.researchSpeed',
 };
 
 function fmtNum(n) {
@@ -32,6 +33,7 @@ function fmtPct(n) {
 }
 
 export default function HeroPanel() {
+  const { t } = useTranslation();
   const heroes = useGameStore((s) => s.heroes);
   const resources = useGameStore((s) => s.resources);
   const heroesLoading = useGameStore((s) => s.heroesLoading);
@@ -75,8 +77,8 @@ export default function HeroPanel() {
   return (
     <div>
       <div className="text-center mb-4">
-        <h2 className="font-display text-2xl text-gold mb-1">Heros</h2>
-        <p className="text-muted text-sm">{owned.length}/6 heros invoques</p>
+        <h2 className="font-display text-2xl text-gold mb-1">{t('heroes.title')}</h2>
+        <p className="text-muted text-sm">{t('heroes.summoned', { count: owned.length })}</p>
       </div>
 
       {error && (
@@ -86,12 +88,12 @@ export default function HeroPanel() {
         </div>
       )}
 
-      {heroesLoading && <p className="text-gold text-sm animate-pulse mb-4">Chargement...</p>}
+      {heroesLoading && <p className="text-gold text-sm animate-pulse mb-4">{t('common.loading')}</p>}
 
       {/* Owned heroes */}
       {owned.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-sm text-parchment font-medium mb-3">Vos Heros</h3>
+          <h3 className="text-sm text-parchment font-medium mb-3">{t('heroes.your_heroes')}</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {owned.map((h) => (
               <HeroCard
@@ -108,7 +110,7 @@ export default function HeroPanel() {
       {/* Available heroes */}
       {available.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-sm text-muted font-medium mb-3">Heros Disponibles</h3>
+          <h3 className="text-sm text-muted font-medium mb-3">{t('heroes.available_heroes')}</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {available.map((h) => (
               <HeroCard
@@ -138,6 +140,7 @@ export default function HeroPanel() {
 }
 
 function HeroCard({ hero: h, isSelected, onClick }) {
+  const { t } = useTranslation();
   const catMeta = CATEGORY_META[h.category];
   return (
     <div
@@ -162,18 +165,18 @@ function HeroCard({ hero: h, isSelected, onClick }) {
       {h.owned ? (
         <div className="flex justify-between items-center">
           <span className="text-xs text-muted">Nv.{h.level}</span>
-          {h.isDead && <span className="text-[10px] text-blood-glow">Mort</span>}
-          {h.isDeployed && !h.isDead && <span className="text-[10px] text-gold">Deploye</span>}
+          {h.isDead && <span className="text-[10px] text-blood-glow">{t('heroes.dead')}</span>}
+          {h.isDeployed && !h.isDead && <span className="text-[10px] text-gold">{t('heroes.deployed')}</span>}
         </div>
       ) : (
         <div className="flex justify-between items-center">
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-base" style={{ color: catMeta?.color }}>
-            {catMeta?.label}
+            {t(catMeta?.label)}
           </span>
           {h.canSummon ? (
-            <span className="text-[10px] text-green-400">Disponible</span>
+            <span className="text-[10px] text-green-400">{t('common.available')}</span>
           ) : (
-            <span className="text-[10px] text-muted">Autel requis</span>
+            <span className="text-[10px] text-muted">{t('heroes.altar_required')}</span>
           )}
         </div>
       )}
@@ -182,6 +185,7 @@ function HeroCard({ hero: h, isSelected, onClick }) {
 }
 
 function HeroDetail({ hero: h, resources, onSummon, onRevive, summoning, onClose }) {
+  const { t } = useTranslation();
   const catMeta = CATEGORY_META[h.category];
 
   const cost = h.summonCost;
@@ -232,7 +236,7 @@ function HeroDetail({ hero: h, resources, onSummon, onRevive, summoning, onClose
       {h.owned && h.xpNext && (
         <div className="mb-4">
           <div className="flex justify-between text-xs text-muted mb-1">
-            <span>Experience</span>
+            <span>{t('heroes.experience')}</span>
             <span>{h.xp} / {h.xpNext}</span>
           </div>
           <div className="h-2 bg-base rounded-full overflow-hidden">
@@ -247,11 +251,11 @@ function HeroDetail({ hero: h, resources, onSummon, onRevive, summoning, onClose
 
       {/* Bonuses */}
       <div className="mb-4">
-        <p className="text-xs text-parchment mb-2">Bonus {h.owned ? `(Nv.${h.level})` : '(Nv.1)'} :</p>
+        <p className="text-xs text-parchment mb-2">{t('heroes.bonus')} {h.owned ? `(Nv.${h.level})` : '(Nv.1)'} :</p>
         <div className="grid grid-cols-2 gap-2">
           {Object.entries(h.owned ? h.bonuses : h.bonusesDef).map(([key, value]) => (
             <div key={key} className="bg-base rounded px-2 py-1.5">
-              <p className="text-[10px] text-muted">{BONUS_LABELS[key] || key}</p>
+              <p className="text-[10px] text-muted">{t(BONUS_LABELS[key] || key)}</p>
               <p className="text-sm text-gold font-medium">
                 +{h.owned ? fmtPct(value) : fmtPct(value)}/nv
               </p>
@@ -263,11 +267,11 @@ function HeroDetail({ hero: h, resources, onSummon, onRevive, summoning, onClose
       {/* Summon button */}
       {!h.owned && h.canSummon && cost && (
         <div>
-          <p className="text-sm text-parchment mb-3">Cout d'invocation :</p>
+          <p className="text-sm text-parchment mb-3">{t('heroes.summon_cost')}</p>
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <CostItem label="Fer" cost={cost.fer} available={resources?.iron} color="text-iron" />
-            <CostItem label="Essence" cost={cost.essence} available={resources?.essence} color="text-essence" />
-            <CostItem label="Ames" cost={cost.ames} available={resources?.souls} color="text-souls" />
+            <CostItem label={t('common.iron')} cost={cost.fer} available={resources?.iron} color="text-iron" />
+            <CostItem label={t('common.essence')} cost={cost.essence} available={resources?.essence} color="text-essence" />
+            <CostItem label={t('common.souls')} cost={cost.ames} available={resources?.souls} color="text-souls" />
           </div>
           <button
             onClick={() => onSummon(h.type)}
@@ -278,23 +282,23 @@ function HeroDetail({ hero: h, resources, onSummon, onRevive, summoning, onClose
                 : 'bg-base border border-border text-muted cursor-not-allowed'
             }`}
           >
-            {summoning ? 'Invocation...' : canAffordSummon ? 'Invoquer' : 'Ressources insuffisantes'}
+            {summoning ? t('heroes.summoning') : canAffordSummon ? t('heroes.summon') : t('common.insufficient_resources')}
           </button>
         </div>
       )}
 
       {!h.owned && !h.canSummon && (
-        <p className="text-muted text-sm text-center">Construisez l'Autel du Sacrifice pour invoquer ce heros</p>
+        <p className="text-muted text-sm text-center">{t('heroes.build_altar')}</p>
       )}
 
       {/* Revive button */}
       {h.owned && h.isDead && reviveCost && (
         <div>
-          <p className="text-sm text-blood-glow mb-3">Ce heros est mort. Cout de resurrection :</p>
+          <p className="text-sm text-blood-glow mb-3">{t('heroes.dead_hero')}</p>
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <CostItem label="Fer" cost={reviveCost.fer} available={resources?.iron} color="text-iron" />
-            <CostItem label="Essence" cost={reviveCost.essence} available={resources?.essence} color="text-essence" />
-            <CostItem label="Ames" cost={reviveCost.ames} available={resources?.souls} color="text-souls" />
+            <CostItem label={t('common.iron')} cost={reviveCost.fer} available={resources?.iron} color="text-iron" />
+            <CostItem label={t('common.essence')} cost={reviveCost.essence} available={resources?.essence} color="text-essence" />
+            <CostItem label={t('common.souls')} cost={reviveCost.ames} available={resources?.souls} color="text-souls" />
           </div>
           <button
             onClick={() => onRevive(h.type)}
@@ -305,17 +309,17 @@ function HeroDetail({ hero: h, resources, onSummon, onRevive, summoning, onClose
                 : 'bg-base border border-border text-muted cursor-not-allowed'
             }`}
           >
-            {canAffordRevive ? 'Ressusciter' : 'Ressources insuffisantes'}
+            {canAffordRevive ? t('heroes.revive') : t('common.insufficient_resources')}
           </button>
         </div>
       )}
 
       {h.owned && !h.isDead && !h.isDeployed && (
-        <p className="text-green-400 text-sm text-center">Pret au combat — Deployez-le avec une legion depuis l'onglet Carte</p>
+        <p className="text-green-400 text-sm text-center">{t('heroes.ready')}</p>
       )}
 
       {h.owned && h.isDeployed && (
-        <p className="text-gold text-sm text-center">Actuellement deploye avec une legion</p>
+        <p className="text-gold text-sm text-center">{t('heroes.currently_deployed')}</p>
       )}
     </div>
   );
