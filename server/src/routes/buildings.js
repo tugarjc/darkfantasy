@@ -175,7 +175,9 @@ router.post('/:circleId/buildings/upgrade', authenticateToken, async (req, res) 
     );
     const biblioLevel = biblioRow.rows[0]?.level || 0;
 
-    const timeSeconds = buildingTime(def.baseTime, nextLevel, biblioLevel);
+    let timeSeconds = buildingTime(def.baseTime, nextLevel, biblioLevel);
+    // Premium bonus: -10% build time
+    if (isPremium) timeSeconds = Math.floor(timeSeconds * 0.9);
     const upgradeEnd = new Date(Date.now() + timeSeconds * 1000);
 
     // Upsert building

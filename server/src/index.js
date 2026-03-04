@@ -22,6 +22,7 @@ const allianceAdvancedRoutes = require('./routes/allianceAdvanced');
 const tutorialRoutes = require('./routes/tutorial');
 const leaderboardRoutes = require('./routes/leaderboard');
 const notificationRoutes = require('./routes/notifications');
+const storeRoutes = require('./routes/store');
 const { startLegionProcessor } = require('./game/legionProcessor');
 const { startEventProcessor } = require('./game/eventProcessor');
 const { setupChat } = require('./chat');
@@ -31,6 +32,8 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: '*' } });
 
 app.use(cors());
+// Stripe webhook needs raw body — mount BEFORE express.json()
+app.use('/api/store/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 // ── Routes ──
@@ -55,6 +58,7 @@ app.use('/api/alliances', allianceAdvancedRoutes);
 app.use('/api/tutorial', tutorialRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/store', storeRoutes);
 
 // ── WebSocket + Chat ──
 setupChat(io);
@@ -109,6 +113,38 @@ async function boot() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS idx_notif_player ON notifications(player_id, read);
+  `);
+
+  // Phase 17 tables (monetization)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS relic_transactions (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+      amount INT NOT NULL,
+      type VARCHAR(32) NOT NULL,
+      source VARCHAR(128),
+      stripe_session_id VARCHAR(255),
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_relic_trans_player ON relic_transactions(player_id);
+
+    CREATE TABLE IF NOT EXISTS player_cosmetics (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+      cosmetic_id VARCHAR(64) NOT NULL,
+      equipped BOOLEAN DEFAULT false,
+      acquired_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(player_id, cosmetic_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS stripe_customers (
+      player_id UUID PRIMARY KEY REFERENCES players(id) ON DELETE CASCADE,
+      stripe_customer_id VARCHAR(255) UNIQUE,
+      subscription_id VARCHAR(255),
+      subscription_status VARCHAR(32) DEFAULT 'inactive',
+      subscription_end TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
   `);
 
   // Start legion arrival processor (every 5 seconds)

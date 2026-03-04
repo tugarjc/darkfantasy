@@ -50,7 +50,8 @@
     "admin": "Admin",
     "circle": "Cercle",
     "tutorial": "Tutoriel",
-    "leaderboard": "Classement"
+    "leaderboard": "Classement",
+    "store": "Boutique"
   },
   "landing": {
     "subtitle": "Le Regne des Seigneurs des Tenebres",
@@ -479,5 +480,43 @@
     "teleport": "Teleporter",
     "drain": "Drainer",
     "target_circle_id": "ID du cercle cible"
+  },
+  "store": {
+    "title": "Boutique des Reliques",
+    "relics_tab": "Reliques",
+    "subscription_tab": "Ombres",
+    "cosmetics_tab": "Cosmetiques",
+    "pack_novice": "Pack Novice",
+    "pack_disciple": "Pack Disciple",
+    "pack_seigneur": "Pack Seigneur",
+    "pack_despote": "Pack Despote",
+    "relics_count": "{{count}} reliques",
+    "bonus": "+{{percent}}% bonus",
+    "buy": "Acheter",
+    "sub_title": "Abonnement Ombres",
+    "sub_price": "9,99€/mois",
+    "sub_subscribe": "S'abonner",
+    "sub_cancel": "Resilier",
+    "sub_active": "Abonnement actif",
+    "sub_inactive": "Non abonne",
+    "sub_benefits": {
+      "production": "+25% production ressources",
+      "building": "-10% temps de construction",
+      "tax": "-5% taxes marche",
+      "slots": "+10 emplacements marche"
+    },
+    "cosmetics_legion": "Legions",
+    "cosmetics_circle": "Cercles",
+    "cosmetics_alliance": "Alliance",
+    "purchase_cost": "{{cost}} reliques",
+    "equip": "Equiper",
+    "unequip": "Retirer",
+    "equipped": "Equipe",
+    "owned": "Possede",
+    "buy_cosmetic": "Acheter",
+    "insufficient_relics": "Reliques insuffisantes",
+    "stripe_unavailable": "Paiements indisponibles",
+    "purchased": "Achat effectue !",
+    "cosmetic_purchased": "Cosmetique acquis !"
   }
 }

@@ -42,6 +42,8 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-changeme_another_32chars_secret}
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3000
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     ports:
       - "3000:3000"
     depends_on:

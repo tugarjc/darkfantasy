@@ -8,20 +8,22 @@ const VALID_RESOURCES = ['iron', 'essence', 'souls'];
 const MAX_AMOUNT = 50000;
 const OFFER_DURATION_HOURS = 24;
 
-// Tax rate per marche level: base 15%, -0.5% per level (min 2%)
-function taxRate(marcheLevel) {
-  return Math.max(0.02, 0.15 - 0.005 * marcheLevel);
+// Tax rate per marche level: base 15%, -0.5% per level (min 2%), premium -5pts
+function taxRate(marcheLevel, isPremium = false) {
+  const base = Math.max(0.02, 0.15 - 0.005 * marcheLevel);
+  return isPremium ? Math.max(0.01, base - 0.05) : base;
 }
 
-// Max simultaneous offers based on marche level
-function maxOffers(marcheLevel) {
-  return Math.min(20, 2 + Math.floor(marcheLevel / 2));
+// Max simultaneous offers based on marche level, premium +10
+function maxOffers(marcheLevel, isPremium = false) {
+  const base = Math.min(20, 2 + Math.floor(marcheLevel / 2));
+  return isPremium ? base + 10 : base;
 }
 
 // ── GET /api/market ── List public offers + own offers
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    // Get marche level
+    // Get marche level + premium
     const circleRes = await pool.query(
       `SELECT c.id, COALESCE(b.level, 0) as marche_level
        FROM circles c
@@ -30,6 +32,8 @@ router.get('/', authenticateToken, async (req, res) => {
       [req.user.id]
     );
     const marcheLevel = circleRes.rows[0]?.marche_level || 0;
+    const premiumRes = await pool.query('SELECT is_premium FROM players WHERE id = $1', [req.user.id]);
+    const isPremium = premiumRes.rows[0]?.is_premium || false;
 
     // Public offers (not expired, not accepted, not own)
     const publicOffers = await pool.query(
@@ -74,8 +78,8 @@ router.get('/', authenticateToken, async (req, res) => {
       myOffers: myOffers.rows,
       incomingOffers: incomingOffers.rows,
       marcheLevel,
-      taxRate: taxRate(marcheLevel),
-      maxOffers: maxOffers(marcheLevel),
+      taxRate: taxRate(marcheLevel, isPremium),
+      maxOffers: maxOffers(marcheLevel, isPremium),
     });
   } catch (err) {
     console.error('Market list error:', err);
@@ -119,15 +123,18 @@ router.post('/create', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Marche Demoniaque requis (niveau 1 minimum)' });
     }
 
+    const premCreate = await client.query('SELECT is_premium FROM players WHERE id = $1', [req.user.id]);
+    const isPremCreate = premCreate.rows[0]?.is_premium || false;
+
     // Check offer count
     const countRes = await client.query(
       `SELECT COUNT(*) as c FROM market_offers
        WHERE seller_id = $1 AND is_accepted = false AND expires_at > NOW()`,
       [req.user.id]
     );
-    if (parseInt(countRes.rows[0].c) >= maxOffers(circle.marche_level)) {
+    if (parseInt(countRes.rows[0].c) >= maxOffers(circle.marche_level, isPremCreate)) {
       await client.query('ROLLBACK');
-      return res.status(400).json({ error: `Maximum ${maxOffers(circle.marche_level)} offres actives` });
+      return res.status(400).json({ error: `Maximum ${maxOffers(circle.marche_level, isPremCreate)} offres actives` });
     }
 
     // Resolve target player if private offer
@@ -241,8 +248,10 @@ router.post('/:id/accept', authenticateToken, async (req, res) => {
     }
 
     // Calculate what buyer pays
+    const premBuyer = await client.query('SELECT is_premium FROM players WHERE id = $1', [req.user.id]);
+    const isPremBuyer = premBuyer.rows[0]?.is_premium || false;
     const buyerPays = Math.ceil(offer.amount * offer.ratio);
-    const tax = taxRate(buyer.marche_level);
+    const tax = taxRate(buyer.marche_level, isPremBuyer);
     const sellerReceives = Math.floor(offer.amount * (1 - tax));
 
     // Check buyer has enough of resource_to

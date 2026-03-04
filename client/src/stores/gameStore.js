@@ -787,6 +787,77 @@ export const useGameStore = create((set, get) => ({
     return data;
   },
 
+  // ── Store / Monetization ──
+  storeData: null,
+  myCosmetics: [],
+
+  loadStore: async () => {
+    try {
+      const res = await fetch(`${API}/store`, { headers: authHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        set({ storeData: data });
+      }
+    } catch (e) { console.error('loadStore error:', e); }
+  },
+
+  loadMyCosmetics: async () => {
+    try {
+      const res = await fetch(`${API}/store/cosmetics/mine`, { headers: authHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        set({ myCosmetics: data.cosmetics || [] });
+      }
+    } catch (e) { console.error('loadMyCosmetics error:', e); }
+  },
+
+  purchaseCosmetic: async (cosmeticId) => {
+    const res = await fetch(`${API}/store/cosmetics/purchase`, {
+      method: 'POST', headers: authHeaders(), body: JSON.stringify({ cosmeticId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
+
+  equipCosmetic: async (cosmeticId, equipped) => {
+    const res = await fetch(`${API}/store/cosmetics/equip`, {
+      method: 'POST', headers: authHeaders(), body: JSON.stringify({ cosmeticId, equipped }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
+
+  startCheckout: async (packId) => {
+    const res = await fetch(`${API}/store/checkout`, {
+      method: 'POST', headers: authHeaders(), body: JSON.stringify({ packId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    if (data.url) window.location.href = data.url;
+    return data;
+  },
+
+  startSubscription: async () => {
+    const res = await fetch(`${API}/store/subscribe`, {
+      method: 'POST', headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    if (data.url) window.location.href = data.url;
+    return data;
+  },
+
+  cancelSubscription: async () => {
+    const res = await fetch(`${API}/store/cancel-subscription`, {
+      method: 'POST', headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
+
   // ── Tick resources locally (visual interpolation) ──
   tickResources: () => set((state) => {
     if (!state.resources) return {};

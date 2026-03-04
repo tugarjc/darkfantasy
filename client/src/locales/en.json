@@ -50,7 +50,8 @@
     "admin": "Admin",
     "circle": "Circle",
     "tutorial": "Tutorial",
-    "leaderboard": "Leaderboard"
+    "leaderboard": "Leaderboard",
+    "store": "Store"
   },
   "landing": {
     "subtitle": "The Reign of the Dark Lords",
@@ -482,5 +483,43 @@
     "coord_q": "Coord Q",
     "coord_r": "Coord R",
     "target_circle_id": "Target circle ID"
+  },
+  "store": {
+    "title": "Relic Store",
+    "relics_tab": "Relics",
+    "subscription_tab": "Shadows",
+    "cosmetics_tab": "Cosmetics",
+    "pack_novice": "Novice Pack",
+    "pack_disciple": "Disciple Pack",
+    "pack_seigneur": "Overlord Pack",
+    "pack_despote": "Despot Pack",
+    "relics_count": "{{count}} relics",
+    "bonus": "+{{percent}}% bonus",
+    "buy": "Buy",
+    "sub_title": "Shadows Subscription",
+    "sub_price": "€9.99/month",
+    "sub_subscribe": "Subscribe",
+    "sub_cancel": "Cancel",
+    "sub_active": "Subscription active",
+    "sub_inactive": "Not subscribed",
+    "sub_benefits": {
+      "production": "+25% resource production",
+      "building": "-10% construction time",
+      "tax": "-5% market taxes",
+      "slots": "+10 market offer slots"
+    },
+    "cosmetics_legion": "Legions",
+    "cosmetics_circle": "Circles",
+    "cosmetics_alliance": "Alliance",
+    "purchase_cost": "{{cost}} relics",
+    "equip": "Equip",
+    "unequip": "Unequip",
+    "equipped": "Equipped",
+    "owned": "Owned",
+    "buy_cosmetic": "Buy",
+    "insufficient_relics": "Insufficient relics",
+    "stripe_unavailable": "Payments unavailable",
+    "purchased": "Purchase complete!",
+    "cosmetic_purchased": "Cosmetic acquired!"
   }
 }

@@ -34,9 +34,10 @@ async function recalcRates(circleId, client) {
   if (circleRow.rows.length === 0) return;
   const playerId = circleRow.rows[0].player_id;
 
-  // Get player faction for production bonuses
-  const playerRow = await db.query('SELECT faction FROM players WHERE id = $1', [playerId]);
+  // Get player faction + premium for production bonuses
+  const playerRow = await db.query('SELECT faction, is_premium FROM players WHERE id = $1', [playerId]);
   const faction = playerRow.rows[0]?.faction || 'none';
+  const premiumBonus = playerRow.rows[0]?.is_premium ? 1.25 : 1;
 
   const rResult = await db.query(
     "SELECT type, level FROM researches WHERE player_id = $1 AND type IN ('metallurgie_maudite', 'extraction_essence', 'recolte_ames', 'entrepot_etendu', 'economie_absolue')",
@@ -56,13 +57,13 @@ async function recalcRates(circleId, client) {
   // Serre bonus: +5% per level on all production
   const serreBonus = 1 + 0.05 * serreLv;
 
-  // Calculate rates (per hour) — include faction bonuses + legendary
+  // Calculate rates (per hour) — include faction bonuses + legendary + premium
   const ironRate = productionRate(BASE_RATES.iron, forgeLv)
-    * (1 + 0.05 * metalResearch) * serreBonus * factionProductionBonus(faction, 'iron') * ecoAbsBonus;
+    * (1 + 0.05 * metalResearch) * serreBonus * factionProductionBonus(faction, 'iron') * ecoAbsBonus * premiumBonus;
   const essenceRate = productionRate(BASE_RATES.essence, sanctLv)
-    * (1 + 0.05 * essenceResearch) * serreBonus * factionProductionBonus(faction, 'essence') * ecoAbsBonus;
+    * (1 + 0.05 * essenceResearch) * serreBonus * factionProductionBonus(faction, 'essence') * ecoAbsBonus * premiumBonus;
   const soulsRate = puitsLv > 0
-    ? productionRate(BASE_RATES.souls, puitsLv) * (1 + 0.05 * soulsResearch) * serreBonus * factionProductionBonus(faction, 'souls') * ecoAbsBonus
+    ? productionRate(BASE_RATES.souls, puitsLv) * (1 + 0.05 * soulsResearch) * serreBonus * factionProductionBonus(faction, 'souls') * ecoAbsBonus * premiumBonus
     : 0;
 
   // Storage caps
