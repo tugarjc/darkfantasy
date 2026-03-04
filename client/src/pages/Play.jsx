@@ -22,6 +22,7 @@ import LeaderboardPanel from '../components/LeaderboardPanel';
 import StorePanel from '../components/StorePanel';
 import MobileBottomBar from '../components/MobileBottomBar';
 import AudioSettings from '../components/AudioSettings';
+import AccountSettings from '../components/AccountSettings';
 
 export default function Play() {
   const { t, i18n } = useTranslation();
@@ -62,8 +63,13 @@ export default function Play() {
 
   return (
     <div className="min-h-screen bg-deep flex flex-col">
+      {/* Skip navigation link */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-gold focus:text-deep focus:px-4 focus:py-2 focus:text-sm">
+        {t('a11y.skip_to_content')}
+      </a>
+
       {/* Top bar */}
-      <header className="bg-base border-b border-border px-3 md:px-4 py-2 flex items-center justify-between">
+      <header className="bg-base border-b border-border px-3 md:px-4 py-2 flex items-center justify-between" role="banner">
         <div className="flex items-center gap-2 md:gap-4">
           <h1 className="font-display text-lg md:text-xl text-gold">
             <span className="hidden md:inline">INFERNO DOMINI</span>
@@ -103,7 +109,7 @@ export default function Play() {
 
       {/* Error banner */}
       {error && (
-        <div className="bg-blood/20 border-b border-blood px-4 py-2 text-sm text-blood-glow flex justify-between">
+        <div role="alert" className="bg-blood/20 border-b border-blood px-4 py-2 text-sm text-blood-glow flex justify-between">
           <span>{error}</span>
           <button onClick={clearError} className="text-muted hover:text-parchment">&times;</button>
         </div>
@@ -113,7 +119,7 @@ export default function Play() {
       <ToastContainer />
 
       {/* Tab navigation (desktop) */}
-      <div className="hidden md:flex bg-surface border-b border-border px-4 gap-1 overflow-x-auto">
+      <div role="tablist" aria-label={t('a11y.main_navigation')} className="hidden md:flex bg-surface border-b border-border px-4 gap-1 overflow-x-auto">
         <TabBtn label={t('nav.structures')} active={tab === 'buildings'} onClick={() => setTab('buildings')} />
         <TabBtn label={t('nav.units')} active={tab === 'units'} onClick={() => setTab('units')} />
         <TabBtn label={t('nav.map')} active={tab === 'map'} onClick={() => setTab('map')} />
@@ -129,11 +135,12 @@ export default function Play() {
         <TabBtn label={t('nav.tutorial')} active={tab === 'tutorial'} onClick={() => setTab('tutorial')} />
         <TabBtn label={t('nav.leaderboard')} active={tab === 'leaderboard'} onClick={() => setTab('leaderboard')} />
         <TabBtn label={t('nav.store')} active={tab === 'store'} onClick={() => setTab('store')} />
+        <TabBtn label={t('account.settings')} active={tab === 'account'} onClick={() => setTab('account')} />
         {player?.is_admin && <TabBtn label={t('nav.admin')} active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </div>
 
       {/* Main content */}
-      <main className="flex-1 p-4 md:p-8 overflow-auto pb-24 md:pb-8">
+      <main id="main-content" className="flex-1 p-4 md:p-8 overflow-auto pb-24 md:pb-8">
         <div className="max-w-6xl mx-auto">
           {tab === 'buildings' && <BuildingGrid />}
           {tab === 'units' && <UnitPanel />}
@@ -167,6 +174,7 @@ export default function Play() {
           {tab === 'tutorial' && <TutorialPanel />}
           {tab === 'leaderboard' && <LeaderboardPanel />}
           {tab === 'store' && <StorePanel />}
+          {tab === 'account' && <AccountSettings />}
           {tab === 'admin' && player?.is_admin && <AdminPanel />}
         </div>
       </main>
@@ -180,6 +188,8 @@ export default function Play() {
 function TabBtn({ label, active, onClick }) {
   return (
     <button
+      role="tab"
+      aria-selected={active}
       onClick={onClick}
       className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
         active ? 'border-gold text-gold' : 'border-transparent text-muted hover:text-parchment'

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
@@ -10,8 +10,11 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [faction, setFaction] = useState('none');
+  const [website, setWebsite] = useState(''); // honeypot
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [localError, setLocalError] = useState('');
   const { register, loading, error, clearError } = useAuthStore();
+  const formLoadedAt = useRef(Date.now());
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -20,7 +23,11 @@ export default function Register() {
       setLocalError(t('auth.password_mismatch'));
       return;
     }
-    register(username, email, password, faction);
+    if (!privacyAccepted) {
+      setLocalError(t('auth.accept_privacy_required'));
+      return;
+    }
+    register(username, email, password, faction, { website, _ts: formLoadedAt.current });
   };
 
   const displayError = localError || error;
@@ -122,6 +129,32 @@ export default function Register() {
                          focus:border-blood focus:outline-none transition-colors"
               placeholder="••••••••"
             />
+          </label>
+
+          {/* Honeypot — hidden from users, bots fill it */}
+          <input
+            type="text"
+            name="website"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
+          />
+
+          {/* Privacy policy consent */}
+          <label className="flex items-start gap-2 mb-6 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={privacyAccepted}
+              onChange={(e) => setPrivacyAccepted(e.target.checked)}
+              className="mt-1 accent-gold"
+            />
+            <span className="text-muted text-xs">
+              {t('auth.accept_privacy')}{' '}
+              <Link to="/privacy" className="text-gold underline" target="_blank">{t('legal.privacy_link')}</Link>
+            </span>
           </label>
 
           <button

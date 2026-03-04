@@ -83,7 +83,12 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="bg-deep border-t border-border py-6 px-4 text-center text-sm text-muted">
-        {t('landing.footer')}
+        <p>{t('landing.footer')}</p>
+        <div className="mt-2 flex justify-center gap-4">
+          <Link to="/privacy" className="text-muted hover:text-gold transition-colors">{t('legal.privacy_link')}</Link>
+          <Link to="/terms" className="text-muted hover:text-gold transition-colors">{t('legal.terms_link')}</Link>
+          <Link to="/legal" className="text-muted hover:text-gold transition-colors">{t('legal.legal_link')}</Link>
+        </div>
       </footer>
     </div>
   );

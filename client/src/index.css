@@ -36,3 +36,9 @@ body {
   100% { filter: brightness(1); }
 }
 .res-flash { animation: res-flash 0.4s ease-out; }
+
+/* Accessibility: visible focus ring */
+:focus-visible {
+  outline: 2px solid #C9A84C;
+  outline-offset: 2px;
+}

@@ -51,7 +51,8 @@
     "circle": "Circle",
     "tutorial": "Tutorial",
     "leaderboard": "Leaderboard",
-    "store": "Store"
+    "store": "Store",
+    "account": "Account"
   },
   "landing": {
     "subtitle": "The Reign of the Dark Lords",
@@ -81,7 +82,9 @@
     "register_button": "Forge my Infernal Circle",
     "has_account": "Already have an account?",
     "password_mismatch": "Passwords do not match",
-    "faction": "Choose your Faction"
+    "faction": "Choose your Faction",
+    "accept_privacy": "I accept the <1>privacy policy</1>",
+    "accept_privacy_required": "You must accept the privacy policy"
   },
   "play": {
     "summoning_circle": "Summoning the Circle..."
@@ -537,5 +540,46 @@
     "play_music": "Music ON",
     "stop_music": "Music OFF",
     "muted": "Muted"
+  },
+  "account": {
+    "title": "Account Settings",
+    "settings": "Account",
+    "created": "Registered",
+    "last_login": "Last login",
+    "export": "Export my data",
+    "export_desc": "Download all your personal data as JSON (GDPR).",
+    "export_loading": "Exporting...",
+    "delete": "Delete my account",
+    "delete_warning": "This action is irreversible. All your data will be permanently deleted.",
+    "delete_confirm": "Enter your password to confirm deletion:",
+    "confirm_delete": "Delete permanently",
+    "password_required": "Password required"
+  },
+  "legal": {
+    "privacy_title": "Privacy Policy",
+    "privacy_data_collected": "Data collected: lord name, email, IP address, game data.",
+    "privacy_purpose": "Purpose: game operation, security, service improvement.",
+    "privacy_retention": "Retention: your data is kept as long as your account is active.",
+    "privacy_rights": "Rights: access, rectification, deletion, portability (GDPR art. 15-20).",
+    "privacy_storage": "Storage: secure servers, data encrypted in transit (HTTPS).",
+    "terms_title": "Terms of Service",
+    "terms_acceptance": "By using Inferno Domini, you accept these terms.",
+    "terms_rules": "Rules: cheating, multi-accounting, and harassment are prohibited.",
+    "terms_account": "Your account may be suspended for rule violations.",
+    "terms_virtual": "Virtual items have no real monetary value.",
+    "terms_availability": "The service is provided without guarantee of permanent availability.",
+    "legal_title": "Legal Notice",
+    "legal_publisher": "Publisher: Inferno Domini (open-source project).",
+    "legal_hosting": "Hosting: self-hosted / Docker.",
+    "legal_contact": "Contact: via the in-game form or global chat."
+  },
+  "cookie": {
+    "message": "This site uses essential cookies for game operation. No advertising cookies are used.",
+    "accept": "I accept"
+  },
+  "a11y": {
+    "skip_to_content": "Skip to main content",
+    "main_navigation": "Main navigation",
+    "resources_region": "Resources"
   }
 }

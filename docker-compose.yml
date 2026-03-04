@@ -66,6 +66,23 @@ services:
     volumes:
       - ./client/src:/app/src
 
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-inferno}
+      POSTGRES_DB: ${POSTGRES_DB:-inferno_domini}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-changeme_in_production}
+    volumes:
+      - ./scripts/backup.sh:/backup.sh:ro
+      - backups:/backups
+    entrypoint: /bin/sh
+    command: -c "while true; do sh /backup.sh; sleep 86400; done"
+
 volumes:
   pgdata:
   redisdata:
+  backups:

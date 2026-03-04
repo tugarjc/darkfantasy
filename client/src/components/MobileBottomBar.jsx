@@ -11,7 +11,7 @@ const MAIN_TABS = [
 
 const PLUS_TABS = [
   'legions', 'heroes', 'research', 'market', 'events',
-  'missions', 'chat', 'reports', 'store', 'leaderboard', 'tutorial',
+  'missions', 'chat', 'reports', 'store', 'leaderboard', 'tutorial', 'account',
 ];
 
 function getActiveMainTab(tab) {
@@ -75,23 +75,28 @@ export default function MobileBottomBar({ currentTab, onTabChange, isAdmin }) {
 
       {/* Bottom bar */}
       <nav
+        role="navigation"
+        aria-label={t('a11y.main_navigation')}
         className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-base border-t border-border flex"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
-        {MAIN_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabClick(tab.id)}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 min-h-[56px] transition-colors ${
-              (tab.id === 'plus' ? plusOpen : activeMain === tab.id)
-                ? 'text-gold'
-                : 'text-muted'
-            }`}
-          >
-            <MainTabIcon tabId={tab.id} />
-            <span className="text-[10px] leading-none">{t(tab.labelKey)}</span>
-          </button>
-        ))}
+        {MAIN_TABS.map((tab) => {
+          const isActive = tab.id === 'plus' ? plusOpen : activeMain === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleTabClick(tab.id)}
+              aria-current={isActive && tab.id !== 'plus' ? 'page' : undefined}
+              aria-expanded={tab.id === 'plus' ? plusOpen : undefined}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 min-h-[56px] transition-colors ${
+                isActive ? 'text-gold' : 'text-muted'
+              }`}
+            >
+              <MainTabIcon tabId={tab.id} />
+              <span className="text-[10px] leading-none">{t(tab.labelKey)}</span>
+            </button>
+          );
+        })}
       </nav>
     </>
   );
@@ -229,6 +234,13 @@ function TabIcon({ tabId }) {
         <svg viewBox="0 0 24 24" className={cls} fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2V3z" />
           <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7V3z" />
+        </svg>
+      );
+    case 'account':
+      return (
+        <svg viewBox="0 0 24 24" className={cls} fill="none" stroke="currentColor" strokeWidth="1.5">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M5 21v-2a7 7 0 0114 0v2" />
         </svg>
       );
     case 'admin':

@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { pool } = require('../db');
 const { redis } = require('../redis');
 const { recalcRates } = require('../game/resources');
+const { sanitizeString } = require('../utils/sanitize');
 
 const router = Router();
 
@@ -21,7 +22,16 @@ function generateTokens(player) {
 
 // ── POST /api/auth/register ──
 router.post('/register', async (req, res) => {
-  const { username, email, password, faction } = req.body;
+  const { username, email, password, faction, website, _ts } = req.body;
+
+  // Honeypot: bots fill hidden fields
+  if (website) {
+    return res.status(201).json({ player: {}, accessToken: '', refreshToken: '' });
+  }
+  // Timing: form submitted too fast (< 2s)
+  if (_ts && Date.now() - _ts < 2000) {
+    return res.status(201).json({ player: {}, accessToken: '', refreshToken: '' });
+  }
 
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'username, email and password required' });
@@ -53,7 +63,7 @@ router.post('/register', async (req, res) => {
     const result = await pool.query(
       `INSERT INTO players (server_id, username, email, password_hash, faction)
        VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, faction, score, relics, created_at`,
-      ['00000000-0000-0000-0000-000000000001', username, email, passwordHash, playerFaction]
+      ['00000000-0000-0000-0000-000000000001', sanitizeString(username, 32), email.trim().toLowerCase(), passwordHash, playerFaction]
     );
     const player = result.rows[0];
 

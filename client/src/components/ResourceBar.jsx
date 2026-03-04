@@ -11,7 +11,7 @@ export default function ResourceBar() {
   if (!resources) return null;
 
   return (
-    <div className="bg-surface border-b border-border px-2 md:px-4 py-2 flex flex-wrap items-center gap-2 md:gap-6">
+    <div role="region" aria-label={t('a11y.resources_region')} className="bg-surface border-b border-border px-2 md:px-4 py-2 flex flex-wrap items-center gap-2 md:gap-6">
       <ResourceItem
         icon={<IronIcon />}
         name={t('resources.iron_name')}
@@ -68,7 +68,14 @@ function ResourceItem({ icon, name, value, rate, cap, color }) {
             +{rate}/h
           </span>
         </div>
-        <div className="mt-0.5 md:mt-1 h-1 md:h-1.5 bg-base rounded-full overflow-hidden">
+        <div
+          role="progressbar"
+          aria-valuenow={Math.floor(value)}
+          aria-valuemin={0}
+          aria-valuemax={Math.floor(cap)}
+          aria-label={name}
+          className="mt-0.5 md:mt-1 h-1 md:h-1.5 bg-base rounded-full overflow-hidden"
+        >
           <div
             className={`h-full rounded-full transition-all duration-1000 ${isFull ? 'bg-blood' : 'bg-gold/60'}`}
             style={{ width: `${pct}%` }}

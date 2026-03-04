@@ -4,6 +4,9 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Play from './pages/Play';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Legal from './pages/Legal';
 
 function ProtectedRoute({ children }) {
   const token = useAuthStore((s) => s.accessToken);
@@ -24,6 +27,9 @@ export default function App() {
       <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
       <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
       <Route path="/play" element={<ProtectedRoute><Play /></ProtectedRoute>} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/legal" element={<Legal />} />
     </Routes>
   );
 }

@@ -25,9 +25,9 @@ export default function Login() {
           <h2 className="font-display text-2xl text-parchment mb-6 text-center">{t('auth.login_title')}</h2>
 
           {error && (
-            <div className="bg-blood/20 border border-blood rounded p-3 mb-4 text-sm text-blood-glow">
+            <div role="alert" className="bg-blood/20 border border-blood rounded p-3 mb-4 text-sm text-blood-glow">
               {error}
-              <button onClick={clearError} className="float-right text-muted hover:text-parchment">&times;</button>
+              <button onClick={clearError} className="float-right text-muted hover:text-parchment" aria-label={t('common.close')}>&times;</button>
             </div>
           )}
 

@@ -51,7 +51,8 @@
     "circle": "Cercle",
     "tutorial": "Tutoriel",
     "leaderboard": "Classement",
-    "store": "Boutique"
+    "store": "Boutique",
+    "account": "Compte"
   },
   "landing": {
     "subtitle": "Le Regne des Seigneurs des Tenebres",
@@ -81,7 +82,9 @@
     "register_button": "Forger mon Cercle Infernal",
     "has_account": "Deja un compte ?",
     "password_mismatch": "Les mots de passe ne correspondent pas",
-    "faction": "Choisissez votre Faction"
+    "faction": "Choisissez votre Faction",
+    "accept_privacy": "J'accepte la <1>politique de confidentialite</1>",
+    "accept_privacy_required": "Vous devez accepter la politique de confidentialite"
   },
   "play": {
     "summoning_circle": "Invocation du Cercle..."
@@ -534,5 +537,46 @@
     "play_music": "Musique ON",
     "stop_music": "Musique OFF",
     "muted": "Muet"
+  },
+  "account": {
+    "title": "Parametres du Compte",
+    "settings": "Compte",
+    "created": "Inscription",
+    "last_login": "Derniere connexion",
+    "export": "Exporter mes donnees",
+    "export_desc": "Telecharger toutes vos donnees personnelles au format JSON (RGPD).",
+    "export_loading": "Export en cours...",
+    "delete": "Supprimer mon compte",
+    "delete_warning": "Cette action est irreversible. Toutes vos donnees seront definitivement supprimees.",
+    "delete_confirm": "Entrez votre mot de passe pour confirmer la suppression :",
+    "confirm_delete": "Supprimer definitivement",
+    "password_required": "Mot de passe requis"
+  },
+  "legal": {
+    "privacy_title": "Politique de Confidentialite",
+    "privacy_data_collected": "Donnees collectees : nom de seigneur, email, adresse IP, donnees de jeu.",
+    "privacy_purpose": "Finalite : fonctionnement du jeu, securite, amelioration du service.",
+    "privacy_retention": "Conservation : vos donnees sont conservees tant que votre compte est actif.",
+    "privacy_rights": "Droits : acces, rectification, suppression, portabilite (RGPD art. 15-20).",
+    "privacy_storage": "Stockage : serveurs securises, donnees chiffrees en transit (HTTPS).",
+    "terms_title": "Conditions d'Utilisation",
+    "terms_acceptance": "En utilisant Inferno Domini, vous acceptez les presentes conditions.",
+    "terms_rules": "Regles : interdiction de triche, multi-comptes, harcellement.",
+    "terms_account": "Votre compte peut etre suspendu en cas de violation des regles.",
+    "terms_virtual": "Les objets virtuels n'ont aucune valeur monetaire reelle.",
+    "terms_availability": "Le service est fourni sans garantie de disponibilite permanente.",
+    "legal_title": "Mentions Legales",
+    "legal_publisher": "Editeur : Inferno Domini (projet open-source).",
+    "legal_hosting": "Hebergement : auto-heberge / Docker.",
+    "legal_contact": "Contact : via le formulaire en jeu ou le chat global."
+  },
+  "cookie": {
+    "message": "Ce site utilise des cookies essentiels pour le fonctionnement du jeu. Aucun cookie publicitaire n'est utilise.",
+    "accept": "J'accepte"
+  },
+  "a11y": {
+    "skip_to_content": "Aller au contenu principal",
+    "main_navigation": "Navigation principale",
+    "resources_region": "Ressources"
   }
 }

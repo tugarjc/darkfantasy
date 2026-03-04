@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const { connectDB } = require('./db');
@@ -23,15 +25,28 @@ const tutorialRoutes = require('./routes/tutorial');
 const leaderboardRoutes = require('./routes/leaderboard');
 const notificationRoutes = require('./routes/notifications');
 const storeRoutes = require('./routes/store');
+const playerRoutes = require('./routes/player');
 const { startLegionProcessor } = require('./game/legionProcessor');
 const { startEventProcessor } = require('./game/eventProcessor');
 const { setupChat } = require('./chat');
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: '*' } });
+const corsOrigin = process.env.NODE_ENV === 'production'
+  ? process.env.CLIENT_ORIGIN || 'https://infernodominigame.com'
+  : true;
+const io = new Server(httpServer, { cors: { origin: corsOrigin } });
 
-app.use(cors());
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors({ origin: corsOrigin }));
+
+// Rate limiters
+const apiLimiter = rateLimit({ windowMs: 60000, max: 100, standardHeaders: true, legacyHeaders: false, message: { error: 'Too many requests' } });
+const authLimiter = rateLimit({ windowMs: 900000, max: 10, standardHeaders: true, legacyHeaders: false, message: { error: 'Too many attempts, try again later' } });
+app.use('/api', apiLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+
 // Stripe webhook needs raw body — mount BEFORE express.json()
 app.use('/api/store/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
@@ -59,6 +74,7 @@ app.use('/api/tutorial', tutorialRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/store', storeRoutes);
+app.use('/api/player', playerRoutes);
 
 // ── WebSocket + Chat ──
 setupChat(io);
