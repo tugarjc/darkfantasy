@@ -359,6 +359,65 @@ export const useGameStore = create((set, get) => ({
     return data;
   },
 
+  // ── Alliance Research ──
+  allianceResearches: [],
+
+  loadAllianceResearch: async () => {
+    try {
+      const res = await fetch(`${API}/alliances/research`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ allianceResearches: data.researches || [] });
+    } catch { /* silent */ }
+  },
+
+  contributeAllianceResearch: async (techType, iron, essence, souls) => {
+    const res = await fetch(`${API}/alliances/research/contribute`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ techType, iron, essence, souls }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadAllianceResearch();
+    await get().loadCircle();
+    return data;
+  },
+
+  // ── Fortress ──
+  fortress: null,
+
+  loadFortress: async () => {
+    try {
+      const res = await fetch(`${API}/alliances/fortress`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ fortress: data.fortress });
+    } catch { /* silent */ }
+  },
+
+  buildFortress: async (coordQ, coordR) => {
+    const res = await fetch(`${API}/alliances/fortress/build`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ coordQ, coordR }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadFortress();
+    return data;
+  },
+
+  declareWar: async (targetAllianceId) => {
+    const res = await fetch(`${API}/alliances/war/declare`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ targetAllianceId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadAlliance();
+    return data;
+  },
+
   // ── Heroes state ──
   heroes: [],
   heroesLoading: false,
@@ -459,6 +518,19 @@ export const useGameStore = create((set, get) => ({
     const res = await fetch(`${API}/market/${offerId}/cancel`, {
       method: 'POST',
       headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadMarket();
+    await get().loadCircle();
+    return data;
+  },
+
+  convertMarket: async (resourceFrom, resourceTo, amount) => {
+    const res = await fetch(`${API}/market/convert`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ resourceFrom, resourceTo, amount }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);

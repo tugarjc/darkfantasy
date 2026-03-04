@@ -9,6 +9,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [faction, setFaction] = useState('none');
   const [localError, setLocalError] = useState('');
   const { register, loading, error, clearError } = useAuthStore();
 
@@ -19,7 +20,7 @@ export default function Register() {
       setLocalError(t('auth.password_mismatch'));
       return;
     }
-    register(username, email, password);
+    register(username, email, password, faction);
   };
 
   const displayError = localError || error;
@@ -82,6 +83,32 @@ export default function Register() {
               placeholder="••••••••"
             />
           </label>
+
+          <div className="mb-4">
+            <span className="text-muted text-sm">{t('auth.faction')}</span>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {[
+                { id: 'legion_cendres', name: t('factions.legion_cendres'), bonus: '+10% Fer, +5% construction' },
+                { id: 'ordre_vide', name: t('factions.ordre_vide'), bonus: '+10% Essence, +5% recherche' },
+                { id: 'pacte_chaines', name: t('factions.pacte_chaines'), bonus: '+10% attaque, +10% pillage' },
+                { id: 'culte_sang', name: t('factions.culte_sang'), bonus: '+10% espionnage, +10% Âmes' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setFaction(f.id)}
+                  className={`p-2 rounded border text-left text-xs transition-all ${
+                    faction === f.id
+                      ? 'border-gold bg-gold/10 text-gold'
+                      : 'border-border bg-base text-muted hover:border-blood/50'
+                  }`}
+                >
+                  <div className="font-medium text-sm">{f.name}</div>
+                  <div className="text-[10px] opacity-70">{f.bonus}</div>
+                </button>
+              ))}
+            </div>
+          </div>
 
           <label className="block mb-6">
             <span className="text-muted text-sm">{t('auth.confirm_password')}</span>

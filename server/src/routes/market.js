@@ -353,4 +353,68 @@ router.post('/:id/cancel', authenticateToken, async (req, res) => {
   }
 });
 
+// ── POST /api/market/convert ── NPC instant conversion with 20% tax
+router.post('/convert', authenticateToken, async (req, res) => {
+  const { resourceFrom, resourceTo, amount } = req.body;
+
+  if (!VALID_RESOURCES.includes(resourceFrom) || !VALID_RESOURCES.includes(resourceTo)) {
+    return res.status(400).json({ error: 'Ressource invalide' });
+  }
+  if (resourceFrom === resourceTo) {
+    return res.status(400).json({ error: 'Impossible de convertir la même ressource' });
+  }
+  if (!amount || amount < 100 || amount > 10000) {
+    return res.status(400).json({ error: 'Quantité entre 100 et 10000' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const circleRes = await client.query(
+      `SELECT c.id, COALESCE(b.level, 0) as marche_level
+       FROM circles c
+       LEFT JOIN buildings b ON b.circle_id = c.id AND b.type = 'marche_demoniaque'
+       WHERE c.player_id = $1 AND c.is_primary = true`,
+      [req.user.id]
+    );
+    const circle = circleRes.rows[0];
+    if (!circle || circle.marche_level < 3) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'Marché Démoniaque niveau 3 requis pour la conversion NPC' });
+    }
+
+    await flushResources(circle.id, client);
+    const resRow = await client.query(
+      'SELECT iron, essence, souls FROM resources WHERE circle_id = $1 FOR UPDATE',
+      [circle.id]
+    );
+    if (resRow.rows[0][resourceFrom] < amount) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'Ressources insuffisantes' });
+    }
+
+    const npcTax = 0.20; // 20% tax
+    const received = Math.floor(amount * (1 - npcTax));
+
+    await client.query(
+      `UPDATE resources SET ${resourceFrom} = ${resourceFrom} - $2 WHERE circle_id = $1`,
+      [circle.id, amount]
+    );
+    await client.query(
+      `UPDATE resources SET ${resourceTo} = LEAST(${resourceTo} + $2, ${resourceTo}_cap) WHERE circle_id = $1`,
+      [circle.id, received]
+    );
+
+    await client.query('COMMIT');
+    res.json({ message: 'Conversion effectuée', spent: amount, received, tax: npcTax });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Market convert error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;

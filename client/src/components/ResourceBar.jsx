@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
+import { useAuthStore } from '../stores/authStore';
 
 export default function ResourceBar() {
   const { t } = useTranslation();
   const resources = useGameStore((s) => s.resources);
+  const player = useAuthStore((s) => s.player);
 
   if (!resources) return null;
 
@@ -33,6 +35,14 @@ export default function ResourceBar() {
         cap={resources.souls_cap}
         color="text-souls"
       />
+      {/* Reliques — no rate, just flat counter */}
+      <div className="flex items-center gap-2 min-w-[100px]">
+        <div className="w-6 h-6 flex-shrink-0"><RelicIcon /></div>
+        <div>
+          <span className="text-sm font-medium text-gold">{(player?.relics || 0).toLocaleString('fr-FR')}</span>
+          <div className="text-[10px] text-muted">{t('resources.relics_name')}</div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -95,6 +105,15 @@ function SoulsIcon() {
       <ellipse cx="28" cy="20" rx="2.5" ry="3" fill="#2D5A3D"/>
       <ellipse cx="20" cy="20" rx="1" ry="1.5" fill="#5AE89A" opacity="0.8"/>
       <ellipse cx="28" cy="20" rx="1" ry="1.5" fill="#5AE89A" opacity="0.8"/>
+    </svg>
+  );
+}
+
+function RelicIcon() {
+  return (
+    <svg viewBox="0 0 48 48" className="w-full h-full">
+      <polygon points="24,6 30,18 44,20 34,30 36,44 24,38 12,44 14,30 4,20 18,18" fill="#D4AF37" stroke="#8B6914" strokeWidth="1.2"/>
+      <circle cx="24" cy="24" r="6" fill="#FFF8DC" opacity="0.5"/>
     </svg>
   );
 }

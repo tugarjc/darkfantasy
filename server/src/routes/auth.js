@@ -21,7 +21,7 @@ function generateTokens(player) {
 
 // ── POST /api/auth/register ──
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, faction } = req.body;
 
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'username, email and password required' });
@@ -45,11 +45,15 @@ router.post('/register', async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Validate faction
+    const validFactions = ['none', 'legion_cendres', 'ordre_vide', 'pacte_chaines', 'culte_sang'];
+    const playerFaction = validFactions.includes(faction) ? faction : 'none';
+
     // Create player
     const result = await pool.query(
-      `INSERT INTO players (server_id, username, email, password_hash)
-       VALUES ($1, $2, $3, $4) RETURNING id, username, email, faction, score, created_at`,
-      ['00000000-0000-0000-0000-000000000001', username, email, passwordHash]
+      `INSERT INTO players (server_id, username, email, password_hash, faction)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, faction, score, relics, created_at`,
+      ['00000000-0000-0000-0000-000000000001', username, email, passwordHash, playerFaction]
     );
     const player = result.rows[0];
 
@@ -84,6 +88,21 @@ router.post('/register', async (req, res) => {
     // Recalculate production rates based on starting buildings
     await recalcRates(circleId);
 
+    // Init tutorial progress
+    const tutorialQuests = [
+      { id: 'premiere_flamme', completed: false, claimed: false, progress: 0 },
+      { id: 'essence_vie', completed: false, claimed: false, progress: 0 },
+      { id: 'premiers_soldats', completed: false, claimed: false, progress: 0 },
+      { id: 'connais_ennemi', completed: false, claimed: false, progress: 0 },
+      { id: 'murs_sang', completed: false, claimed: false, progress: 0 },
+      { id: 'premiere_conquete', completed: false, claimed: false, progress: 0 },
+      { id: 'maitre_ombres', completed: false, claimed: false, progress: 0 },
+    ];
+    await pool.query(
+      'INSERT INTO tutorial_progress (player_id, quests) VALUES ($1, $2) ON CONFLICT (player_id) DO NOTHING',
+      [player.id, JSON.stringify(tutorialQuests)]
+    );
+
     const tokens = generateTokens(player);
 
     // Store refresh token in Redis
@@ -106,7 +125,7 @@ router.post('/login', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT id, username, email, password_hash, faction, score, is_banned, is_admin FROM players WHERE email = $1 AND server_id = $2',
+      'SELECT id, username, email, password_hash, faction, score, relics, is_banned, is_admin FROM players WHERE email = $1 AND server_id = $2',
       [email, '00000000-0000-0000-0000-000000000001']
     );
 

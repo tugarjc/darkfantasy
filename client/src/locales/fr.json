@@ -48,7 +48,8 @@
     "chat": "Chat",
     "reports": "Rapports",
     "admin": "Admin",
-    "circle": "Cercle"
+    "circle": "Cercle",
+    "tutorial": "Tutoriel"
   },
   "landing": {
     "subtitle": "Le Regne des Seigneurs des Tenebres",
@@ -77,7 +78,8 @@
     "register_loading": "Invocation...",
     "register_button": "Forger mon Cercle Infernal",
     "has_account": "Deja un compte ?",
-    "password_mismatch": "Les mots de passe ne correspondent pas"
+    "password_mismatch": "Les mots de passe ne correspondent pas",
+    "faction": "Choisissez votre Faction"
   },
   "play": {
     "summoning_circle": "Invocation du Cercle..."
@@ -85,7 +87,8 @@
   "resources": {
     "iron_name": "Fer Maudit",
     "essence_name": "Essence",
-    "souls_name": "Ames"
+    "souls_name": "Ames",
+    "relics_name": "Reliques"
   },
   "buildings": {
     "upgrade": "Ameliorer",
@@ -403,5 +406,42 @@
     "ordre_vide": "Ordre du Vide",
     "pacte_chaines": "Pacte des Chaines",
     "culte_sang": "Culte du Sang"
+  },
+  "tutorial": {
+    "title": "Tutoriel — Quetes d'Introduction",
+    "chapter": "Chapitre",
+    "progress": "Progression",
+    "claim": "Reclamer",
+    "claimed": "Recu",
+    "in_progress": "En cours",
+    "all_complete": "Felicitations ! Vous avez termine toutes les quetes d'introduction. Bienvenue, Seigneur des Tenebres !"
+  },
+  "market_convert": {
+    "title": "Conversion NPC",
+    "description": "Convertir instantanement des ressources (taxe 20%). Marche nv 3 requis.",
+    "convert": "Convertir",
+    "converting": "Conversion..."
+  },
+  "alliance_research": {
+    "title": "Recherches d'Alliance",
+    "contribute": "Contribuer",
+    "contributing": "Contribution...",
+    "level": "Niveau",
+    "maxed": "Maximum",
+    "total_contributed": "Total contribue"
+  },
+  "fortress": {
+    "title": "Forteresse du Pandemonium",
+    "build": "Construire",
+    "building": "En construction...",
+    "hp": "Points de structure",
+    "controlled": "Controlee depuis",
+    "days": "jours",
+    "bonus_active": "Bonus actif (+20% production, +10% combat)",
+    "bonus_pending": "Bonus actif apres 7 jours de controle"
+  },
+  "war": {
+    "declare": "Declarer la guerre",
+    "declared": "Guerre declaree !"
   }
 }

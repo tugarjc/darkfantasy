@@ -127,11 +127,15 @@ async function processCompletedEvents() {
             );
           }
 
-          // Add score
-          if (rewards.score > 0) {
+          // Add score + relics based on rank
+          const relicsReward = defeated
+            ? (ratio >= 0.3 ? 500 : ratio >= 0.1 ? 200 : ratio >= 0.02 ? 100 : 50)
+            : Math.floor(50 * ratio);
+
+          if (rewards.score > 0 || relicsReward > 0) {
             await client.query(
-              "UPDATE players SET score = score + $2 WHERE id = $1",
-              [contrib.player_id, rewards.score]
+              "UPDATE players SET score = score + $2, relics = relics + $3 WHERE id = $1",
+              [contrib.player_id, rewards.score, relicsReward]
             );
           }
 

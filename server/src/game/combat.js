@@ -4,9 +4,10 @@
 // ============================================================
 
 const { UNITS } = require('./units');
+const { factionAttackBonus, factionPlunderBonus } = require('./factions');
 
 // Calculate total attack and defense power for a composition
-function compositionPower(comp) {
+function compositionPower(comp, faction = null) {
   let totalAttack = 0;
   let totalDefense = 0;
   let totalPlunder = 0;
@@ -16,6 +17,11 @@ function compositionPower(comp) {
     totalAttack += unit.attack * qty;
     totalDefense += unit.defense * qty;
     totalPlunder += unit.plunder * qty;
+  }
+  // Apply faction bonuses if provided
+  if (faction) {
+    totalAttack = Math.floor(totalAttack * factionAttackBonus(faction));
+    totalPlunder = Math.floor(totalPlunder * factionPlunderBonus(faction));
   }
   return { totalAttack, totalDefense, totalPlunder };
 }
@@ -27,9 +33,9 @@ function wallBonus(murLevel, tourLevel) {
 
 // Resolve combat between attacker and defender compositions
 // Returns: { attackerWins, attackerLosses, defenderLosses, plunder }
-function resolveCombat(attackerComp, defenderComp, defenseBonus = 1) {
-  const attPower = compositionPower(attackerComp);
-  const defPower = compositionPower(defenderComp);
+function resolveCombat(attackerComp, defenderComp, defenseBonus = 1, attackerFaction = null, defenderFaction = null) {
+  const attPower = compositionPower(attackerComp, attackerFaction);
+  const defPower = compositionPower(defenderComp, defenderFaction);
 
   // Apply wall/defense bonus to defender
   const adjustedDefense = defPower.totalDefense * defenseBonus;

@@ -4,6 +4,7 @@
 // ============================================================
 
 const { productionRate, storageCap } = require('./formulas');
+const { factionProductionBonus } = require('./factions');
 const { pool } = require('../db');
 
 const BASE_RATES = { iron: 30, essence: 20, souls: 10 };
@@ -33,6 +34,10 @@ async function recalcRates(circleId, client) {
   if (circleRow.rows.length === 0) return;
   const playerId = circleRow.rows[0].player_id;
 
+  // Get player faction for production bonuses
+  const playerRow = await db.query('SELECT faction FROM players WHERE id = $1', [playerId]);
+  const faction = playerRow.rows[0]?.faction || 'none';
+
   const rResult = await db.query(
     "SELECT type, level FROM researches WHERE player_id = $1 AND type IN ('metallurgie_maudite', 'extraction_essence', 'recolte_ames', 'entrepot_etendu')",
     [playerId]
@@ -48,13 +53,13 @@ async function recalcRates(circleId, client) {
   // Serre bonus: +5% per level on all production
   const serreBonus = 1 + 0.05 * serreLv;
 
-  // Calculate rates (per hour)
+  // Calculate rates (per hour) — include faction bonuses
   const ironRate = productionRate(BASE_RATES.iron, forgeLv)
-    * (1 + 0.05 * metalResearch) * serreBonus;
+    * (1 + 0.05 * metalResearch) * serreBonus * factionProductionBonus(faction, 'iron');
   const essenceRate = productionRate(BASE_RATES.essence, sanctLv)
-    * (1 + 0.05 * essenceResearch) * serreBonus;
+    * (1 + 0.05 * essenceResearch) * serreBonus * factionProductionBonus(faction, 'essence');
   const soulsRate = puitsLv > 0
-    ? productionRate(BASE_RATES.souls, puitsLv) * (1 + 0.05 * soulsResearch) * serreBonus
+    ? productionRate(BASE_RATES.souls, puitsLv) * (1 + 0.05 * soulsResearch) * serreBonus * factionProductionBonus(faction, 'souls')
     : 0;
 
   // Storage caps

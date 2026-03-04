@@ -18,6 +18,8 @@ const marketRoutes = require('./routes/market');
 const adminRoutes = require('./routes/admin');
 const eventRoutes = require('./routes/events');
 const missionRoutes = require('./routes/missions');
+const allianceAdvancedRoutes = require('./routes/allianceAdvanced');
+const tutorialRoutes = require('./routes/tutorial');
 const { startLegionProcessor } = require('./game/legionProcessor');
 const { startEventProcessor } = require('./game/eventProcessor');
 const { setupChat } = require('./chat');
@@ -47,6 +49,8 @@ app.use('/api/market', marketRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/missions', missionRoutes);
+app.use('/api/alliances', allianceAdvancedRoutes);
+app.use('/api/tutorial', tutorialRoutes);
 
 // ── WebSocket + Chat ──
 setupChat(io);
@@ -64,6 +68,19 @@ async function boot() {
     INSERT INTO servers (id, name, type, speed)
     VALUES ('00000000-0000-0000-0000-000000000001', 'Pandémonium Alpha', 'standard', 1.0)
     ON CONFLICT (id) DO NOTHING
+  `);
+
+  // Create tables for Phases 12-14 if not exist
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS tutorial_progress (
+      player_id UUID PRIMARY KEY REFERENCES players(id) ON DELETE CASCADE,
+      quests JSONB NOT NULL DEFAULT '[]',
+      completed BOOLEAN NOT NULL DEFAULT false,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    ALTER TABLE fortress ADD COLUMN IF NOT EXISTS hp_max INT DEFAULT 1000000;
+    ALTER TABLE fortress ADD COLUMN IF NOT EXISTS build_complete BOOLEAN DEFAULT false;
+    ALTER TABLE fortress ADD COLUMN IF NOT EXISTS build_end_time TIMESTAMPTZ;
   `);
 
   // Start legion arrival processor (every 5 seconds)

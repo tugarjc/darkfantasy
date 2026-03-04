@@ -109,6 +109,7 @@ export default function Play() {
         <TabBtn label={t('nav.missions')} active={tab === 'missions'} onClick={() => setTab('missions')} />
         <TabBtn label={t('nav.chat')} active={tab === 'chat'} onClick={() => setTab('chat')} />
         <TabBtn label={t('nav.reports')} active={tab === 'reports'} onClick={() => setTab('reports')} />
+        <TabBtn label={t('nav.tutorial')} active={tab === 'tutorial'} onClick={() => setTab('tutorial')} />
         {player?.is_admin && <TabBtn label={t('nav.admin')} active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </div>
 
@@ -144,6 +145,7 @@ export default function Play() {
           {tab === 'missions' && <MissionPanel />}
           {tab === 'chat' && <ChatPanel />}
           {tab === 'reports' && <ReportsPanel />}
+          {tab === 'tutorial' && <TutorialPanel />}
           {tab === 'admin' && player?.is_admin && <AdminPanel />}
         </div>
       </main>
@@ -162,6 +164,7 @@ export default function Play() {
         <NavBtn label={t('nav.missions')} active={tab === 'missions'} onClick={() => setTab('missions')} />
         <NavBtn label={t('nav.chat')} active={tab === 'chat'} onClick={() => setTab('chat')} />
         <NavBtn label={t('nav.reports')} active={tab === 'reports'} onClick={() => setTab('reports')} />
+        <NavBtn label={t('nav.tutorial')} active={tab === 'tutorial'} onClick={() => setTab('tutorial')} />
         {player?.is_admin && <NavBtn label={t('nav.admin')} active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </nav>
     </div>
@@ -178,6 +181,82 @@ function TabBtn({ label, active, onClick }) {
     >
       {label}
     </button>
+  );
+}
+
+function TutorialPanel() {
+  const { t } = useTranslation();
+  const [quests, setQuests] = useState([]);
+  const [tutorialComplete, setTutorialComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch('/api/tutorial', { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (res.ok) {
+        setQuests(data.quests || []);
+        setTutorialComplete(data.tutorialComplete || false);
+      }
+    } catch { /* silent */ }
+    setLoading(false);
+  };
+
+  const claim = async (questId) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch('/api/tutorial/claim', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questId }),
+      });
+      if (res.ok) load();
+    } catch { /* silent */ }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  if (loading) return <p className="text-muted">{t('common.loading')}</p>;
+
+  const chapters = [1, 2, 3];
+
+  return (
+    <div>
+      <h2 className="font-display text-2xl text-gold mb-4">{t('tutorial.title')}</h2>
+      {tutorialComplete && (
+        <div className="bg-gold/10 border border-gold rounded p-3 mb-4 text-gold text-sm">
+          {t('tutorial.all_complete')}
+        </div>
+      )}
+      {chapters.map((ch) => (
+        <div key={ch} className="mb-6">
+          <h3 className="font-display text-lg text-parchment mb-2">{t('tutorial.chapter')} {ch}</h3>
+          <div className="space-y-2">
+            {quests.filter(q => q.chapter === ch).map((q) => (
+              <div key={q.id} className={`bg-surface border rounded p-3 flex items-center justify-between ${q.completed ? 'border-gold/30' : 'border-border'}`}>
+                <div>
+                  <div className="text-sm text-parchment font-medium">{q.name}</div>
+                  <div className="text-xs text-muted">{q.description}</div>
+                  {!q.completed && q.objective.type !== 'complete_all_previous' && (
+                    <div className="mt-1 text-xs text-gold">{t('tutorial.progress')}: {q.progress || 0}/{q.objective.count || q.objective.level || 1}</div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {q.completed && !q.claimed && (
+                    <button onClick={() => claim(q.id)} className="px-3 py-1 bg-blood border border-gold rounded text-xs text-parchment hover:bg-blood-light">
+                      {t('tutorial.claim')}
+                    </button>
+                  )}
+                  {q.claimed && <span className="text-xs text-gold">{t('tutorial.claimed')}</span>}
+                  {!q.completed && <span className="text-xs text-muted">{t('tutorial.in_progress')}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

@@ -48,7 +48,8 @@
     "chat": "Chat",
     "reports": "Reports",
     "admin": "Admin",
-    "circle": "Circle"
+    "circle": "Circle",
+    "tutorial": "Tutorial"
   },
   "landing": {
     "subtitle": "The Reign of the Dark Lords",
@@ -77,7 +78,8 @@
     "register_loading": "Summoning...",
     "register_button": "Forge my Infernal Circle",
     "has_account": "Already have an account?",
-    "password_mismatch": "Passwords do not match"
+    "password_mismatch": "Passwords do not match",
+    "faction": "Choose your Faction"
   },
   "play": {
     "summoning_circle": "Summoning the Circle..."
@@ -85,7 +87,8 @@
   "resources": {
     "iron_name": "Cursed Iron",
     "essence_name": "Essence",
-    "souls_name": "Souls"
+    "souls_name": "Souls",
+    "relics_name": "Relics"
   },
   "buildings": {
     "upgrade": "Upgrade",
@@ -403,5 +406,42 @@
     "ordre_vide": "Order of the Void",
     "pacte_chaines": "Pact of Chains",
     "culte_sang": "Cult of Blood"
+  },
+  "tutorial": {
+    "title": "Tutorial — Introduction Quests",
+    "chapter": "Chapter",
+    "progress": "Progress",
+    "claim": "Claim",
+    "claimed": "Claimed",
+    "in_progress": "In progress",
+    "all_complete": "Congratulations! You have completed all introduction quests. Welcome, Lord of Darkness!"
+  },
+  "market_convert": {
+    "title": "NPC Conversion",
+    "description": "Instantly convert resources (20% tax). Market lv 3 required.",
+    "convert": "Convert",
+    "converting": "Converting..."
+  },
+  "alliance_research": {
+    "title": "Alliance Research",
+    "contribute": "Contribute",
+    "contributing": "Contributing...",
+    "level": "Level",
+    "maxed": "Maxed",
+    "total_contributed": "Total contributed"
+  },
+  "fortress": {
+    "title": "Pandemonium Fortress",
+    "build": "Build",
+    "building": "Building...",
+    "hp": "Structure points",
+    "controlled": "Controlled since",
+    "days": "days",
+    "bonus_active": "Bonus active (+20% production, +10% combat)",
+    "bonus_pending": "Bonus active after 7 days of control"
+  },
+  "war": {
+    "declare": "Declare war",
+    "declared": "War declared!"
   }
 }
