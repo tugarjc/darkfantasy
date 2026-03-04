@@ -4,6 +4,8 @@ const { authenticateToken } = require('../middleware/auth');
 const { RESEARCHES } = require('../game/researches');
 const { researchCost, researchTime } = require('../game/formulas');
 const { flushResources, recalcRates } = require('../game/resources');
+const { LEGENDARY_EFFECTS, hasLegendary, isOnCooldown, isEffectActive, getLegendaryStatus } = require('../game/legendaryEffects');
+const { notify } = require('../game/notify');
 
 const router = Router();
 
@@ -296,6 +298,206 @@ router.post('/complete', authenticateToken, async (req, res) => {
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Research complete error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
+
+// ── GET /api/researches/legendary/status ──
+router.get('/legendary/status', authenticateToken, async (req, res) => {
+  try {
+    const status = await getLegendaryStatus(req.user.id, pool);
+    res.json({ status });
+  } catch (err) {
+    console.error('Legendary status error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ── POST /api/researches/activate ──
+router.post('/activate', authenticateToken, async (req, res) => {
+  const { researchType, coordQ, coordR, targetCircleId } = req.body;
+
+  if (!researchType || !LEGENDARY_EFFECTS[researchType]) {
+    return res.status(400).json({ error: 'Invalid legendary research type' });
+  }
+
+  const def = LEGENDARY_EFFECTS[researchType];
+  if (def.type === 'passive') {
+    return res.status(400).json({ error: 'Passive effects are always active once researched' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Check research level
+    const rRow = await client.query(
+      'SELECT level FROM researches WHERE player_id = $1 AND type = $2',
+      [req.user.id, researchType]
+    );
+    if ((rRow.rows[0]?.level || 0) < 1) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'Research not completed' });
+    }
+
+    // Check cooldown
+    const cdRow = await client.query(
+      `SELECT cooldown_end FROM legendary_activations
+       WHERE player_id = $1 AND research_type = $2
+         AND cooldown_end > NOW()
+       ORDER BY activated_at DESC LIMIT 1`,
+      [req.user.id, researchType]
+    );
+    if (cdRow.rows.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        error: 'On cooldown',
+        cooldownEnd: cdRow.rows[0].cooldown_end,
+      });
+    }
+
+    let result = {};
+    const expiresAt = def.duration ? new Date(Date.now() + def.duration * 1000) : null;
+    const cooldownEnd = def.cooldown ? new Date(Date.now() + def.cooldown * 1000) : null;
+
+    // ── Apply effect by type ──
+    switch (researchType) {
+      case 'teleportation_infernale': {
+        if (coordQ === undefined || coordR === undefined) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: 'coordQ and coordR required' });
+        }
+        const q = parseInt(coordQ), r = parseInt(coordR);
+        if (isNaN(q) || isNaN(r) || q < -100 || q > 100 || r < -100 || r > 100) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: 'Invalid coordinates (range: -100 to 100)' });
+        }
+        // Check target hex is empty
+        const occupied = await client.query(
+          'SELECT id FROM circles WHERE coord_q = $1 AND coord_r = $2',
+          [q, r]
+        );
+        if (occupied.rows.length > 0) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: 'Target hex is occupied' });
+        }
+        // Move primary circle
+        const primary = await client.query(
+          "SELECT id FROM circles WHERE player_id = $1 AND is_primary = true",
+          [req.user.id]
+        );
+        if (primary.rows.length === 0) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: 'No primary circle' });
+        }
+        await client.query(
+          'UPDATE circles SET coord_q = $2, coord_r = $3 WHERE id = $1',
+          [primary.rows[0].id, q, r]
+        );
+        result = { movedTo: { q, r } };
+        break;
+      }
+
+      case 'bouclier_absolu': {
+        // Check not already active
+        const active = await client.query(
+          `SELECT id FROM legendary_activations
+           WHERE player_id = $1 AND research_type = 'bouclier_absolu'
+             AND expires_at > NOW()`,
+          [req.user.id]
+        );
+        if (active.rows.length > 0) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: 'Shield already active' });
+        }
+        result = { shieldExpiresAt: expiresAt };
+        break;
+      }
+
+      case 'drain_dimensionnel': {
+        if (!targetCircleId) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: 'targetCircleId required' });
+        }
+        // Check target circle exists and belongs to another player
+        const target = await client.query(
+          'SELECT c.id, c.player_id FROM circles c WHERE c.id = $1',
+          [targetCircleId]
+        );
+        if (target.rows.length === 0) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: 'Target circle not found' });
+        }
+        if (target.rows[0].player_id === req.user.id) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: 'Cannot drain own circle' });
+        }
+        // Flush target resources and steal 5%
+        await client.query('SELECT update_resources($1)', [targetCircleId]);
+        const targetRes = await client.query(
+          'SELECT iron, essence, souls FROM resources WHERE circle_id = $1 FOR UPDATE',
+          [targetCircleId]
+        );
+        const tr = targetRes.rows[0];
+        const stolen = {
+          iron: Math.floor(tr.iron * 0.05),
+          essence: Math.floor(tr.essence * 0.05),
+          souls: Math.floor(tr.souls * 0.05),
+        };
+        // Remove from target
+        await client.query(
+          'UPDATE resources SET iron = iron - $2, essence = essence - $3, souls = souls - $4 WHERE circle_id = $1',
+          [targetCircleId, stolen.iron, stolen.essence, stolen.souls]
+        );
+        // Add to player's primary circle
+        const myCircle = await client.query(
+          "SELECT id FROM circles WHERE player_id = $1 AND is_primary = true",
+          [req.user.id]
+        );
+        if (myCircle.rows.length > 0) {
+          await client.query('SELECT update_resources($1)', [myCircle.rows[0].id]);
+          await client.query(
+            `UPDATE resources SET
+               iron = LEAST(iron + $2, iron_cap),
+               essence = LEAST(essence + $3, essence_cap),
+               souls = LEAST(souls + $4, souls_cap)
+             WHERE circle_id = $1`,
+            [myCircle.rows[0].id, stolen.iron, stolen.essence, stolen.souls]
+          );
+        }
+        // Notify target
+        await notify(target.rows[0].player_id, 'drain_received', {
+          stolenIron: stolen.iron, stolenEssence: stolen.essence, stolenSouls: stolen.souls,
+        }, client);
+        result = { stolen };
+        break;
+      }
+
+      default:
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Unknown activation type' });
+    }
+
+    // Record activation
+    await client.query(
+      `INSERT INTO legendary_activations (player_id, research_type, expires_at, cooldown_end, data)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [req.user.id, researchType, expiresAt, cooldownEnd, JSON.stringify(result)]
+    );
+
+    // Notify player
+    await notify(req.user.id, 'legendary_activated', {
+      researchType, ...result,
+    }, client);
+
+    await client.query('COMMIT');
+
+    res.json({ message: `${researchType} activated`, expiresAt, cooldownEnd, ...result });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Legendary activate error:', err);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
     client.release();

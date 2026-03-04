@@ -25,9 +25,17 @@ function generateHexType(q, r) {
 router.get('/sector', authenticateToken, async (req, res) => {
   const cq = parseInt(req.query.q) || 0;
   const cr = parseInt(req.query.r) || 0;
-  const radius = Math.min(parseInt(req.query.radius) || 5, 15); // Max 15 radius
+  let radius = Math.min(parseInt(req.query.radius) || 5, 15); // Max 15 radius
 
   try {
+    // Vision pandemonium: see all circles on the map
+    const visionRes = await pool.query(
+      "SELECT level FROM researches WHERE player_id = $1 AND type = 'vision_pandemonium'",
+      [req.user.id]
+    );
+    const hasVision = (visionRes.rows[0]?.level || 0) >= 1;
+    if (hasVision) radius = 100; // Reveal entire map
+
     const coords = hexesInRadius(cq, cr, radius);
 
     // Batch query: find all player circles in this area

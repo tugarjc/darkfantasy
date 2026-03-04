@@ -20,6 +20,8 @@ const eventRoutes = require('./routes/events');
 const missionRoutes = require('./routes/missions');
 const allianceAdvancedRoutes = require('./routes/allianceAdvanced');
 const tutorialRoutes = require('./routes/tutorial');
+const leaderboardRoutes = require('./routes/leaderboard');
+const notificationRoutes = require('./routes/notifications');
 const { startLegionProcessor } = require('./game/legionProcessor');
 const { startEventProcessor } = require('./game/eventProcessor');
 const { setupChat } = require('./chat');
@@ -51,6 +53,8 @@ app.use('/api/events', eventRoutes);
 app.use('/api/missions', missionRoutes);
 app.use('/api/alliances', allianceAdvancedRoutes);
 app.use('/api/tutorial', tutorialRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // ── WebSocket + Chat ──
 setupChat(io);
@@ -81,6 +85,30 @@ async function boot() {
     ALTER TABLE fortress ADD COLUMN IF NOT EXISTS hp_max INT DEFAULT 1000000;
     ALTER TABLE fortress ADD COLUMN IF NOT EXISTS build_complete BOOLEAN DEFAULT false;
     ALTER TABLE fortress ADD COLUMN IF NOT EXISTS build_end_time TIMESTAMPTZ;
+  `);
+
+  // Phase 15 tables
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS legendary_activations (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+      research_type VARCHAR(64) NOT NULL,
+      activated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      expires_at TIMESTAMPTZ,
+      cooldown_end TIMESTAMPTZ,
+      data JSONB DEFAULT '{}'
+    );
+    CREATE INDEX IF NOT EXISTS idx_leg_act_player ON legendary_activations(player_id, research_type);
+
+    CREATE TABLE IF NOT EXISTS notifications (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+      type VARCHAR(32) NOT NULL,
+      data JSONB DEFAULT '{}',
+      read BOOLEAN DEFAULT false,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_notif_player ON notifications(player_id, read);
   `);
 
   // Start legion arrival processor (every 5 seconds)

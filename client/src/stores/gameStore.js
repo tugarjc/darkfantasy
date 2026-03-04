@@ -714,6 +714,79 @@ export const useGameStore = create((set, get) => ({
     return data;
   },
 
+  // ── Leaderboard ──
+  leaderboard: [],
+  leaderboardLoading: false,
+
+  loadLeaderboard: async (type = 'score') => {
+    set({ leaderboardLoading: true });
+    try {
+      const res = await fetch(`${API}/leaderboard?type=${type}`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ leaderboard: data.entries || [], leaderboardLoading: false });
+      else set({ leaderboardLoading: false });
+    } catch {
+      set({ leaderboardLoading: false });
+    }
+  },
+
+  // ── Notifications ──
+  notifications: [],
+  unreadCount: 0,
+
+  loadNotifications: async () => {
+    try {
+      const res = await fetch(`${API}/notifications`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ notifications: data.notifications || [], unreadCount: data.unreadCount || 0 });
+    } catch { /* silent */ }
+  },
+
+  markNotificationsRead: async (ids) => {
+    try {
+      await fetch(`${API}/notifications/read`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ ids }),
+      });
+      await get().loadNotifications();
+    } catch { /* silent */ }
+  },
+
+  markAllNotificationsRead: async () => {
+    try {
+      await fetch(`${API}/notifications/read-all`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      await get().loadNotifications();
+    } catch { /* silent */ }
+  },
+
+  // ── Legendary Activations ──
+  legendaryStatus: {},
+
+  loadLegendaryStatus: async () => {
+    try {
+      const res = await fetch(`${API}/researches/legendary/status`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ legendaryStatus: data.status || {} });
+    } catch { /* silent */ }
+  },
+
+  activateLegendary: async (researchType, extraData = {}) => {
+    const res = await fetch(`${API}/researches/activate`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ researchType, ...extraData }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    await get().loadLegendaryStatus();
+    await get().loadCircle();
+    return data;
+  },
+
   // ── Tick resources locally (visual interpolation) ──
   tickResources: () => set((state) => {
     if (!state.resources) return {};

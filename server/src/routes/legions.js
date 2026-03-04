@@ -141,11 +141,29 @@ router.post('/send', authenticateToken, async (req, res) => {
       speedBonus *= 1 + 0.10 * (colonResearch.rows[0]?.level || 0);
     }
 
-    const travelMinutes = (distance * SPEED_BASE) / speedBonus;
+    // Portail permanent: instant travel between own circles
+    let instantPortal = false;
+    if (mission === 'transport') {
+      const portalRes = await client.query(
+        "SELECT level FROM researches WHERE player_id = $1 AND type = 'portail_permanent'",
+        [req.user.id]
+      );
+      if ((portalRes.rows[0]?.level || 0) >= 1) {
+        const destCircle = await client.query(
+          'SELECT id FROM circles WHERE player_id = $1 AND coord_q = $2 AND coord_r = $3',
+          [req.user.id, toQ, toR]
+        );
+        if (destCircle.rows.length > 0) {
+          instantPortal = true;
+        }
+      }
+    }
+
+    const travelMinutes = instantPortal ? 0.01 : (distance * SPEED_BASE) / speedBonus;
     const travelMs = travelMinutes * 60 * 1000;
 
-    // Calculate souls cost
-    const soulsCost = distance * SOULS_PER_HEX;
+    // Calculate souls cost (free with portal)
+    const soulsCost = instantPortal ? 0 : distance * SOULS_PER_HEX;
 
     // Flush and check souls
     await flushResources(fromCircleId, client);

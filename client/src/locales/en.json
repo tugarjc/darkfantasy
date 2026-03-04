@@ -49,7 +49,8 @@
     "reports": "Reports",
     "admin": "Admin",
     "circle": "Circle",
-    "tutorial": "Tutorial"
+    "tutorial": "Tutorial",
+    "leaderboard": "Leaderboard"
   },
   "landing": {
     "subtitle": "The Reign of the Dark Lords",
@@ -443,5 +444,43 @@
   "war": {
     "declare": "Declare war",
     "declared": "War declared!"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "score": "Score",
+    "military": "Military",
+    "relics": "Relics",
+    "rank": "Rank",
+    "player": "Player",
+    "faction_col": "Faction",
+    "alliance_col": "Alliance",
+    "value": "Value",
+    "empty": "No data available"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mark_all_read": "Mark all read",
+    "empty": "No notifications",
+    "types": {
+      "attack_result": "Battle report: {{result}} against {{target}}",
+      "drain_received": "Dimensional drain! {{attacker}} stole resources",
+      "legendary_activated": "Legendary activation: {{type}}",
+      "war_declared": "War declared by {{attacker}} against {{target}}",
+      "research_complete": "Research completed: {{name}}",
+      "building_complete": "Construction completed: {{name}}",
+      "shield_expired": "Your Absolute Shield has expired"
+    }
+  },
+  "legendary": {
+    "activate": "Activate",
+    "activated": "Activated!",
+    "passive_active": "Permanent effect active",
+    "active_until": "Active until {{time}}",
+    "cooldown_until": "Cooldown until {{time}}",
+    "teleport": "Teleport",
+    "drain": "Drain",
+    "coord_q": "Coord Q",
+    "coord_r": "Coord R",
+    "target_circle_id": "Target circle ID"
   }
 }

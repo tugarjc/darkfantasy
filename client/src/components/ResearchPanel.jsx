@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { useGameStore } from '../stores/gameStore';
+import { useToastStore } from './ui/Toast';
 
 const CATEGORY_META = {
   production: { label: 'research.categories.production', color: '#B0592A', icon: '⚒' },
@@ -37,6 +38,9 @@ export default function ResearchPanel() {
   const loadResearches = useGameStore((s) => s.loadResearches);
   const startResearch = useGameStore((s) => s.startResearch);
   const completeResearch = useGameStore((s) => s.completeResearch);
+  const legendaryStatus = useGameStore((s) => s.legendaryStatus);
+  const loadLegendaryStatus = useGameStore((s) => s.loadLegendaryStatus);
+  const activateLegendary = useGameStore((s) => s.activateLegendary);
 
   const [selectedCategory, setSelectedCategory] = useState('production');
   const [selected, setSelected] = useState(null);
@@ -44,6 +48,7 @@ export default function ResearchPanel() {
 
   useEffect(() => {
     loadResearches();
+    loadLegendaryStatus();
   }, []);
 
   useEffect(() => {
@@ -174,18 +179,25 @@ export default function ResearchPanel() {
           activeResearch={activeResearch}
           onStart={handleStart}
           onClose={() => setSelected(null)}
+          legendaryStatus={legendaryStatus}
+          activateLegendary={activateLegendary}
+          loadLegendaryStatus={loadLegendaryStatus}
         />
       )}
     </div>
   );
 }
 
-function ResearchDetail({ research: r, resources, now, activeResearch, onStart, onClose }) {
+function ResearchDetail({ research: r, resources, now, activeResearch, onStart, onClose, legendaryStatus, activateLegendary, loadLegendaryStatus }) {
   const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
   const meta = CATEGORY_META[r.category];
   const isResearching = r.isResearching && r.researchEnd && new Date(r.researchEnd).getTime() > now;
   const remaining = isResearching ? Math.max(0, (new Date(r.researchEnd).getTime() - now) / 1000) : 0;
   const next = r.nextLevel;
+  const [teleCoord, setTeleCoord] = useState({ q: '', r: '' });
+  const [drainTarget, setDrainTarget] = useState('');
+  const [activating, setActivating] = useState(false);
 
   const canAfford = next && resources && (
     resources.iron >= next.costFer &&
@@ -194,6 +206,22 @@ function ResearchDetail({ research: r, resources, now, activeResearch, onStart, 
   );
 
   const canStart = canAfford && r.prereqsMet && !activeResearch;
+
+  // Legendary status for this research
+  const legStatus = legendaryStatus?.[r.type];
+  const isLegendaryMaxed = r.category === 'legendary' && r.isMaxed;
+
+  const handleActivate = async (extraData = {}) => {
+    setActivating(true);
+    try {
+      await activateLegendary(r.type, extraData);
+      addToast(t('legendary.activated', { name: r.name }), 'success');
+      loadLegendaryStatus();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+    setActivating(false);
+  };
 
   return (
     <div className="mt-4 bg-elevated border border-border rounded-lg p-6">
@@ -239,6 +267,84 @@ function ResearchDetail({ research: r, resources, now, activeResearch, onStart, 
         </div>
       )}
 
+      {/* Legendary activation panel */}
+      {isLegendaryMaxed && legStatus && (
+        <div className="mb-4 bg-base rounded-lg p-4 border border-gold/20">
+          {legStatus.effectType === 'passive' && (
+            <div className="flex items-center gap-2">
+              <span className="text-green-400 text-sm">●</span>
+              <span className="text-sm text-green-400">{t('legendary.passive_active')}</span>
+            </div>
+          )}
+
+          {legStatus.effectType === 'timed' && (
+            <div>
+              {legStatus.isActive ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-green-400 text-sm">●</span>
+                  <span className="text-sm text-green-400">
+                    {t('legendary.active_until', { time: new Date(legStatus.expiresAt).toLocaleString() })}
+                  </span>
+                </div>
+              ) : legStatus.onCooldown ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-blood-glow text-sm">●</span>
+                  <span className="text-sm text-muted">
+                    {t('legendary.cooldown_until', { time: new Date(legStatus.cooldownEnd).toLocaleString() })}
+                  </span>
+                </div>
+              ) : (
+                <button onClick={() => handleActivate()} disabled={activating}
+                  className="w-full py-2 bg-gold/20 border border-gold text-gold rounded font-display hover:bg-gold/30 transition-colors">
+                  {activating ? t('common.loading') : t('legendary.activate')}
+                </button>
+              )}
+            </div>
+          )}
+
+          {legStatus.effectType === 'instant' && r.type === 'teleportation_infernale' && (
+            <div>
+              {legStatus.onCooldown ? (
+                <p className="text-sm text-muted">{t('legendary.cooldown_until', { time: new Date(legStatus.cooldownEnd).toLocaleString() })}</p>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input type="number" placeholder="Q" value={teleCoord.q}
+                      onChange={(e) => setTeleCoord(p => ({...p, q: e.target.value}))}
+                      className="flex-1 bg-surface border border-border rounded px-2 py-1 text-sm text-parchment outline-none focus:border-gold/50" />
+                    <input type="number" placeholder="R" value={teleCoord.r}
+                      onChange={(e) => setTeleCoord(p => ({...p, r: e.target.value}))}
+                      className="flex-1 bg-surface border border-border rounded px-2 py-1 text-sm text-parchment outline-none focus:border-gold/50" />
+                  </div>
+                  <button onClick={() => handleActivate({ coordQ: parseInt(teleCoord.q), coordR: parseInt(teleCoord.r) })} disabled={activating || !teleCoord.q || !teleCoord.r}
+                    className="w-full py-2 bg-gold/20 border border-gold text-gold rounded font-display hover:bg-gold/30 transition-colors disabled:opacity-50">
+                    {activating ? t('common.loading') : t('legendary.teleport')}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {legStatus.effectType === 'instant' && r.type === 'drain_dimensionnel' && (
+            <div>
+              {legStatus.onCooldown ? (
+                <p className="text-sm text-muted">{t('legendary.cooldown_until', { time: new Date(legStatus.cooldownEnd).toLocaleString() })}</p>
+              ) : (
+                <div className="space-y-2">
+                  <input type="text" placeholder={t('legendary.target_circle_id')} value={drainTarget}
+                    onChange={(e) => setDrainTarget(e.target.value)}
+                    className="w-full bg-surface border border-border rounded px-2 py-1 text-sm text-parchment outline-none focus:border-gold/50" />
+                  <button onClick={() => handleActivate({ targetCircleId: drainTarget })} disabled={activating || !drainTarget}
+                    className="w-full py-2 bg-gold/20 border border-gold text-gold rounded font-display hover:bg-gold/30 transition-colors disabled:opacity-50">
+                    {activating ? t('common.loading') : t('legendary.drain')}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {next && !isResearching && (
         <div>
           <p className="text-sm text-parchment mb-3">
@@ -270,7 +376,7 @@ function ResearchDetail({ research: r, resources, now, activeResearch, onStart, 
         </div>
       )}
 
-      {r.isMaxed && !isResearching && (
+      {r.isMaxed && !isResearching && !isLegendaryMaxed && (
         <p className="text-gold text-sm text-center">{t('research.max_level')}</p>
       )}
     </div>

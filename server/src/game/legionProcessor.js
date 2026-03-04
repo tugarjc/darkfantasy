@@ -7,6 +7,7 @@ const { pool } = require('../db');
 const { resolveCombat, wallBonus, calculatePlunder } = require('./combat');
 const { recalcRates, flushResources } = require('./resources');
 const { hexDistance } = require('./hex');
+const { notify } = require('./notify');
 
 const SPEED_BASE = 10;
 const SOULS_PER_HEX = 5;
@@ -92,6 +93,25 @@ async function processAttack(legion, client) {
   }
 
   const target = targetCircle.rows[0];
+
+  // Check bouclier absolu (24h shield)
+  const shield = await client.query(
+    `SELECT id FROM legendary_activations
+     WHERE player_id = $1 AND research_type = 'bouclier_absolu'
+       AND expires_at > NOW()`,
+    [target.player_id]
+  );
+  if (shield.rows.length > 0) {
+    // Shield active — return attacker without combat
+    await notify(legion.player_id, 'attack_result', {
+      targetName: target.name, shielded: true,
+    }, client);
+    await notify(target.player_id, 'attack_result', {
+      shielded: true, attackerBlocked: true,
+    }, client);
+    await setReturn(legion, client, {});
+    return;
+  }
 
   // Get defender units
   const defUnits = await client.query(
@@ -180,6 +200,14 @@ async function processAttack(legion, client) {
     'INSERT INTO battle_reports (attacker_id, defender_id, circle_id, outcome) VALUES ($1, $2, $3, $4)',
     [legion.player_id, target.player_id, target.id, JSON.stringify(outcome)]
   );
+
+  // Notify both players
+  await notify(legion.player_id, 'attack_result', {
+    targetName: target.name, won: result.attackerWins, plunder,
+  }, client);
+  await notify(target.player_id, 'attack_result', {
+    attacked: true, won: !result.attackerWins, plunder,
+  }, client);
 
   // Set return with surviving units and loot
   await setReturn(legion, client, plunder, result.attackerSurvivors);

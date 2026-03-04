@@ -49,7 +49,8 @@
     "reports": "Rapports",
     "admin": "Admin",
     "circle": "Cercle",
-    "tutorial": "Tutoriel"
+    "tutorial": "Tutoriel",
+    "leaderboard": "Classement"
   },
   "landing": {
     "subtitle": "Le Regne des Seigneurs des Tenebres",
@@ -443,5 +444,40 @@
   "war": {
     "declare": "Declarer la guerre",
     "declared": "Guerre declaree !"
+  },
+  "leaderboard": {
+    "title": "Classement du Pandemonium",
+    "score": "Score",
+    "military": "Militaire",
+    "relics": "Reliques",
+    "player": "Joueur",
+    "faction_col": "Faction",
+    "alliance_col": "Alliance",
+    "value": "Valeur",
+    "empty": "Aucun joueur"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mark_all_read": "Tout marquer lu",
+    "empty": "Aucune notification",
+    "types": {
+      "attack_result": "Resultat de combat",
+      "drain_received": "Ressources drainées",
+      "legendary_activated": "Arcane activee",
+      "war_declared": "Guerre declaree",
+      "research_complete": "Recherche terminee",
+      "building_complete": "Construction terminee",
+      "shield_expired": "Bouclier expire"
+    }
+  },
+  "legendary": {
+    "activate": "Activer",
+    "activated": "{{name}} active !",
+    "passive_active": "Effet permanent actif",
+    "active_until": "Actif jusqu'a {{time}}",
+    "cooldown_until": "Cooldown jusqu'a {{time}}",
+    "teleport": "Teleporter",
+    "drain": "Drainer",
+    "target_circle_id": "ID du cercle cible"
   }
 }

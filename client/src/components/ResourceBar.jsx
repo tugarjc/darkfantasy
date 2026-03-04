@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 import { useAuthStore } from '../stores/authStore';
+import NotificationCenter from './NotificationCenter';
 
 export default function ResourceBar() {
   const { t } = useTranslation();
@@ -42,6 +43,10 @@ export default function ResourceBar() {
           <span className="text-sm font-medium text-gold">{(player?.relics || 0).toLocaleString('fr-FR')}</span>
           <div className="text-[10px] text-muted">{t('resources.relics_name')}</div>
         </div>
+      </div>
+      {/* Notifications bell */}
+      <div className="ml-auto">
+        <NotificationCenter />
       </div>
     </div>
   );

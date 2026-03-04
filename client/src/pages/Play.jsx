@@ -17,6 +17,7 @@ import AdminPanel from '../components/AdminPanel';
 import EventPanel from '../components/EventPanel';
 import MissionPanel from '../components/MissionPanel';
 import ToastContainer from '../components/ui/Toast';
+import LeaderboardPanel from '../components/LeaderboardPanel';
 
 export default function Play() {
   const { t, i18n } = useTranslation();
@@ -110,6 +111,7 @@ export default function Play() {
         <TabBtn label={t('nav.chat')} active={tab === 'chat'} onClick={() => setTab('chat')} />
         <TabBtn label={t('nav.reports')} active={tab === 'reports'} onClick={() => setTab('reports')} />
         <TabBtn label={t('nav.tutorial')} active={tab === 'tutorial'} onClick={() => setTab('tutorial')} />
+        <TabBtn label={t('nav.leaderboard')} active={tab === 'leaderboard'} onClick={() => setTab('leaderboard')} />
         {player?.is_admin && <TabBtn label={t('nav.admin')} active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </div>
 
@@ -146,6 +148,7 @@ export default function Play() {
           {tab === 'chat' && <ChatPanel />}
           {tab === 'reports' && <ReportsPanel />}
           {tab === 'tutorial' && <TutorialPanel />}
+          {tab === 'leaderboard' && <LeaderboardPanel />}
           {tab === 'admin' && player?.is_admin && <AdminPanel />}
         </div>
       </main>
@@ -165,6 +168,7 @@ export default function Play() {
         <NavBtn label={t('nav.chat')} active={tab === 'chat'} onClick={() => setTab('chat')} />
         <NavBtn label={t('nav.reports')} active={tab === 'reports'} onClick={() => setTab('reports')} />
         <NavBtn label={t('nav.tutorial')} active={tab === 'tutorial'} onClick={() => setTab('tutorial')} />
+        <NavBtn label={t('nav.leaderboard')} active={tab === 'leaderboard'} onClick={() => setTab('leaderboard')} />
         {player?.is_admin && <NavBtn label={t('nav.admin')} active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </nav>
     </div>

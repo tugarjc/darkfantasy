@@ -39,7 +39,7 @@ async function recalcRates(circleId, client) {
   const faction = playerRow.rows[0]?.faction || 'none';
 
   const rResult = await db.query(
-    "SELECT type, level FROM researches WHERE player_id = $1 AND type IN ('metallurgie_maudite', 'extraction_essence', 'recolte_ames', 'entrepot_etendu')",
+    "SELECT type, level FROM researches WHERE player_id = $1 AND type IN ('metallurgie_maudite', 'extraction_essence', 'recolte_ames', 'entrepot_etendu', 'economie_absolue')",
     [playerId]
   );
   const rMap = {};
@@ -50,16 +50,19 @@ async function recalcRates(circleId, client) {
   const soulsResearch = rMap.recolte_ames || 0;
   const storageResearch = rMap.entrepot_etendu || 0;
 
+  // Legendary economie_absolue: +50% all production
+  const ecoAbsBonus = (rMap.economie_absolue || 0) >= 1 ? 1.5 : 1;
+
   // Serre bonus: +5% per level on all production
   const serreBonus = 1 + 0.05 * serreLv;
 
-  // Calculate rates (per hour) — include faction bonuses
+  // Calculate rates (per hour) — include faction bonuses + legendary
   const ironRate = productionRate(BASE_RATES.iron, forgeLv)
-    * (1 + 0.05 * metalResearch) * serreBonus * factionProductionBonus(faction, 'iron');
+    * (1 + 0.05 * metalResearch) * serreBonus * factionProductionBonus(faction, 'iron') * ecoAbsBonus;
   const essenceRate = productionRate(BASE_RATES.essence, sanctLv)
-    * (1 + 0.05 * essenceResearch) * serreBonus * factionProductionBonus(faction, 'essence');
+    * (1 + 0.05 * essenceResearch) * serreBonus * factionProductionBonus(faction, 'essence') * ecoAbsBonus;
   const soulsRate = puitsLv > 0
-    ? productionRate(BASE_RATES.souls, puitsLv) * (1 + 0.05 * soulsResearch) * serreBonus * factionProductionBonus(faction, 'souls')
+    ? productionRate(BASE_RATES.souls, puitsLv) * (1 + 0.05 * soulsResearch) * serreBonus * factionProductionBonus(faction, 'souls') * ecoAbsBonus
     : 0;
 
   // Storage caps
