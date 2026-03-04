@@ -54,6 +54,15 @@ export default function BuildingGrid() {
     return () => clearInterval(interval);
   }, []);
 
+  // Escape key closes detail panel
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setSelected(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Auto-complete finished buildings
   useEffect(() => {
     for (const b of buildings) {
@@ -170,7 +179,9 @@ function BuildingDetail({ building: b, resources, now, onUpgrade, onClose }) {
           </div>
           <div className="h-2 bg-base rounded-full overflow-hidden">
             <div className="h-full bg-gold/60 rounded-full transition-all duration-1000 animate-pulse"
-                 style={{ width: '60%' }} />
+                 style={{ width: b.upgrade_start && b.upgrade_end
+                   ? Math.min(100, ((now - new Date(b.upgrade_start).getTime()) / (new Date(b.upgrade_end).getTime() - new Date(b.upgrade_start).getTime())) * 100) + '%'
+                   : '50%' }} />
           </div>
         </div>
       )}

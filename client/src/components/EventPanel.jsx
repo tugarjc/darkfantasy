@@ -118,13 +118,16 @@ function EventCard({ event, selected, onClick }) {
       </div>
 
       {/* HP bar */}
-      <div className="w-full bg-deep rounded-full h-3 mb-2 overflow-hidden">
+      <div className="w-full bg-deep rounded-full h-3 mb-2 overflow-hidden relative">
         <div
           className={`h-full rounded-full transition-all ${
             hpPercent > 50 ? 'bg-green-600' : hpPercent > 20 ? 'bg-yellow-600' : 'bg-blood'
           }`}
           style={{ width: `${hpPercent}%` }}
         />
+        <span className="absolute inset-0 flex items-center justify-center text-[9px] font-medium text-parchment drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+          {Math.round(hpPercent)}%
+        </span>
       </div>
       <div className="flex justify-between text-xs text-muted">
         <span>{t('events.hp') + ':'} {event.hpRemaining.toLocaleString()} / {event.hpMax.toLocaleString()}</span>
@@ -159,13 +162,16 @@ function EventDetailView({ detail }) {
         </div>
       ) : (
         <>
-          <div className="w-full bg-deep rounded-full h-4 mb-2 overflow-hidden">
+          <div className="w-full bg-deep rounded-full h-4 mb-2 overflow-hidden relative">
             <div
               className={`h-full rounded-full transition-all ${
                 hpPercent > 50 ? 'bg-green-600' : hpPercent > 20 ? 'bg-yellow-600' : 'bg-blood'
               }`}
               style={{ width: `${hpPercent}%` }}
             />
+            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-parchment drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+              {Math.round(hpPercent)}%
+            </span>
           </div>
           <p className="text-xs text-muted text-center mb-3">
             {event.hpRemaining.toLocaleString()} / {event.hpMax.toLocaleString()} PV

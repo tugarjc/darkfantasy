@@ -16,6 +16,7 @@ import ChatPanel from '../components/ChatPanel';
 import AdminPanel from '../components/AdminPanel';
 import EventPanel from '../components/EventPanel';
 import MissionPanel from '../components/MissionPanel';
+import ToastContainer from '../components/ui/Toast';
 
 export default function Play() {
   const { t, i18n } = useTranslation();
@@ -91,8 +92,11 @@ export default function Play() {
         </div>
       )}
 
+      {/* Toasts */}
+      <ToastContainer />
+
       {/* Tab navigation */}
-      <div className="bg-surface border-b border-border px-4 flex gap-1">
+      <div className="hidden md:flex bg-surface border-b border-border px-4 gap-1 overflow-x-auto">
         <TabBtn label={t('nav.structures')} active={tab === 'buildings'} onClick={() => setTab('buildings')} />
         <TabBtn label={t('nav.units')} active={tab === 'units'} onClick={() => setTab('units')} />
         <TabBtn label={t('nav.map')} active={tab === 'map'} onClick={() => setTab('map')} />
@@ -145,7 +149,7 @@ export default function Play() {
       </main>
 
       {/* Bottom nav (mobile) */}
-      <nav className="md:hidden bg-base border-t border-border flex justify-around py-2">
+      <nav className="md:hidden bg-base border-t border-border flex overflow-x-auto py-2 px-2 gap-1">
         <NavBtn label={t('nav.circle')} active={tab === 'buildings'} onClick={() => setTab('buildings')} />
         <NavBtn label={t('nav.units')} active={tab === 'units'} onClick={() => setTab('units')} />
         <NavBtn label={t('nav.map')} active={tab === 'map'} onClick={() => setTab('map')} />

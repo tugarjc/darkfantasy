@@ -31,7 +31,8 @@
     "available": "Available",
     "quantity": "Quantity",
     "disconnection": "Logout",
-    "lord": "Lord"
+    "lord": "Lord",
+    "members_count": "members"
   },
   "nav": {
     "structures": "Structures",
@@ -128,6 +129,7 @@
     "active_legions": "Active Legions",
     "no_legions": "No active legion",
     "recall": "Recall",
+    "confirm_recall": "Recall this legion?",
     "recalled": "(Recalled)",
     "returning": "(Returning)",
     "missions": {
@@ -177,6 +179,7 @@
     "diplomacy": "Diplomacy",
     "no_diplomacy": "No diplomatic relations",
     "kick": "Kick",
+    "confirm_kick": "Kick {{name}}?",
     "promote_officer": "Officer",
     "demote": "Demote",
     "transfer_leader": "Leader",
@@ -257,7 +260,8 @@
     "from": "From",
     "public": "Public",
     "private": "Private",
-    "expired": "Expired"
+    "expired": "Expired",
+    "confirm_cancel": "Cancel this offer?"
   },
   "chat": {
     "global": "Global",
@@ -389,7 +393,9 @@
     "no_entries": "No entries",
     "registration": "Registration",
     "last_login": "Last login",
-    "never": "Never"
+    "never": "Never",
+    "confirm_ban": "Ban {{name}}?",
+    "confirm_unban": "Unban {{name}}?"
   },
   "factions": {
     "none": "None",

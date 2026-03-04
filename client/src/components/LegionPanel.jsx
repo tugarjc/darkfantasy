@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { useGameStore } from '../stores/gameStore';
+import ConfirmDialog from './ui/ConfirmDialog';
 
 const MISSION_LABELS = {
   attaque: { label: 'legions.missions.attaque', color: '#8B1A1A', icon: '⚔' },
@@ -35,6 +36,7 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
   const [composition, setComposition] = useState({});
   const [sending, setSending] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const [confirmRecall, setConfirmRecall] = useState(null);
 
   useEffect(() => {
     loadLegions();
@@ -212,7 +214,7 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
                       <p className="text-xs text-gold">{fmtTime(remaining)}</p>
                       {leg.status === 'en_route' && (
                         <button
-                          onClick={() => handleRecall(leg.id)}
+                          onClick={() => setConfirmRecall(leg.id)}
                           className="text-[10px] text-muted hover:text-blood-glow mt-0.5"
                         >
                           {t('legions.recall')}
@@ -226,6 +228,14 @@ export default function LegionPanel({ targetHex, onClearTarget }) {
           </div>
         )}
       </div>
+
+      {confirmRecall && (
+        <ConfirmDialog
+          message={t('legions.confirm_recall') || 'Rappeler cette legion ?'}
+          onConfirm={() => { handleRecall(confirmRecall); setConfirmRecall(null); }}
+          onCancel={() => setConfirmRecall(null)}
+        />
+      )}
     </div>
   );
 }

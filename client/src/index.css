@@ -21,3 +21,18 @@ body {
 ::-webkit-scrollbar-track { background: #0A0A0F; }
 ::-webkit-scrollbar-thumb { background: #2E2E3A; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #5A3A3A; }
+
+/* Toast slide-in animation */
+@keyframes slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-in { animation: slide-in 0.25s ease-out; }
+
+/* Resource flash */
+@keyframes res-flash {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
+  100% { filter: brightness(1); }
+}
+.res-flash { animation: res-flash 0.4s ease-out; }

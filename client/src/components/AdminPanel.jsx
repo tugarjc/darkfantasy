@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
+import ConfirmDialog from './ui/ConfirmDialog';
+import { useToastStore } from './ui/Toast';
 
 const FACTION_LABELS = {
   none: 'factions.none',
@@ -124,6 +126,7 @@ function PlayersView() {
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [msg, setMsg] = useState('');
+  const [confirmAction, setConfirmAction] = useState(null);
 
   useEffect(() => { loadAdminPlayers(); }, []);
 
@@ -187,7 +190,7 @@ function PlayersView() {
                     {p.is_banned && <span className="text-xs bg-blood/20 text-blood-glow px-2 py-0.5 rounded">Banni</span>}
                     {!p.is_admin && (
                       <button
-                        onClick={(e) => { e.stopPropagation(); toggleBan(p.id, p.is_banned); }}
+                        onClick={(e) => { e.stopPropagation(); setConfirmAction({ playerId: p.id, username: p.username, isBanned: p.is_banned }); }}
                         className={`text-xs px-2 py-1 rounded ${
                           p.is_banned ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-blood/20 text-blood-glow hover:bg-blood/30'
                         }`}
@@ -231,6 +234,16 @@ function PlayersView() {
           </div>
         )}
       </div>
+
+      {confirmAction && (
+        <ConfirmDialog
+          message={confirmAction.isBanned
+            ? `${t('admin.unban')} ${confirmAction.username} ?`
+            : `${t('admin.ban')} ${confirmAction.username} ?`}
+          onConfirm={() => { toggleBan(confirmAction.playerId, confirmAction.isBanned); setConfirmAction(null); }}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
     </div>
   );
 }
@@ -308,15 +321,15 @@ function PlayerDetail({ detail, onMsg }) {
           <h4 className="text-sm font-medium text-parchment mb-2">{t('admin.edit_resources')}</h4>
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="text-xs text-muted">Fer</label>
+              <label className="text-xs text-muted">{t('common.iron')}</label>
               <input value={iron} onChange={(e) => setIron(e.target.value)} className="w-full bg-deep border border-border rounded px-2 py-1 text-sm text-parchment outline-none focus:border-gold/50" />
             </div>
             <div>
-              <label className="text-xs text-muted">Essence</label>
+              <label className="text-xs text-muted">{t('common.essence')}</label>
               <input value={essence} onChange={(e) => setEssence(e.target.value)} className="w-full bg-deep border border-border rounded px-2 py-1 text-sm text-parchment outline-none focus:border-gold/50" />
             </div>
             <div>
-              <label className="text-xs text-muted">Ames</label>
+              <label className="text-xs text-muted">{t('common.souls')}</label>
               <input value={souls} onChange={(e) => setSouls(e.target.value)} className="w-full bg-deep border border-border rounded px-2 py-1 text-sm text-parchment outline-none focus:border-gold/50" />
             </div>
           </div>
@@ -364,16 +377,16 @@ function AnnounceView() {
   const { t } = useTranslation();
   const { adminAnnounce } = useGameStore();
   const [message, setMessage] = useState('');
-  const [status, setStatus] = useState('');
+  const addToast = useToastStore((s) => s.addToast);
 
   const send = async () => {
     if (!message.trim()) return;
     try {
       await adminAnnounce(message.trim());
-      setStatus(t('admin.announce_sent'));
+      addToast(t('admin.announce_sent'), 'success');
       setMessage('');
     } catch (err) {
-      setStatus(err.message);
+      addToast(err.message, 'error');
     }
   };
 
@@ -396,7 +409,6 @@ function AnnounceView() {
           {t('common.send')}
         </button>
       </div>
-      {status && <p className="text-sm text-gold mt-3">{status}</p>}
     </div>
   );
 }
@@ -408,49 +420,51 @@ function AuditView() {
 
   useEffect(() => { loadAdminAudit(); }, []);
 
-  if (!adminAudit) return <p className="text-muted animate-pulse">Chargement...</p>;
+  if (!adminAudit) return <p className="text-muted animate-pulse">{t('common.loading')}</p>;
 
   return (
     <div>
       <h3 className="font-display text-lg text-parchment mb-3">{t('admin.audit_log')}</h3>
       <p className="text-xs text-muted mb-3">{adminAudit.total} {t('admin.entries')} — page {adminAudit.page}</p>
 
-      <div className="bg-surface border border-border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-muted">
-              <th className="px-3 py-2 text-left">{t('admin.date')}</th>
-              <th className="px-3 py-2 text-left">{t('admin.admin_col')}</th>
-              <th className="px-3 py-2 text-left">{t('admin.action')}</th>
-              <th className="px-3 py-2 text-left">{t('admin.target')}</th>
-              <th className="px-3 py-2 text-left">{t('admin.details')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {adminAudit.logs?.map((log) => (
-              <tr key={log.id} className="border-b border-border/50">
-                <td className="px-3 py-2 text-muted text-xs">{new Date(log.created_at).toLocaleString('fr-FR')}</td>
-                <td className="px-3 py-2 text-parchment">{log.admin_name}</td>
-                <td className="px-3 py-2">
-                  <span className={`text-xs px-2 py-0.5 rounded ${
-                    log.action === 'ban' ? 'bg-blood/20 text-blood-glow' :
-                    log.action === 'unban' ? 'bg-green-900/30 text-green-400' :
-                    'bg-surface text-muted'
-                  }`}>
-                    {log.action}
-                  </span>
-                </td>
-                <td className="px-3 py-2 text-muted">{log.target || '-'}</td>
-                <td className="px-3 py-2 text-muted text-xs max-w-48 truncate">
-                  {log.details && Object.keys(log.details).length > 0 ? JSON.stringify(log.details) : '-'}
-                </td>
+      <div className="overflow-x-auto">
+        <div className="bg-surface border border-border rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-muted">
+                <th className="px-3 py-2 text-left">{t('admin.date')}</th>
+                <th className="px-3 py-2 text-left">{t('admin.admin_col')}</th>
+                <th className="px-3 py-2 text-left">{t('admin.action')}</th>
+                <th className="px-3 py-2 text-left">{t('admin.target')}</th>
+                <th className="px-3 py-2 text-left">{t('admin.details')}</th>
               </tr>
-            ))}
-            {(!adminAudit.logs || adminAudit.logs.length === 0) && (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted">{t('admin.no_entries')}</td></tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {adminAudit.logs?.map((log) => (
+                <tr key={log.id} className="border-b border-border/50">
+                  <td className="px-3 py-2 text-muted text-xs">{new Date(log.created_at).toLocaleString('fr-FR')}</td>
+                  <td className="px-3 py-2 text-parchment">{log.admin_name}</td>
+                  <td className="px-3 py-2">
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      log.action === 'ban' ? 'bg-blood/20 text-blood-glow' :
+                      log.action === 'unban' ? 'bg-green-900/30 text-green-400' :
+                      'bg-surface text-muted'
+                    }`}>
+                      {log.action}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-muted">{log.target || '-'}</td>
+                  <td className="px-3 py-2 text-muted text-xs max-w-48 truncate">
+                    {log.details && Object.keys(log.details).length > 0 ? JSON.stringify(log.details) : '-'}
+                  </td>
+                </tr>
+              ))}
+              {(!adminAudit.logs || adminAudit.logs.length === 0) && (
+                <tr><td colSpan={5} className="px-3 py-6 text-center text-muted">{t('admin.no_entries')}</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Pagination */}

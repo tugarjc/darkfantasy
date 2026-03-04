@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
+import ConfirmDialog from './ui/ConfirmDialog';
 
 const ROLE_LABELS = { leader: 'alliance.roles.leader', officer: 'alliance.roles.officer', member: 'alliance.roles.member' };
 const ROLE_COLORS = { leader: 'text-gold', officer: 'text-essence', member: 'text-muted' };
@@ -227,6 +228,7 @@ function AllianceView() {
 
   const [section, setSection] = useState('members'); // 'members' | 'diplomacy'
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [confirmKick, setConfirmKick] = useState(null);
   const [error, setError] = useState(null);
 
   const myRole = alliance.myRole;
@@ -267,7 +269,7 @@ function AllianceView() {
               [{alliance.tag}] {alliance.name}
             </h2>
             <p className="text-muted text-sm">
-              {t('alliance.leader')}: {alliance.leader_name} | {alliance.members?.length || 0}/30 membres
+              {t('alliance.leader')}: {alliance.leader_name} | {alliance.members?.length || 0}/30 {t('common.members_count')}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -356,7 +358,7 @@ function AllianceView() {
                     </button>
                   )}
                   <button
-                    onClick={() => handleKick(m.id)}
+                    onClick={() => setConfirmKick({ id: m.id, username: m.username })}
                     className="px-2 py-1 text-[10px] bg-base border border-border rounded text-blood-glow hover:border-blood transition-colors"
                     title={t('alliance.kick')}
                   >
@@ -367,6 +369,14 @@ function AllianceView() {
             </div>
           ))}
         </div>
+      )}
+
+      {confirmKick && (
+        <ConfirmDialog
+          message={t('alliance.confirm_kick', { name: confirmKick.username }) || `Expulser ${confirmKick.username} ?`}
+          onConfirm={() => { handleKick(confirmKick.id); setConfirmKick(null); }}
+          onCancel={() => setConfirmKick(null)}
+        />
       )}
 
       {/* Diplomacy */}

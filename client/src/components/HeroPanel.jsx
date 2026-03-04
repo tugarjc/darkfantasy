@@ -49,6 +49,15 @@ export default function HeroPanel() {
     loadHeroes();
   }, []);
 
+  // Escape key closes detail panel
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setSelected(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleSummon = useCallback(async (type) => {
     setError(null);
     setSummoning(true);
@@ -164,7 +173,7 @@ function HeroCard({ hero: h, isSelected, onClick }) {
 
       {h.owned ? (
         <div className="flex justify-between items-center">
-          <span className="text-xs text-muted">Nv.{h.level}</span>
+          <span className="text-xs text-muted">{t('common.lvl')}{h.level}</span>
           {h.isDead && <span className="text-[10px] text-blood-glow">{t('heroes.dead')}</span>}
           {h.isDeployed && !h.isDead && <span className="text-[10px] text-gold">{t('heroes.deployed')}</span>}
         </div>
@@ -222,7 +231,7 @@ function HeroDetail({ hero: h, resources, onSummon, onRevive, summoning, onClose
             <p className="text-muted text-sm">{h.title}</p>
             {h.owned && (
               <p className="text-xs text-muted">
-                Niveau {h.level} | XP: {h.xp}/{h.xpNext}
+                {t('common.level')} {h.level} | XP: {h.xp}/{h.xpNext}
               </p>
             )}
           </div>
@@ -251,7 +260,7 @@ function HeroDetail({ hero: h, resources, onSummon, onRevive, summoning, onClose
 
       {/* Bonuses */}
       <div className="mb-4">
-        <p className="text-xs text-parchment mb-2">{t('heroes.bonus')} {h.owned ? `(Nv.${h.level})` : '(Nv.1)'} :</p>
+        <p className="text-xs text-parchment mb-2">{t('heroes.bonus')} ({t('common.lvl')}{h.owned ? h.level : 1}) :</p>
         <div className="grid grid-cols-2 gap-2">
           {Object.entries(h.owned ? h.bonuses : h.bonusesDef).map(([key, value]) => (
             <div key={key} className="bg-base rounded px-2 py-1.5">

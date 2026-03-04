@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
+import { useToastStore } from './ui/Toast';
 
 const MISSION_ICONS = {
   build: 'missions.types.build',
@@ -18,12 +19,12 @@ const MISSION_ICONS = {
 export default function MissionPanel() {
   const { t } = useTranslation();
   const { missionsData, missionsLoading, loadMissions, claimMission } = useGameStore();
-  const [msg, setMsg] = useState('');
+  const addToast = useToastStore((s) => s.addToast);
 
   useEffect(() => { loadMissions(); }, []);
 
   if (missionsLoading && !missionsData) {
-    return <p className="text-muted animate-pulse">Chargement des missions...</p>;
+    return <p className="text-muted animate-pulse">{t('common.loading')}</p>;
   }
 
   if (!missionsData) return null;
@@ -31,12 +32,11 @@ export default function MissionPanel() {
   const { missions, completed, bonuses, bonusClaimed = {} } = missionsData;
 
   const claim = async (index) => {
-    setMsg('');
     try {
       const result = await claimMission(index);
-      setMsg(`+${result.reward.iron} Fer, +${result.reward.essence} Ess, +${result.reward.souls} Ames, +${result.reward.score} Score`);
+      addToast(`+${result.reward.iron} ${t('common.iron')}, +${result.reward.essence} ${t('common.essence')}, +${result.reward.souls} ${t('common.souls')}`, 'success');
     } catch (err) {
-      setMsg(err.message);
+      addToast(err.message, 'error');
     }
   };
 
@@ -45,7 +45,6 @@ export default function MissionPanel() {
       <h2 className="font-display text-2xl text-gold mb-2">{t('missions.title')}</h2>
       <p className="text-xs text-muted mb-4">{t('missions.completed_count', { count: completed })}</p>
 
-      {msg && <div className="text-sm text-gold bg-gold/10 border border-gold/30 rounded p-2 mb-4">{msg}</div>}
 
       {/* Mission list */}
       <div className="space-y-2 mb-6">
@@ -68,6 +67,7 @@ export default function MissionPanel() {
                     />
                   </div>
                   <span className="text-xs text-muted">{m.progress}/{m.target}</span>
+                  <span className="text-xs text-muted/60">({Math.min(100, Math.round((m.progress / m.target) * 100))}%)</span>
                 </div>
               </div>
             </div>

@@ -46,10 +46,10 @@ function ResourceItem({ icon, name, value, rate, cap, color }) {
       <div className="w-6 h-6 flex-shrink-0">{icon}</div>
       <div className="flex-1">
         <div className="flex items-baseline justify-between">
-          <span className={`text-sm font-medium ${color}`}>
+          <span className={`text-sm font-medium transition-all duration-300 ${color}`}>
             {Math.floor(value).toLocaleString('fr-FR')}
           </span>
-          <span className="text-xs text-muted">
+          <span className="text-xs text-muted transition-all duration-300">
             +{rate}/h
           </span>
         </div>

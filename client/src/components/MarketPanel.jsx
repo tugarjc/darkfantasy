@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { useGameStore } from '../stores/gameStore';
+import ConfirmDialog from './ui/ConfirmDialog';
+import { useToastStore } from './ui/Toast';
 
 const RES_LABELS = { iron: 'common.iron', essence: 'common.essence', souls: 'common.souls' };
 const RES_COLORS = { iron: 'text-iron', essence: 'text-essence', souls: 'text-souls' };
@@ -150,7 +152,7 @@ function CreateOffer() {
   const [target, setTarget] = useState('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  const addToast = useToastStore((s) => s.addToast);
 
   // Auto-switch to avoid same resource
   useEffect(() => {
@@ -163,11 +165,10 @@ function CreateOffer() {
   const handleCreate = async (e) => {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
     setCreating(true);
     try {
       await createOffer(from, to, parseInt(amount), parseFloat(ratio), target || undefined);
-      setSuccess(t('market.offer_created'));
+      addToast(t('market.offer_created'), 'success');
       setAmount('');
     } catch (err) {
       setError(err.message);
@@ -184,7 +185,6 @@ function CreateOffer() {
       <h3 className="font-display text-lg text-gold mb-4">{t('market.new_offer')}</h3>
 
       {error && <p className="text-blood-glow text-sm mb-3">{error}</p>}
-      {success && <p className="text-green-400 text-sm mb-3">{success}</p>}
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div>
@@ -254,6 +254,7 @@ function MyOffers() {
   const cancelOffer = useGameStore((s) => s.cancelOffer);
   const [cancelling, setCancelling] = useState(null);
   const [error, setError] = useState(null);
+  const [confirmCancel, setConfirmCancel] = useState(null);
 
   const handleCancel = async (id) => {
     setError(null);
@@ -274,6 +275,13 @@ function MyOffers() {
   return (
     <div>
       {error && <p className="text-blood-glow text-sm mb-3">{error}</p>}
+      {confirmCancel && (
+        <ConfirmDialog
+          message={t('market.confirm_cancel') || 'Annuler cette offre ?'}
+          onConfirm={() => { handleCancel(confirmCancel); setConfirmCancel(null); }}
+          onCancel={() => setConfirmCancel(null)}
+        />
+      )}
       <div className="space-y-2">
         {offers.map((o) => (
           <div key={o.id} className="bg-surface border border-border rounded-lg p-3 flex items-center justify-between">
@@ -289,7 +297,7 @@ function MyOffers() {
               </div>
             </div>
             <button
-              onClick={() => handleCancel(o.id)}
+              onClick={() => setConfirmCancel(o.id)}
               disabled={cancelling === o.id}
               className="px-3 py-1.5 text-xs border border-border rounded text-muted hover:text-blood-glow hover:border-blood transition-colors disabled:opacity-50"
             >
