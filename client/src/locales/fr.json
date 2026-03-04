@@ -518,5 +518,21 @@
     "stripe_unavailable": "Paiements indisponibles",
     "purchased": "Achat effectue !",
     "cosmetic_purchased": "Cosmetique acquis !"
+  },
+  "mobile": {
+    "base": "Base",
+    "army": "Armee",
+    "map": "Carte",
+    "social": "Social",
+    "more": "Plus"
+  },
+  "audio": {
+    "title": "Audio",
+    "master": "Volume",
+    "sfx": "Effets",
+    "music": "Musique",
+    "play_music": "Musique ON",
+    "stop_music": "Musique OFF",
+    "muted": "Muet"
   }
 }

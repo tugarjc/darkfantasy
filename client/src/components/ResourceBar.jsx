@@ -11,7 +11,7 @@ export default function ResourceBar() {
   if (!resources) return null;
 
   return (
-    <div className="bg-surface border-b border-border px-4 py-2 flex flex-wrap items-center gap-6">
+    <div className="bg-surface border-b border-border px-2 md:px-4 py-2 flex flex-wrap items-center gap-2 md:gap-6">
       <ResourceItem
         icon={<IronIcon />}
         name={t('resources.iron_name')}
@@ -37,11 +37,11 @@ export default function ResourceBar() {
         color="text-souls"
       />
       {/* Reliques — no rate, just flat counter */}
-      <div className="flex items-center gap-2 min-w-[100px]">
-        <div className="w-6 h-6 flex-shrink-0"><RelicIcon /></div>
+      <div className="flex items-center gap-1.5 md:gap-2 min-w-[60px] md:min-w-[100px]">
+        <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0"><RelicIcon /></div>
         <div>
-          <span className="text-sm font-medium text-gold">{(player?.relics || 0).toLocaleString('fr-FR')}</span>
-          <div className="text-[10px] text-muted">{t('resources.relics_name')}</div>
+          <span className="text-xs md:text-sm font-medium text-gold">{(player?.relics || 0).toLocaleString('fr-FR')}</span>
+          <div className="text-[10px] text-muted hidden md:block">{t('resources.relics_name')}</div>
         </div>
       </div>
       {/* Notifications bell */}
@@ -57,24 +57,24 @@ function ResourceItem({ icon, name, value, rate, cap, color }) {
   const isFull = value >= cap * 0.95;
 
   return (
-    <div className="flex items-center gap-2 min-w-[180px]">
-      <div className="w-6 h-6 flex-shrink-0">{icon}</div>
+    <div className="flex items-center gap-1.5 md:gap-2 min-w-[100px] md:min-w-[180px]">
+      <div className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0">{icon}</div>
       <div className="flex-1">
         <div className="flex items-baseline justify-between">
-          <span className={`text-sm font-medium transition-all duration-300 ${color}`}>
+          <span className={`text-xs md:text-sm font-medium transition-all duration-300 ${color}`}>
             {Math.floor(value).toLocaleString('fr-FR')}
           </span>
-          <span className="text-xs text-muted transition-all duration-300">
+          <span className="text-xs text-muted transition-all duration-300 hidden md:inline">
             +{rate}/h
           </span>
         </div>
-        <div className="mt-1 h-1.5 bg-base rounded-full overflow-hidden">
+        <div className="mt-0.5 md:mt-1 h-1 md:h-1.5 bg-base rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-1000 ${isFull ? 'bg-blood' : 'bg-gold/60'}`}
             style={{ width: `${pct}%` }}
           />
         </div>
-        <div className="flex justify-between">
+        <div className="hidden md:flex justify-between">
           <span className="text-[10px] text-muted">{name}</span>
           <span className="text-[10px] text-muted">{Math.floor(cap).toLocaleString('fr-FR')}</span>
         </div>

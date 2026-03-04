@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 import { useGameStore } from '../stores/gameStore';
+import { useAudioStore } from '../stores/audioStore';
 import ResourceBar from '../components/ResourceBar';
 import BuildingGrid from '../components/BuildingGrid';
 import UnitPanel from '../components/UnitPanel';
@@ -19,11 +20,14 @@ import MissionPanel from '../components/MissionPanel';
 import ToastContainer from '../components/ui/Toast';
 import LeaderboardPanel from '../components/LeaderboardPanel';
 import StorePanel from '../components/StorePanel';
+import MobileBottomBar from '../components/MobileBottomBar';
+import AudioSettings from '../components/AudioSettings';
 
 export default function Play() {
   const { t, i18n } = useTranslation();
   const { player, logout } = useAuthStore();
   const { circle, circles, loading, loadCircle, loadBuildings, loadUnits, switchCircle, tickResources, error, clearError } = useGameStore();
+  const initAudio = useAudioStore((s) => s.init);
   const [tab, setTab] = useState('buildings');
   const [legionTarget, setLegionTarget] = useState(null);
 
@@ -41,6 +45,13 @@ export default function Play() {
     return () => clearInterval(interval);
   }, [tickResources]);
 
+  // Init audio on first user interaction
+  useEffect(() => {
+    const handler = () => { initAudio(); window.removeEventListener('click', handler); };
+    window.addEventListener('click', handler);
+    return () => window.removeEventListener('click', handler);
+  }, [initAudio]);
+
   if (loading && !circle) {
     return (
       <div className="min-h-screen bg-deep flex items-center justify-center">
@@ -52,10 +63,13 @@ export default function Play() {
   return (
     <div className="min-h-screen bg-deep flex flex-col">
       {/* Top bar */}
-      <header className="bg-base border-b border-border px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="font-display text-xl text-gold">INFERNO DOMINI</h1>
-          <span className="text-muted text-sm">|</span>
+      <header className="bg-base border-b border-border px-3 md:px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-2 md:gap-4">
+          <h1 className="font-display text-lg md:text-xl text-gold">
+            <span className="hidden md:inline">INFERNO DOMINI</span>
+            <span className="md:hidden">ID</span>
+          </h1>
+          <span className="text-muted text-sm hidden md:inline">|</span>
           {circles.length > 1 ? (
             <select
               value={circle?.id || ''}
@@ -72,8 +86,9 @@ export default function Play() {
             <span className="text-parchment text-sm">{circle?.name || 'Cercle'}</span>
           )}
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-muted text-sm">{player?.username || 'Seigneur'}</span>
+        <div className="flex items-center gap-2 md:gap-4">
+          <AudioSettings />
+          <span className="text-muted text-sm hidden md:inline">{player?.username || 'Seigneur'}</span>
           <button onClick={() => { const next = i18n.language === 'fr' ? 'en' : 'fr'; i18n.changeLanguage(next); localStorage.setItem('lang', next); }} className="text-xs text-muted hover:text-gold transition-colors px-2">
             {i18n.language === 'fr' ? 'EN' : 'FR'}
           </button>
@@ -97,7 +112,7 @@ export default function Play() {
       {/* Toasts */}
       <ToastContainer />
 
-      {/* Tab navigation */}
+      {/* Tab navigation (desktop) */}
       <div className="hidden md:flex bg-surface border-b border-border px-4 gap-1 overflow-x-auto">
         <TabBtn label={t('nav.structures')} active={tab === 'buildings'} onClick={() => setTab('buildings')} />
         <TabBtn label={t('nav.units')} active={tab === 'units'} onClick={() => setTab('units')} />
@@ -118,7 +133,7 @@ export default function Play() {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 p-4 md:p-8 overflow-auto">
+      <main className="flex-1 p-4 md:p-8 overflow-auto pb-24 md:pb-8">
         <div className="max-w-6xl mx-auto">
           {tab === 'buildings' && <BuildingGrid />}
           {tab === 'units' && <UnitPanel />}
@@ -157,24 +172,7 @@ export default function Play() {
       </main>
 
       {/* Bottom nav (mobile) */}
-      <nav className="md:hidden bg-base border-t border-border flex overflow-x-auto py-2 px-2 gap-1">
-        <NavBtn label={t('nav.circle')} active={tab === 'buildings'} onClick={() => setTab('buildings')} />
-        <NavBtn label={t('nav.units')} active={tab === 'units'} onClick={() => setTab('units')} />
-        <NavBtn label={t('nav.map')} active={tab === 'map'} onClick={() => setTab('map')} />
-        <NavBtn label={t('nav.legions')} active={tab === 'legions'} onClick={() => setTab('legions')} />
-        <NavBtn label={t('nav.research')} active={tab === 'research'} onClick={() => setTab('research')} />
-        <NavBtn label={t('nav.heroes')} active={tab === 'heroes'} onClick={() => setTab('heroes')} />
-        <NavBtn label={t('nav.market')} active={tab === 'market'} onClick={() => setTab('market')} />
-        <NavBtn label={t('nav.alliance')} active={tab === 'alliance'} onClick={() => setTab('alliance')} />
-        <NavBtn label={t('nav.events')} active={tab === 'events'} onClick={() => setTab('events')} />
-        <NavBtn label={t('nav.missions')} active={tab === 'missions'} onClick={() => setTab('missions')} />
-        <NavBtn label={t('nav.chat')} active={tab === 'chat'} onClick={() => setTab('chat')} />
-        <NavBtn label={t('nav.reports')} active={tab === 'reports'} onClick={() => setTab('reports')} />
-        <NavBtn label={t('nav.tutorial')} active={tab === 'tutorial'} onClick={() => setTab('tutorial')} />
-        <NavBtn label={t('nav.leaderboard')} active={tab === 'leaderboard'} onClick={() => setTab('leaderboard')} />
-        <NavBtn label={t('nav.store')} active={tab === 'store'} onClick={() => setTab('store')} />
-        {player?.is_admin && <NavBtn label={t('nav.admin')} active={tab === 'admin'} onClick={() => setTab('admin')} />}
-      </nav>
+      <MobileBottomBar currentTab={tab} onTabChange={setTab} isAdmin={player?.is_admin} />
     </div>
   );
 }
@@ -265,16 +263,5 @@ function TutorialPanel() {
         </div>
       ))}
     </div>
-  );
-}
-
-function NavBtn({ label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`text-xs px-3 py-1 rounded ${active ? 'text-gold bg-surface' : 'text-muted'}`}
-    >
-      {label}
-    </button>
   );
 }

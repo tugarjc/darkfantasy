@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
+import { useAudioStore } from '../stores/audioStore';
 
 const BUILDING_ICONS = {
   forge_damnes: { color: '#B0592A', letter: 'F' },
@@ -45,6 +46,7 @@ export default function BuildingGrid() {
   const resources = useGameStore((s) => s.resources);
   const upgradeBuilding = useGameStore((s) => s.upgradeBuilding);
   const completeBuilding = useGameStore((s) => s.completeBuilding);
+  const playSound = useAudioStore((s) => s.play);
   const [selected, setSelected] = useState(null);
   const [now, setNow] = useState(Date.now());
 
@@ -68,6 +70,7 @@ export default function BuildingGrid() {
     for (const b of buildings) {
       if (b.upgrade_end && new Date(b.upgrade_end).getTime() <= now && b.isUpgrading !== false) {
         completeBuilding(b.type);
+        playSound('build_complete');
       }
     }
   }, [now, buildings]);
@@ -75,8 +78,9 @@ export default function BuildingGrid() {
   const handleUpgrade = useCallback(async (type) => {
     try {
       await upgradeBuilding(type);
+      playSound('build_start');
     } catch { /* error handled in store */ }
-  }, [upgradeBuilding]);
+  }, [upgradeBuilding, playSound]);
 
   const selectedBuilding = buildings.find((b) => b.type === selected);
 
