@@ -52,6 +52,7 @@
     "tutorial": "Tutoriel",
     "leaderboard": "Classement",
     "store": "Boutique",
+    "seasons": "Saisons",
     "account": "Compte"
   },
   "landing": {
@@ -573,6 +574,37 @@
   "cookie": {
     "message": "Ce site utilise des cookies essentiels pour le fonctionnement du jeu. Aucun cookie publicitaire n'est utilise.",
     "accept": "J'accepte"
+  },
+  "seasons": {
+    "title": "Saisons",
+    "active": "En cours",
+    "upcoming": "A venir",
+    "ended": "Terminee",
+    "no_active_season": "Aucune saison active. Les saisons saisonnieres commenceront bientot.",
+    "time_remaining": "Temps restant",
+    "my_rank": "Mon rang",
+    "my_score": "Mon score",
+    "participants": "Participants",
+    "leaderboard": "Classement de la Saison",
+    "rank": "#",
+    "player": "Joueur",
+    "score": "Score",
+    "relics_earned": "Reliques",
+    "first_place": "1er",
+    "second_place": "2eme",
+    "third_place": "3eme",
+    "past_seasons": "Saisons passees",
+    "prestige_title": "Prestige",
+    "prestige_level": "Prestige niveau {{level}}",
+    "prestige_xp": "Experience de prestige",
+    "xp_needed": "{{current}} / {{needed}} XP",
+    "max_prestige": "Prestige maximum atteint !",
+    "bonuses": "Bonus actifs",
+    "bonus_production": "+{{value}}% production",
+    "bonus_combat": "+{{value}}% combat",
+    "bonus_build_time": "-{{value}}% temps construction",
+    "bonus_max_legion": "+{{value}} legion max",
+    "no_prestige": "Participez aux saisons pour gagner de l'experience de prestige."
   },
   "a11y": {
     "skip_to_content": "Aller au contenu principal",

@@ -33,12 +33,15 @@ function wallBonus(murLevel, tourLevel) {
 
 // Resolve combat between attacker and defender compositions
 // Returns: { attackerWins, attackerLosses, defenderLosses, plunder }
-function resolveCombat(attackerComp, defenderComp, defenseBonus = 1, attackerFaction = null, defenderFaction = null) {
+function resolveCombat(attackerComp, defenderComp, defenseBonus = 1, attackerFaction = null, defenderFaction = null, attackerPrestigeBonus = 0, defenderPrestigeBonus = 0) {
   const attPower = compositionPower(attackerComp, attackerFaction);
   const defPower = compositionPower(defenderComp, defenderFaction);
 
-  // Apply wall/defense bonus to defender
-  const adjustedDefense = defPower.totalDefense * defenseBonus;
+  // Apply prestige combat bonus to attacker
+  attPower.totalAttack = Math.floor(attPower.totalAttack * (1 + attackerPrestigeBonus));
+
+  // Apply wall/defense bonus + prestige to defender
+  const adjustedDefense = defPower.totalDefense * defenseBonus * (1 + defenderPrestigeBonus);
 
   // Combat ratio
   const totalForce = attPower.totalAttack + adjustedDefense;

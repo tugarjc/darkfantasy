@@ -11,7 +11,7 @@ const MAIN_TABS = [
 
 const PLUS_TABS = [
   'legions', 'heroes', 'research', 'market', 'events',
-  'missions', 'chat', 'reports', 'store', 'leaderboard', 'tutorial', 'account',
+  'missions', 'chat', 'reports', 'store', 'leaderboard', 'seasons', 'tutorial', 'account',
 ];
 
 function getActiveMainTab(tab) {
@@ -234,6 +234,14 @@ function TabIcon({ tabId }) {
         <svg viewBox="0 0 24 24" className={cls} fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2V3z" />
           <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7V3z" />
+        </svg>
+      );
+    case 'seasons':
+      return (
+        <svg viewBox="0 0 24 24" className={cls} fill="none" stroke="currentColor" strokeWidth="1.5">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 3" />
+          <path d="M16 3l1.5 1.5M8 3L6.5 4.5" />
         </svg>
       );
     case 'account':

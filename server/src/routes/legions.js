@@ -63,7 +63,11 @@ router.post('/send', authenticateToken, async (req, res) => {
       [fromCircleId]
     );
     const palaisLevel = palais.rows[0]?.level || 0;
-    const maxLegions = 1 + Math.floor(palaisLevel / 2); // 1 base + 1 per 2 levels
+    let maxLegions = 1 + Math.floor(palaisLevel / 2); // 1 base + 1 per 2 levels
+
+    // Prestige bonus: +1 max legion at prestige 5
+    const prestigeRow = await client.query('SELECT bonuses FROM prestige WHERE player_id = $1', [req.user.id]);
+    maxLegions += (prestigeRow.rows[0]?.bonuses?.maxLegion || 0);
 
     const activeLegions = await client.query(
       "SELECT COUNT(*) as count FROM legions WHERE player_id = $1 AND status IN ('en_route', 'combat')",
@@ -98,11 +102,11 @@ router.post('/send', authenticateToken, async (req, res) => {
         [primaryC.rows[0]?.id]
       );
       const pLevel = palaisCol.rows[0]?.level || 0;
-      if (pLevel < 5) {
+      if (pLevel < 10) {
         await client.query('ROLLBACK');
-        return res.status(400).json({ error: 'Palais Infernal niveau 5 requis pour coloniser' });
+        return res.status(400).json({ error: 'Palais Infernal niveau 10 requis pour coloniser' });
       }
-      const maxCircles = 1 + Math.floor(pLevel / 5);
+      const maxCircles = 1 + Math.floor((pLevel - 5) / 5);
       const curCircles = await client.query('SELECT COUNT(*) as c FROM circles WHERE player_id = $1', [req.user.id]);
       if (parseInt(curCircles.rows[0].c) >= maxCircles) {
         await client.query('ROLLBACK');

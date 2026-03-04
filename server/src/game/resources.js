@@ -57,13 +57,17 @@ async function recalcRates(circleId, client) {
   // Serre bonus: +5% per level on all production
   const serreBonus = 1 + 0.05 * serreLv;
 
-  // Calculate rates (per hour) — include faction bonuses + legendary + premium
+  // Prestige production bonus
+  const prestigeRow = await db.query('SELECT bonuses FROM prestige WHERE player_id = $1', [playerId]);
+  const prestigeProd = 1 + (prestigeRow.rows[0]?.bonuses?.production || 0);
+
+  // Calculate rates (per hour) — include faction bonuses + legendary + premium + prestige
   const ironRate = productionRate(BASE_RATES.iron, forgeLv)
-    * (1 + 0.05 * metalResearch) * serreBonus * factionProductionBonus(faction, 'iron') * ecoAbsBonus * premiumBonus;
+    * (1 + 0.05 * metalResearch) * serreBonus * factionProductionBonus(faction, 'iron') * ecoAbsBonus * premiumBonus * prestigeProd;
   const essenceRate = productionRate(BASE_RATES.essence, sanctLv)
-    * (1 + 0.05 * essenceResearch) * serreBonus * factionProductionBonus(faction, 'essence') * ecoAbsBonus * premiumBonus;
+    * (1 + 0.05 * essenceResearch) * serreBonus * factionProductionBonus(faction, 'essence') * ecoAbsBonus * premiumBonus * prestigeProd;
   const soulsRate = puitsLv > 0
-    ? productionRate(BASE_RATES.souls, puitsLv) * (1 + 0.05 * soulsResearch) * serreBonus * factionProductionBonus(faction, 'souls') * ecoAbsBonus * premiumBonus
+    ? productionRate(BASE_RATES.souls, puitsLv) * (1 + 0.05 * soulsResearch) * serreBonus * factionProductionBonus(faction, 'souls') * ecoAbsBonus * premiumBonus * prestigeProd
     : 0;
 
   // Storage caps

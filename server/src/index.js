@@ -26,8 +26,10 @@ const leaderboardRoutes = require('./routes/leaderboard');
 const notificationRoutes = require('./routes/notifications');
 const storeRoutes = require('./routes/store');
 const playerRoutes = require('./routes/player');
+const seasonRoutes = require('./routes/seasons');
 const { startLegionProcessor } = require('./game/legionProcessor');
 const { startEventProcessor } = require('./game/eventProcessor');
+const { startSeasonProcessor } = require('./game/seasonProcessor');
 const { setupChat } = require('./chat');
 
 const app = express();
@@ -75,6 +77,7 @@ app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/store', storeRoutes);
 app.use('/api/player', playerRoutes);
+app.use('/api/seasons', seasonRoutes);
 
 // ── WebSocket + Chat ──
 setupChat(io);
@@ -163,11 +166,49 @@ async function boot() {
     );
   `);
 
+  // Phase 20 tables (seasons & prestige)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS seasons (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      server_id UUID NOT NULL REFERENCES servers(id),
+      name VARCHAR(128) NOT NULL,
+      start_date TIMESTAMPTZ NOT NULL,
+      end_date TIMESTAMPTZ NOT NULL,
+      status VARCHAR(16) NOT NULL DEFAULT 'upcoming'
+        CHECK (status IN ('upcoming', 'active', 'ended')),
+      rewards_config JSONB NOT NULL DEFAULT '{"1":5000,"2":3000,"3":2000,"top10":1000,"top25":500,"top50":200,"participant":100}',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_seasons_server ON seasons(server_id, status);
+
+    CREATE TABLE IF NOT EXISTS season_scores (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      season_id UUID NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
+      player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+      score BIGINT NOT NULL DEFAULT 0,
+      rank INT,
+      relics_earned INT DEFAULT 0,
+      UNIQUE (season_id, player_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_season_scores ON season_scores(season_id, score DESC);
+
+    CREATE TABLE IF NOT EXISTS prestige (
+      player_id UUID PRIMARY KEY REFERENCES players(id) ON DELETE CASCADE,
+      level INT NOT NULL DEFAULT 0,
+      total_xp BIGINT NOT NULL DEFAULT 0,
+      bonuses JSONB NOT NULL DEFAULT '{}',
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+  `);
+
   // Start legion arrival processor (every 5 seconds)
   startLegionProcessor(5000);
 
   // Start event processor (every 60 seconds)
   startEventProcessor(60000);
+
+  // Start season processor (every 60 seconds)
+  startSeasonProcessor(60000);
 
   httpServer.listen(PORT, () => {
     console.log(`Inferno Domini server running on port ${PORT}`);

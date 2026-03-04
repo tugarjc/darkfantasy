@@ -178,6 +178,10 @@ router.post('/:circleId/buildings/upgrade', authenticateToken, async (req, res) 
     let timeSeconds = buildingTime(def.baseTime, nextLevel, biblioLevel);
     // Premium bonus: -10% build time
     if (isPremium) timeSeconds = Math.floor(timeSeconds * 0.9);
+    // Prestige bonus: build time reduction
+    const prestigeRow = await client.query('SELECT bonuses FROM prestige WHERE player_id = $1', [req.user.id]);
+    const prestigeBuildMult = 1 + (prestigeRow.rows[0]?.bonuses?.buildTime || 0);
+    timeSeconds = Math.max(10, Math.floor(timeSeconds * prestigeBuildMult));
     const upgradeEnd = new Date(Date.now() + timeSeconds * 1000);
 
     // Upsert building

@@ -136,8 +136,14 @@ async function processAttack(legion, client) {
 
   const defBonus = wallBonus(murLevel, tourLevel);
 
+  // Fetch prestige combat bonuses
+  const atkPrestige = await client.query('SELECT bonuses FROM prestige WHERE player_id = $1', [legion.player_id]);
+  const defPrestige = await client.query('SELECT bonuses FROM prestige WHERE player_id = $1', [target.player_id]);
+  const atkCombatBonus = atkPrestige.rows[0]?.bonuses?.combat || 0;
+  const defCombatBonus = defPrestige.rows[0]?.bonuses?.combat || 0;
+
   // Resolve combat
-  const result = resolveCombat(composition, defenderComp, defBonus);
+  const result = resolveCombat(composition, defenderComp, defBonus, null, null, atkCombatBonus, defCombatBonus);
 
   // Apply defender losses
   for (const [type, losses] of Object.entries(result.defenderLosses)) {
@@ -339,7 +345,11 @@ async function processColonisation(legion, client) {
     [primaryCircle.rows[0]?.id]
   );
   const palaisLevel = palais.rows[0]?.level || 0;
-  const maxCircles = 1 + Math.floor(palaisLevel / 5); // 1 base + 1 per 5 levels
+  if (palaisLevel < 10) {
+    await setReturn(legion, client, {});
+    return;
+  }
+  const maxCircles = 1 + Math.floor((palaisLevel - 5) / 5);
 
   const currentCircles = await client.query(
     'SELECT COUNT(*) as c FROM circles WHERE player_id = $1',

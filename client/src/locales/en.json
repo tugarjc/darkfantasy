@@ -52,6 +52,7 @@
     "tutorial": "Tutorial",
     "leaderboard": "Leaderboard",
     "store": "Store",
+    "seasons": "Seasons",
     "account": "Account"
   },
   "landing": {
@@ -576,6 +577,37 @@
   "cookie": {
     "message": "This site uses essential cookies for game operation. No advertising cookies are used.",
     "accept": "I accept"
+  },
+  "seasons": {
+    "title": "Seasons",
+    "active": "Active",
+    "upcoming": "Upcoming",
+    "ended": "Ended",
+    "no_active_season": "No active season. Seasonal servers will start soon.",
+    "time_remaining": "Time remaining",
+    "my_rank": "My rank",
+    "my_score": "My score",
+    "participants": "Participants",
+    "leaderboard": "Season Leaderboard",
+    "rank": "#",
+    "player": "Player",
+    "score": "Score",
+    "relics_earned": "Relics",
+    "first_place": "1st",
+    "second_place": "2nd",
+    "third_place": "3rd",
+    "past_seasons": "Past seasons",
+    "prestige_title": "Prestige",
+    "prestige_level": "Prestige level {{level}}",
+    "prestige_xp": "Prestige experience",
+    "xp_needed": "{{current}} / {{needed}} XP",
+    "max_prestige": "Maximum prestige reached!",
+    "bonuses": "Active bonuses",
+    "bonus_production": "+{{value}}% production",
+    "bonus_combat": "+{{value}}% combat",
+    "bonus_build_time": "-{{value}}% build time",
+    "bonus_max_legion": "+{{value}} max legion",
+    "no_prestige": "Participate in seasons to earn prestige experience."
   },
   "a11y": {
     "skip_to_content": "Skip to main content",

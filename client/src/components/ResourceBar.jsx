@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/gameStore';
 import { useAuthStore } from '../stores/authStore';
@@ -6,7 +7,11 @@ import NotificationCenter from './NotificationCenter';
 export default function ResourceBar() {
   const { t } = useTranslation();
   const resources = useGameStore((s) => s.resources);
+  const prestige = useGameStore((s) => s.prestige);
+  const loadPrestige = useGameStore((s) => s.loadPrestige);
   const player = useAuthStore((s) => s.player);
+
+  useEffect(() => { loadPrestige(); }, []);
 
   if (!resources) return null;
 
@@ -44,6 +49,13 @@ export default function ResourceBar() {
           <div className="text-[10px] text-muted hidden md:block">{t('resources.relics_name')}</div>
         </div>
       </div>
+      {/* Prestige badge */}
+      {prestige && prestige.level > 0 && (
+        <div className="flex items-center gap-1" title={t('seasons.prestige_level', { level: prestige.level })}>
+          <PrestigeBadge level={prestige.level} />
+          <span className="text-xs font-display text-gold hidden md:inline">P{prestige.level}</span>
+        </div>
+      )}
       {/* Notifications bell */}
       <div className="ml-auto">
         <NotificationCenter />
@@ -126,6 +138,17 @@ function RelicIcon() {
     <svg viewBox="0 0 48 48" className="w-full h-full">
       <polygon points="24,6 30,18 44,20 34,30 36,44 24,38 12,44 14,30 4,20 18,18" fill="#D4AF37" stroke="#8B6914" strokeWidth="1.2"/>
       <circle cx="24" cy="24" r="6" fill="#FFF8DC" opacity="0.5"/>
+    </svg>
+  );
+}
+
+function PrestigeBadge({ level }) {
+  const colors = ['', '#CD7F32', '#C0C0C0', '#FFD700', '#E5C158', '#FF4500'];
+  const color = colors[level] || '#C9A84C';
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 md:w-6 md:h-6">
+      <polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9" fill={color} opacity="0.9" />
+      <text x="12" y="14" textAnchor="middle" fontSize="8" fill="#0A0A0F" fontWeight="bold">{level}</text>
     </svg>
   );
 }

@@ -872,5 +872,39 @@ export const useGameStore = create((set, get) => ({
     };
   }),
 
+  // ── Seasons ──
+  seasons: [],
+  seasonLeaderboard: [],
+  seasonsLoading: false,
+
+  loadSeasons: async () => {
+    set({ seasonsLoading: true });
+    try {
+      const res = await fetch(`${API}/seasons`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ seasons: data.seasons || [], seasonsLoading: false });
+      else set({ seasonsLoading: false });
+    } catch { set({ seasonsLoading: false }); }
+  },
+
+  loadSeasonLeaderboard: async (seasonId) => {
+    try {
+      const res = await fetch(`${API}/seasons/${seasonId}/leaderboard`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ seasonLeaderboard: data.entries || [] });
+    } catch { /* silent */ }
+  },
+
+  // ── Prestige ──
+  prestige: null,
+
+  loadPrestige: async () => {
+    try {
+      const res = await fetch(`${API}/seasons/prestige`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ prestige: data });
+    } catch { /* silent */ }
+  },
+
   clearError: () => set({ error: null }),
 }));
