@@ -1,5 +1,5 @@
 const { pool } = require('../db');
-const { notify } = require('../utils/notify');
+const { notify } = require('./notify');
 
 const ACHIEVEMENTS = [
   // ── Progression ──
