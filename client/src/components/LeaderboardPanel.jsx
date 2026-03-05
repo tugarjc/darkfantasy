@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 import { useGameStore } from '../stores/gameStore';
+import PlayerProfileModal from './PlayerProfileModal';
 
 const FACTION_COLORS = {
   none: '#999', legion_cendres: '#B0592A', ordre_vide: '#6B2FA0',
@@ -15,6 +16,7 @@ export default function LeaderboardPanel() {
   const loading = useGameStore((s) => s.leaderboardLoading);
   const loadLeaderboard = useGameStore((s) => s.loadLeaderboard);
   const [category, setCategory] = useState('score');
+  const [profileId, setProfileId] = useState(null);
 
   useEffect(() => { loadLeaderboard(category); }, [category]);
 
@@ -67,7 +69,9 @@ export default function LeaderboardPanel() {
                 <tr key={entry.id} className={`border-b border-border/50 ${isMe ? 'bg-gold/5' : ''}`}>
                   <td className="px-3 py-2 text-gold font-display">{entry.rank}</td>
                   <td className={`px-3 py-2 ${isMe ? 'text-gold font-medium' : 'text-parchment'}`}>
-                    {entry.username}
+                    <button onClick={() => setProfileId(entry.id)} className="hover:underline hover:text-gold transition-colors">
+                      {entry.username}
+                    </button>
                   </td>
                   <td className="px-3 py-2">
                     <span className="text-xs" style={{ color: FACTION_COLORS[entry.faction] || '#999' }}>
@@ -89,6 +93,10 @@ export default function LeaderboardPanel() {
           </tbody>
         </table>
       </div>
+
+      {profileId && (
+        <PlayerProfileModal playerId={profileId} onClose={() => setProfileId(null)} />
+      )}
     </div>
   );
 }

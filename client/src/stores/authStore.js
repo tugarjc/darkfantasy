@@ -57,5 +57,41 @@ export const useAuthStore = create((set, get) => ({
     set({ player: null, accessToken: null });
   },
 
+  forgotPassword: async (email) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await fetch(`${API}/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      set({ loading: false });
+      return true;
+    } catch (err) {
+      set({ error: err.message, loading: false });
+      return false;
+    }
+  },
+
+  resetPassword: async (token, password) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await fetch(`${API}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      set({ loading: false });
+      return true;
+    } catch (err) {
+      set({ error: err.message, loading: false });
+      return false;
+    }
+  },
+
   clearError: () => set({ error: null }),
 }));

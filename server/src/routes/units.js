@@ -3,6 +3,7 @@ const { pool } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const { UNITS } = require('../game/units');
 const { flushResources } = require('../game/resources');
+const { checkAchievement } = require('../game/achievements');
 
 const router = Router();
 
@@ -157,6 +158,11 @@ router.post('/:circleId/units/train', authenticateToken, async (req, res) => {
     );
     // We only update military portion — simplified for Phase 1
     await client.query('COMMIT');
+
+    // Achievement hook: dragon_slayer
+    if (unitType === 'dragon_abyssal') {
+      checkAchievement(req.user.id, 'dragon_slayer', 1).catch(() => {});
+    }
 
     const totalTime = def.trainTime * qty;
 

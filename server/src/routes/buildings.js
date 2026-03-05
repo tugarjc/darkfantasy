@@ -4,6 +4,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { BUILDINGS } = require('../game/buildings');
 const { buildingCost, buildingTime } = require('../game/formulas');
 const { recalcRates, flushResources } = require('../game/resources');
+const { checkAchievement } = require('../game/achievements');
 
 const router = Router();
 
@@ -262,6 +263,20 @@ router.post('/:circleId/buildings/complete', authenticateToken, async (req, res)
     await client.query('UPDATE players SET score = $2 WHERE id = $1', [req.user.id, totalLevels * 100]);
 
     await client.query('COMMIT');
+
+    // Achievement hooks (fire-and-forget)
+    checkAchievement(req.user.id, 'first_building', 1).catch(() => {});
+    checkAchievement(req.user.id, 'builder_10', 1).catch(() => {});
+    if (buildingType === 'palais_infernal') {
+      checkAchievement(req.user.id, 'palace_10', 0, null, newLevel).catch(() => {});
+    }
+    // Check all_buildings (all >= 5)
+    const allBlds = await pool.query(
+      'SELECT MIN(level) as min_lv FROM buildings WHERE circle_id = $1', [circleId]
+    );
+    if (allBlds.rows[0]?.min_lv >= 5) {
+      checkAchievement(req.user.id, 'all_buildings', 0, null, 1).catch(() => {});
+    }
 
     res.json({
       message: `${BUILDINGS[buildingType]?.name || buildingType} upgraded to level ${newLevel}`,

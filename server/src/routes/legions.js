@@ -4,6 +4,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { hexDistance } = require('../game/hex');
 const { UNITS } = require('../game/units');
 const { flushResources } = require('../game/resources');
+const { checkAchievement } = require('../game/achievements');
 
 const router = Router();
 
@@ -205,6 +206,11 @@ router.post('/send', authenticateToken, async (req, res) => {
     );
 
     await client.query('COMMIT');
+
+    // Achievement hooks
+    if (mission === 'attaque' || mission === 'farming') checkAchievement(req.user.id, 'first_attack', 1).catch(() => {});
+    if (mission === 'espionnage') checkAchievement(req.user.id, 'spy_10', 1).catch(() => {});
+    if (mission === 'defense_alliee') checkAchievement(req.user.id, 'ally_defense', 1).catch(() => {});
 
     res.json({
       legionId: legion.rows[0].id,

@@ -53,6 +53,7 @@
     "leaderboard": "Classement",
     "store": "Boutique",
     "seasons": "Saisons",
+    "achievements": "Succes",
     "account": "Compte"
   },
   "landing": {
@@ -85,7 +86,14 @@
     "password_mismatch": "Les mots de passe ne correspondent pas",
     "faction": "Choisissez votre Faction",
     "accept_privacy": "J'accepte la <1>politique de confidentialite</1>",
-    "accept_privacy_required": "Vous devez accepter la politique de confidentialite"
+    "accept_privacy_required": "Vous devez accepter la politique de confidentialite",
+    "forgot_password": "Mot de passe oublie ?",
+    "forgot_email_sent": "Si cette adresse existe, un lien de reinitialisation a ete envoye.",
+    "reset_password": "Reinitialiser le mot de passe",
+    "reset_success": "Mot de passe reinitialise avec succes ! Vous pouvez maintenant vous connecter.",
+    "new_password": "Nouveau mot de passe",
+    "confirm_new_password": "Confirmer le nouveau mot de passe",
+    "reset_expired": "Lien de reinitialisation invalide ou expire"
   },
   "play": {
     "summoning_circle": "Invocation du Cercle..."
@@ -472,7 +480,8 @@
       "war_declared": "Guerre declaree",
       "research_complete": "Recherche terminee",
       "building_complete": "Construction terminee",
-      "shield_expired": "Bouclier expire"
+      "shield_expired": "Bouclier expire",
+      "achievement_unlocked": "Succes debloque !"
     }
   },
   "legendary": {
@@ -605,6 +614,76 @@
     "bonus_build_time": "-{{value}}% temps construction",
     "bonus_max_legion": "+{{value}} legion max",
     "no_prestige": "Participez aux saisons pour gagner de l'experience de prestige."
+  },
+  "achievements": {
+    "title": "Succes",
+    "unlocked_count": "{{count}}/{{total}} debloques",
+    "claim": "Reclamer",
+    "claimed": "Recu",
+    "locked": "Verrouille",
+    "progress": "Progression",
+    "categories": {
+      "progression": "Progression",
+      "combat": "Combat",
+      "economy": "Economie",
+      "social": "Social",
+      "mastery": "Maitrise"
+    },
+    "names": {
+      "first_building": "Premier Batisseur",
+      "builder_10": "Architecte Infernal",
+      "palace_10": "Seigneur du Palais",
+      "all_buildings": "Maitre des Structures",
+      "first_attack": "Premiere Conquete",
+      "warrior_50": "Guerrier Aguerri",
+      "victories_25": "Stratege",
+      "dragon_slayer": "Tueur de Dragons",
+      "first_trade": "Premier Echange",
+      "merchant_20": "Marchand des Tenebres",
+      "rich_100k": "Tresorier Infernal",
+      "collector_500": "Collectionneur",
+      "join_alliance": "Pacte Scelle",
+      "chat_100": "Voix des Tenebres",
+      "spy_10": "Oeil de l'Ombre",
+      "ally_defense": "Gardien du Pacte",
+      "research_5": "Erudit",
+      "hero_summon": "Invocateur",
+      "colonize": "Colonisateur",
+      "prestige_1": "Prestige Eternel"
+    },
+    "descs": {
+      "first_building": "Ameliorez un batiment pour la premiere fois.",
+      "builder_10": "Ameliorez 10 batiments au total.",
+      "palace_10": "Atteignez le niveau 10 du Palais Infernal.",
+      "all_buildings": "Tous vos batiments au niveau 5 ou plus.",
+      "first_attack": "Lancez votre premiere attaque.",
+      "warrior_50": "Participez a 50 batailles.",
+      "victories_25": "Remportez 25 victoires en combat.",
+      "dragon_slayer": "Entrainez un Dragon Abyssal.",
+      "first_trade": "Creez votre premiere offre au marche.",
+      "merchant_20": "Creez 20 offres au marche.",
+      "rich_100k": "Accumulez 100 000 de fer.",
+      "collector_500": "Accumulez 500 reliques.",
+      "join_alliance": "Rejoignez une alliance.",
+      "chat_100": "Envoyez 100 messages dans le chat.",
+      "spy_10": "Effectuez 10 missions d'espionnage.",
+      "ally_defense": "Envoyez une defense alliee.",
+      "research_5": "Terminez 5 recherches.",
+      "hero_summon": "Invoquez votre premier heros.",
+      "colonize": "Colonisez un nouveau cercle.",
+      "prestige_1": "Atteignez le niveau de prestige 1."
+    }
+  },
+  "profile": {
+    "title": "Profil du Joueur",
+    "faction": "Faction",
+    "score": "Score",
+    "alliance": "Alliance",
+    "prestige": "Prestige",
+    "achievements": "Succes",
+    "member_since": "Membre depuis",
+    "no_alliance": "Aucune alliance",
+    "circles": "Cercles"
   },
   "a11y": {
     "skip_to_content": "Aller au contenu principal",

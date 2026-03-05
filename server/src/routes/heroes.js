@@ -3,6 +3,7 @@ const { pool } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const { HEROES, xpForLevel, summonCost, getHeroBonuses } = require('../game/heroes');
 const { flushResources } = require('../game/resources');
+const { checkAchievement } = require('../game/achievements');
 
 const router = Router();
 
@@ -127,6 +128,7 @@ router.post('/summon', authenticateToken, async (req, res) => {
     await client.query('UPDATE players SET score = score + 200 WHERE id = $1', [req.user.id]);
 
     await client.query('COMMIT');
+    checkAchievement(req.user.id, 'hero_summon', 1).catch(() => {});
     res.status(201).json({
       heroType,
       name: HEROES[heroType].name,

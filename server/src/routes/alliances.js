@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const { pool } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
+const { checkAchievement } = require('../game/achievements');
 
 const router = Router();
 const SERVER_ID = '00000000-0000-0000-0000-000000000001';
@@ -189,6 +190,7 @@ router.post('/:id/join', authenticateToken, async (req, res) => {
     await client.query('UPDATE players SET alliance_id = $2 WHERE id = $1', [req.user.id, req.params.id]);
 
     await client.query('COMMIT');
+    checkAchievement(req.user.id, 'join_alliance', 1).catch(() => {});
     res.json({ message: `Joined ${alliance.rows[0].name}` });
   } catch (err) {
     await client.query('ROLLBACK');

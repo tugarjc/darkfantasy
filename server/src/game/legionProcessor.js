@@ -8,6 +8,7 @@ const { resolveCombat, wallBonus, calculatePlunder } = require('./combat');
 const { recalcRates, flushResources } = require('./resources');
 const { hexDistance } = require('./hex');
 const { notify } = require('./notify');
+const { checkAchievement } = require('./achievements');
 
 const SPEED_BASE = 10;
 const SOULS_PER_HEX = 5;
@@ -215,6 +216,12 @@ async function processAttack(legion, client) {
     attacked: true, won: !result.attackerWins, plunder,
   }, client);
 
+  // Achievement hooks
+  checkAchievement(legion.player_id, 'warrior_50', 1).catch(() => {});
+  if (result.attackerWins) {
+    checkAchievement(legion.player_id, 'victories_25', 1).catch(() => {});
+  }
+
   // Set return with surviving units and loot
   await setReturn(legion, client, plunder, result.attackerSurvivors);
 }
@@ -399,6 +406,9 @@ async function processColonisation(legion, client) {
   await client.query('DELETE FROM legions WHERE id = $1', [legion.id]);
 
   console.log(`[COLONISATION] ${username} colonised (${legion.to_coord_q},${legion.to_coord_r}) — circle #${circleCount}`);
+
+  // Achievement hook
+  checkAchievement(legion.player_id, 'colonize', 1).catch(() => {});
 }
 
 // ── DEFENSE ALLIEE ──

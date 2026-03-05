@@ -6,6 +6,7 @@ const { researchCost, researchTime } = require('../game/formulas');
 const { flushResources, recalcRates } = require('../game/resources');
 const { LEGENDARY_EFFECTS, hasLegendary, isOnCooldown, isEffectActive, getLegendaryStatus } = require('../game/legendaryEffects');
 const { notify } = require('../game/notify');
+const { checkAchievement } = require('../game/achievements');
 
 const router = Router();
 
@@ -289,6 +290,9 @@ router.post('/complete', authenticateToken, async (req, res) => {
     );
 
     await client.query('COMMIT');
+
+    // Achievement hook
+    checkAchievement(req.user.id, 'research_5', 1).catch(() => {});
 
     res.json({
       researchType,

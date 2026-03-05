@@ -2,6 +2,7 @@ const { Router } = require('express');
 const { pool } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const { flushResources } = require('../game/resources');
+const { checkAchievement } = require('../game/achievements');
 
 const router = Router();
 const VALID_RESOURCES = ['iron', 'essence', 'souls'];
@@ -183,6 +184,11 @@ router.post('/create', authenticateToken, async (req, res) => {
     );
 
     await client.query('COMMIT');
+
+    // Achievement hooks
+    checkAchievement(req.user.id, 'first_trade', 1).catch(() => {});
+    checkAchievement(req.user.id, 'merchant_20', 1).catch(() => {});
+
     res.status(201).json({
       offerId: offerRes.rows[0].id,
       message: 'Offre creee',

@@ -167,4 +167,54 @@ router.get('/profile', authenticateToken, async (req, res) => {
   }
 });
 
+// ── GET /api/player/:id/public — Public profile ──
+router.get('/:id/public', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `SELECT p.id, p.username, p.faction, p.score, p.victory_points, p.relics, p.created_at,
+              a.name as alliance_name, a.tag as alliance_tag
+       FROM players p
+       LEFT JOIN alliances a ON p.alliance_id = a.id
+       WHERE p.id = $1`,
+      [id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Player not found' });
+
+    const player = result.rows[0];
+
+    // Prestige level
+    const prestige = await pool.query('SELECT level FROM prestige WHERE player_id = $1', [id]);
+    const prestigeLevel = prestige.rows[0]?.level || 0;
+
+    // Achievements count
+    const achievements = await pool.query(
+      'SELECT COUNT(*) as count FROM player_achievements WHERE player_id = $1 AND unlocked = true', [id]
+    );
+    const achievementsCount = parseInt(achievements.rows[0]?.count || 0);
+
+    // Circles count
+    const circles = await pool.query('SELECT COUNT(*) as count FROM circles WHERE player_id = $1', [id]);
+    const circlesCount = parseInt(circles.rows[0]?.count || 0);
+
+    res.json({
+      id: player.id,
+      username: player.username,
+      faction: player.faction,
+      score: player.score,
+      victory_points: player.victory_points,
+      relics: player.relics,
+      created_at: player.created_at,
+      alliance: player.alliance_name ? { name: player.alliance_name, tag: player.alliance_tag } : null,
+      prestigeLevel,
+      achievementsCount,
+      circlesCount,
+    });
+  } catch (err) {
+    console.error('Public profile error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

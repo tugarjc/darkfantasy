@@ -53,6 +53,7 @@
     "leaderboard": "Leaderboard",
     "store": "Store",
     "seasons": "Seasons",
+    "achievements": "Achievements",
     "account": "Account"
   },
   "landing": {
@@ -85,7 +86,14 @@
     "password_mismatch": "Passwords do not match",
     "faction": "Choose your Faction",
     "accept_privacy": "I accept the <1>privacy policy</1>",
-    "accept_privacy_required": "You must accept the privacy policy"
+    "accept_privacy_required": "You must accept the privacy policy",
+    "forgot_password": "Forgot password?",
+    "forgot_email_sent": "If this email exists, a reset link has been sent.",
+    "reset_password": "Reset password",
+    "reset_success": "Password reset successfully! You can now log in.",
+    "new_password": "New password",
+    "confirm_new_password": "Confirm new password",
+    "reset_expired": "Invalid or expired reset link"
   },
   "play": {
     "summoning_circle": "Summoning the Circle..."
@@ -473,7 +481,8 @@
       "war_declared": "War declared by {{attacker}} against {{target}}",
       "research_complete": "Research completed: {{name}}",
       "building_complete": "Construction completed: {{name}}",
-      "shield_expired": "Your Absolute Shield has expired"
+      "shield_expired": "Your Absolute Shield has expired",
+      "achievement_unlocked": "Achievement unlocked!"
     }
   },
   "legendary": {
@@ -608,6 +617,76 @@
     "bonus_build_time": "-{{value}}% build time",
     "bonus_max_legion": "+{{value}} max legion",
     "no_prestige": "Participate in seasons to earn prestige experience."
+  },
+  "achievements": {
+    "title": "Achievements",
+    "unlocked_count": "{{count}}/{{total}} unlocked",
+    "claim": "Claim",
+    "claimed": "Claimed",
+    "locked": "Locked",
+    "progress": "Progress",
+    "categories": {
+      "progression": "Progression",
+      "combat": "Combat",
+      "economy": "Economy",
+      "social": "Social",
+      "mastery": "Mastery"
+    },
+    "names": {
+      "first_building": "First Builder",
+      "builder_10": "Infernal Architect",
+      "palace_10": "Palace Lord",
+      "all_buildings": "Master of Structures",
+      "first_attack": "First Conquest",
+      "warrior_50": "Seasoned Warrior",
+      "victories_25": "Strategist",
+      "dragon_slayer": "Dragon Slayer",
+      "first_trade": "First Trade",
+      "merchant_20": "Dark Merchant",
+      "rich_100k": "Infernal Treasurer",
+      "collector_500": "Collector",
+      "join_alliance": "Sealed Pact",
+      "chat_100": "Voice of Darkness",
+      "spy_10": "Shadow Eye",
+      "ally_defense": "Pact Guardian",
+      "research_5": "Scholar",
+      "hero_summon": "Summoner",
+      "colonize": "Colonizer",
+      "prestige_1": "Eternal Prestige"
+    },
+    "descs": {
+      "first_building": "Upgrade a building for the first time.",
+      "builder_10": "Upgrade 10 buildings total.",
+      "palace_10": "Reach Infernal Palace level 10.",
+      "all_buildings": "All buildings at level 5 or higher.",
+      "first_attack": "Launch your first attack.",
+      "warrior_50": "Participate in 50 battles.",
+      "victories_25": "Win 25 battles.",
+      "dragon_slayer": "Train an Abyssal Dragon.",
+      "first_trade": "Create your first market offer.",
+      "merchant_20": "Create 20 market offers.",
+      "rich_100k": "Accumulate 100,000 iron.",
+      "collector_500": "Accumulate 500 relics.",
+      "join_alliance": "Join an alliance.",
+      "chat_100": "Send 100 chat messages.",
+      "spy_10": "Complete 10 espionage missions.",
+      "ally_defense": "Send an allied defense.",
+      "research_5": "Complete 5 researches.",
+      "hero_summon": "Summon your first hero.",
+      "colonize": "Colonize a new circle.",
+      "prestige_1": "Reach prestige level 1."
+    }
+  },
+  "profile": {
+    "title": "Player Profile",
+    "faction": "Faction",
+    "score": "Score",
+    "alliance": "Alliance",
+    "prestige": "Prestige",
+    "achievements": "Achievements",
+    "member_since": "Member since",
+    "no_alliance": "No alliance",
+    "circles": "Circles"
   },
   "a11y": {
     "skip_to_content": "Skip to main content",

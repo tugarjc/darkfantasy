@@ -906,5 +906,38 @@ export const useGameStore = create((set, get) => ({
     } catch { /* silent */ }
   },
 
+  // ── Achievements ──
+  achievements: [], achievementsLoading: false,
+
+  loadAchievements: async () => {
+    set({ achievementsLoading: true });
+    try {
+      const res = await fetch(`${API}/achievements`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ achievements: data.achievements || [] });
+    } catch { /* silent */ }
+    set({ achievementsLoading: false });
+  },
+
+  claimAchievement: async (id) => {
+    try {
+      const res = await fetch(`${API}/achievements/${id}/claim`, { method: 'POST', headers: authHeaders() });
+      if (res.ok) get().loadAchievements();
+    } catch { /* silent */ }
+  },
+
+  // ── Public Profile ──
+  publicProfile: null, publicProfileLoading: false,
+
+  loadPublicProfile: async (playerId) => {
+    set({ publicProfileLoading: true, publicProfile: null });
+    try {
+      const res = await fetch(`${API}/player/${playerId}/public`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) set({ publicProfile: data });
+    } catch { /* silent */ }
+    set({ publicProfileLoading: false });
+  },
+
   clearError: () => set({ error: null }),
 }));

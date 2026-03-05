@@ -27,6 +27,7 @@ const notificationRoutes = require('./routes/notifications');
 const storeRoutes = require('./routes/store');
 const playerRoutes = require('./routes/player');
 const seasonRoutes = require('./routes/seasons');
+const achievementRoutes = require('./routes/achievements');
 const { startLegionProcessor } = require('./game/legionProcessor');
 const { startEventProcessor } = require('./game/eventProcessor');
 const { startSeasonProcessor } = require('./game/seasonProcessor');
@@ -48,6 +49,8 @@ const authLimiter = rateLimit({ windowMs: 900000, max: 10, standardHeaders: true
 app.use('/api', apiLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
+const resetLimiter = rateLimit({ windowMs: 900000, max: 5, standardHeaders: true, legacyHeaders: false, message: { error: 'Too many attempts, try again later' } });
+app.use('/api/auth/forgot-password', resetLimiter);
 
 // Stripe webhook needs raw body — mount BEFORE express.json()
 app.use('/api/store/webhook', express.raw({ type: 'application/json' }));
@@ -78,6 +81,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/store', storeRoutes);
 app.use('/api/player', playerRoutes);
 app.use('/api/seasons', seasonRoutes);
+app.use('/api/achievements', achievementRoutes);
 
 // ── WebSocket + Chat ──
 setupChat(io);
@@ -163,6 +167,19 @@ async function boot() {
       subscription_status VARCHAR(32) DEFAULT 'inactive',
       subscription_end TIMESTAMPTZ,
       created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  // Phase 21 tables (achievements)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS player_achievements (
+      player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+      achievement_id VARCHAR(64) NOT NULL,
+      progress INT NOT NULL DEFAULT 0,
+      unlocked BOOLEAN NOT NULL DEFAULT false,
+      unlocked_at TIMESTAMPTZ,
+      claimed BOOLEAN NOT NULL DEFAULT false,
+      PRIMARY KEY (player_id, achievement_id)
     );
   `);
 

@@ -18,6 +18,7 @@ import AdminPanel from '../components/AdminPanel';
 import EventPanel from '../components/EventPanel';
 import MissionPanel from '../components/MissionPanel';
 import SeasonPanel from '../components/SeasonPanel';
+import AchievementPanel from '../components/AchievementPanel';
 import ToastContainer from '../components/ui/Toast';
 import LeaderboardPanel from '../components/LeaderboardPanel';
 import StorePanel from '../components/StorePanel';
@@ -137,6 +138,7 @@ export default function Play() {
         <TabBtn label={t('nav.leaderboard')} active={tab === 'leaderboard'} onClick={() => setTab('leaderboard')} />
         <TabBtn label={t('nav.store')} active={tab === 'store'} onClick={() => setTab('store')} />
         <TabBtn label={t('nav.seasons')} active={tab === 'seasons'} onClick={() => setTab('seasons')} />
+        <TabBtn label={t('nav.achievements')} active={tab === 'achievements'} onClick={() => setTab('achievements')} />
         <TabBtn label={t('account.settings')} active={tab === 'account'} onClick={() => setTab('account')} />
         {player?.is_admin && <TabBtn label={t('nav.admin')} active={tab === 'admin'} onClick={() => setTab('admin')} />}
       </div>
@@ -177,6 +179,7 @@ export default function Play() {
           {tab === 'leaderboard' && <LeaderboardPanel />}
           {tab === 'store' && <StorePanel />}
           {tab === 'seasons' && <SeasonPanel />}
+          {tab === 'achievements' && <AchievementPanel />}
           {tab === 'account' && <AccountSettings />}
           {tab === 'admin' && player?.is_admin && <AdminPanel />}
         </div>

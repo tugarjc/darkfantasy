@@ -5,6 +5,7 @@
 
 const { pool } = require('../db');
 const { computePrestigeLevel, getPrestigeBonuses, seasonXpFromScore } = require('./prestige');
+const { checkAchievement } = require('./achievements');
 
 async function seasonTick() {
   const client = await pool.connect();
@@ -97,6 +98,11 @@ async function seasonTick() {
             'UPDATE prestige SET level = $2, bonuses = $3 WHERE player_id = $1',
             [entry.player_id, newLevel, JSON.stringify(bonuses)]
           );
+
+          // Achievement hook
+          if (newLevel >= 1) {
+            checkAchievement(entry.player_id, 'prestige_1', 0, null, 1).catch(() => {});
+          }
 
           // Sync victory_points for display
           await client.query(
